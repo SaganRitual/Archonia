@@ -54,6 +54,29 @@ var game = null;
       game.input.onDown.add(A.onMouseDown, A);
     },
     
+    generateBellCurve: function(stopBelow, height, xOffset, widthOfRange) {
+      var points = [];
+      
+      for(var x = xOffset, h = height; h >= stopBelow; x++) {
+        h = this.getCurve(x, height, xOffset, widthOfRange);
+        points.push(h);
+      }
+      
+      var leftHand = [];
+      for(var i = points.length - 1; i > 0; i--) {
+        leftHand.push(points[i]);
+      }
+
+      return leftHand.concat(points);
+    },
+      
+    getCurve: function(x, a, b, c) {
+      var f = -Math.pow(x - b, 2);
+      var g = 2 * Math.pow(c, 2);
+
+      return a * Math.pow(Math.E, f / g);
+    },
+
     handleClick: function(/*pointer*/) {
       
     },
