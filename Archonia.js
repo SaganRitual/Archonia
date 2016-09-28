@@ -15,20 +15,39 @@ var game = null;
     archoniaGooDiameter: 100,
     archoniaGooRadius: 50,
     bg: null,
+    darknessAlphaHi: 0.3,
+    darknessAlphaLo: 0.0,
+    darknessRange: null,
+    dayLength: 5 * 1000,  // In ms, not ticks
     frameCount: 0,
     gameCenter: null,
     gameHeight: 600,
+    gameRadius: null,
     gameWidth: 600,
     mouseUp: true,
+    oneToZeroRange: null,
+    temperatureHi: 1000,
+    temperatureLo: -1000,
+    temperatureRange: null,
+    worldColorRange: null,
+    zeroToOneRange: null,
     
     create: function() {
-      A.gameCenter = { x: A.gameWidth / 2, y: A.gameHeight / 2 };
-      
       game.physics.startSystem(Phaser.Physics.ARCADE);
+
+      A.gameCenter = A.XY(A.gameWidth / 2, A.gameHeight / 2);
+      A.gameRadius = A.gameWidth / 2;
 
       A.setupBitmaps();
       A.Sun.ignite();
       A.MannaGenerator.bestow();
+
+      A.darknessRange = new A.Range(A.darknessAlphaHi, A.darknessAlphaLo);
+      A.oneToZeroRange = new A.Range(1, 0);
+      A.temperatureRange = new A.Range(A.temperatureLo, A.temperatureHi);
+      A.worldColorRange = A.Sun.getWorldColorRange();
+      A.yAxisRange = new A.Range(A.gameHeight, 0);
+      A.zeroToOneRange = new A.Range(0, 1);
       
       A.cursors = game.input.keyboard.createCursorKeys();
       game.input.onUp.add(A.onMouseUp, A);
