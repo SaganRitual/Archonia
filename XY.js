@@ -151,5 +151,5 @@ function getSign(a1, a2) {
 })(A);
 
 if(typeof window === "undefined") {
-  module.exports = A.XY;
+  module.exports = A;
 }

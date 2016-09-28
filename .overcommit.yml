@@ -19,6 +19,7 @@ PreCommit:
   JsHint:
     enabled: true
     on_warn: fail
+    exclude: 'utest/*'
 
 #  RuboCop:
 #    enabled: true

@@ -68,3 +68,7 @@ A.Range.prototype = {
 
   
 })(A);
+
+if(typeof window === "undefined") {
+  module.exports = A;
+}
