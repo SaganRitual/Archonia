@@ -18,7 +18,7 @@ var game = null;
     darknessAlphaHi: 0.3,
     darknessAlphaLo: 0.0,
     darknessRange: null,
-    dayLength: 5 * 1000,  // In ms, not ticks
+    dayLength: 60 * 1000,  // In ms, not ticks
     frameCount: 0,
     gameCenter: null,
     gameHeight: 600,

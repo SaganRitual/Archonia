@@ -13,6 +13,9 @@ var A = A || {};
     var morselScale = 0.05;
     
     this.howManyMorsels = 500;
+    this.howManyMorselsLaunched = 0;
+    this.morselIndex = null;
+    
     this.bellCurveHeight = 5;
     
     var stopBelow = 0.01, xOffset = 0, width = 2;
@@ -23,7 +26,11 @@ var A = A || {};
     this.randomPoint = new A.RandomXY();
     this.randomPoint.setMin(0, 0);
     this.randomPoint.setMax(A.gameWidth, A.gameHeight);
+    this.optimalTemp = 500;
     
+    // We make the game scale larger than the radius so the manna will go off
+    // the screen when the temps are extreme in either direction
+    this.tempScale = new A.Range(-1000, 1000);
     this.gameScale = new A.Range(-A.gameRadius, A.gameRadius);
     this.arrayScale = new A.Range(-this.bellCurveRadius, this.bellCurveRadius);
     
@@ -47,38 +54,45 @@ var A = A || {};
   
   A.MannaGenerator.prototype = {
     
-    getMannaPoint: function() {
-      this.randomPoint.random();
-      var scaledY = this.arrayScale.convertPoint(this.randomPoint.point.y, this.gameScale);
-      var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
-      
-      return A.realInRange(0, 1) < p;
-    },
-    
-    givethAndTaketh: function() {
+    giveth: function() {
       var thisParticle = null;
+      var temp = A.Sun.getTemperature(A.gameCenter);
       
       for(var i = 0; i < 10; i++) {
-        thisParticle = this.spriteGroup.getFirstDead();
+        this.randomPoint.random();
+        
+        var scaledY = this.arrayScale.convertPoint(this.randomPoint.point.y, this.gameScale);
+        var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
+        
+        if(A.realInRange(0, 1) < p) {
 
-        if(thisParticle !== null && this.getMannaPoint()) {
-          thisParticle.position.setTo(this.randomPoint.point.x, this.randomPoint.point.y);
-          thisParticle.revive();
+          thisParticle = this.spriteGroup.getFirstDead();
+          
+          if(thisParticle === null) {
+            break;
+          } else {
+            this.randomPoint.point.y += this.gameScale.convertPoint(temp, this.tempScale);
+          
+            if(this.randomPoint.point.y > 0 && this.randomPoint.point.y < A.gameHeight) {
+              thisParticle.position.setTo(this.randomPoint.point.x, this.randomPoint.point.y);
+              thisParticle.revive();
+            }
+          }
+          
         }
       }
-      
-      var c = this.spriteGroup.countLiving();
-      if(c >= this.howManyMorsels) {
-        var r = A.integerInRange(0, c - 1);
-
-        thisParticle = this.spriteGroup.getChildAt(r);
-        if(thisParticle === null) { throw new ReferenceError("Sprite group behaving not as you expected"); }
-
-        r = A.integerInRange(0, this.bellCurve.length);
-        var p = this.bellCurve[r];
-      
-        if(A.realInRange(0, 1) < (p / this.bellCurveHeight)) {
-          thisParticle.kill();
+    },
+    
+    takethAway: function() {
+      for(var i = 0; i < 10; i++) {
+        var thisParticle = this.spriteGroup.getRandom();
+        if(thisParticle.alive) {
+          var r = A.integerInRange(0, this.bellCurve.length);
+          var p = this.bellCurve[r] / this.bellCurveHeight;
+    
+          if(A.realInRange(0, 1) < p) {
+            thisParticle.kill();
+          }
         }
       }
     },
@@ -95,7 +109,8 @@ var A = A || {};
     },
     
     tick: function(/*frameCount*/) {
-      this.givethAndTaketh();
+      this.giveth();
+      this.takethAway();
     }
     
   };

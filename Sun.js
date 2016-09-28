@@ -18,7 +18,8 @@ A.Sun = (function(A) {
       return A.clamp(A.zeroToOneRange.convertPoint(A.Sun.darkness.alpha, A.darknessRange), 0, 1);
     },
     
-    getTemperature: function(where) {
+    getTemperature: function(where, whereY) {
+      where.set(where, whereY);
       where.floor();
 
       var rgb = {};
@@ -56,7 +57,7 @@ A.Sun = (function(A) {
     ignite: function() {
       A.Sun.darkness = game.add.sprite(A.gameCenter.x, A.gameCenter.y, game.cache.getBitmapData('archoniaGoo'));
 
-      var scale = A.gameWidth / A.archoniaGooDiamter;
+      var scale = A.gameWidth / A.archoniaGooRadius;
       A.Sun.darkness.scale.setTo(scale, scale); // Big enough to cover the world
 
       A.Sun.darkness.anchor.setTo(0.5, 0.5);
