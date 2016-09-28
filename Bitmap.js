@@ -57,14 +57,11 @@ var A = A || {};
     },
   
     archoniaGoo: function() {
-      var diameter = 100;
-      var radius = diameter / 2;
-
-      var bm = game.add.bitmapData(diameter, diameter);
+      var bm = game.add.bitmapData(A.archoniaGooDiameter, A.archoniaGooDiameter);
       var cx = bm.context;
 
       cx.beginPath();
-      bm.circle(radius, radius, radius, 'rgba(255, 255, 255, 1)');
+      bm.circle(A.archoniaGooRadius, A.archoniaGooRadius, A.archoniaGooRadius, 'rgba(255, 255, 255, 1)');
       cx.fill();
 
       game.cache.addBitmapData('archoniaGoo', bm);

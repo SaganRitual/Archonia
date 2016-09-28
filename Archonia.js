@@ -12,7 +12,10 @@ var game = null;
 
   A = {
     ag: null,
+    archoniaGooDiameter: 100,
+    archoniaGooRadius: 50,
     bg: null,
+    frameCount: 0,
     gameCenter: null,
     gameHeight: 600,
     gameWidth: 600,
@@ -25,6 +28,7 @@ var game = null;
 
       A.setupBitmaps();
       A.Sun.ignite();
+      A.MannaGenerator.bestow();
       
       A.cursors = game.input.keyboard.createCursorKeys();
       game.input.onUp.add(A.onMouseUp, A);
@@ -33,6 +37,10 @@ var game = null;
     
     handleClick: function(/*pointer*/) {
       
+    },
+    
+    integerInRange: function(lo, hi) {
+      return game.rnd.integerInRange(lo, hi);
     },
     
     onMouseDown: function(/*pointer*/) {
@@ -48,7 +56,7 @@ var game = null;
     },
     
     render: function() {
-      
+      A.MannaGenerator.render();
     },
 
     setupBitmaps: function() {
@@ -57,7 +65,9 @@ var game = null;
     },
     
     update: function() {
+      A.frameCount++;
       
+      A.MannaGenerator.tick(A.frameCount);
     }
     
   };
