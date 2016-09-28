@@ -127,8 +127,7 @@ A.RandomXY.prototype = {
   random: function() {
     var x = A.integerInRange(this.min.x, this.max.x);
     var y = A.integerInRange(this.min.y, this.max.y);
-    this.point.set(x, y);
-    return this.point;
+    return this.point.set(x, y);
   },
   
   setMin: function(minX, minY) { this.min.set(minX, minY); },
