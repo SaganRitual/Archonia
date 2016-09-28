@@ -12,14 +12,18 @@ var game = null;
 
   A = {
     bg: null,
+    gameCenter: null,
     gameHeight: 600,
     gameWidth: 600,
     mouseUp: true,
     
     create: function() {
+      A.gameCenter = { x: A.gameWidth / 2, y: A.gameHeight / 2 };
+      
       game.physics.startSystem(Phaser.Physics.ARCADE);
 
       A.setupBitmaps();
+      A.Sun.ignite();
       
       A.cursors = game.input.keyboard.createCursorKeys();
       game.input.onUp.add(A.onMouseUp, A);
@@ -48,6 +52,7 @@ var game = null;
 
     setupBitmaps: function() {
       A.bg = A.Bitmap.makeBitmap('archonia');
+      A.ag = A.Bitmap.makeBitmap('archoniaGoo');
     },
     
     update: function() {

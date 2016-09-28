@@ -45,6 +45,22 @@ A.Bitmap = (function(A) {
     return bm;
   },
   
+  archoniaGoo: function() {
+    var diameter = 100;
+    var radius = diameter / 2;
+
+    var bm = game.add.bitmapData(diameter, diameter);
+    var cx = bm.context;
+
+    cx.beginPath();
+    bm.circle(radius, radius, radius, 'rgba(255, 255, 255, 1)');
+    cx.fill();
+
+    game.cache.addBitmapData('archoniaGoo', bm);
+    
+    return bm;
+  },
+  
   makeBitmap: function(whichBitmap) {
     var b = A.Bitmap[whichBitmap]();
     
