@@ -40,7 +40,7 @@ var game = null;
 
       A.setupBitmaps();
       A.Sun.ignite();
-      A.MannaGenerator.bestow();
+      A.mannaGenerator = new A.MannaGenerator();
 
       A.darknessRange = new A.Range(A.darknessAlphaHi, A.darknessAlphaLo);
       A.oneToZeroRange = new A.Range(1, 0);
@@ -94,11 +94,15 @@ var game = null;
     },
 
     preload: function() {
-      
+      game.load.image('particles', 'assets/sprites/pangball.png');
+    },
+    
+    realInRange: function(lo, hi) {
+      return game.rnd.realInRange(lo, hi);
     },
     
     render: function() {
-      A.MannaGenerator.render();
+      A.mannaGenerator.render();
     },
 
     setupBitmaps: function() {
@@ -109,7 +113,7 @@ var game = null;
     update: function() {
       A.frameCount++;
       
-      A.MannaGenerator.tick(A.frameCount);
+      A.mannaGenerator.tick(A.frameCount);
     }
     
   };
