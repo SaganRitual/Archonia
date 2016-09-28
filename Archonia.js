@@ -11,6 +11,7 @@ var game = null;
 (function() {
 
   A = {
+    ag: null,
     bg: null,
     gameCenter: null,
     gameHeight: 600,
@@ -51,8 +52,8 @@ var game = null;
     },
 
     setupBitmaps: function() {
-      A.bg = A.Bitmap.makeBitmap('archonia');
-      A.ag = A.Bitmap.makeBitmap('archoniaGoo');
+      A.bg = A.BitmapFactory.makeBitmap('archonia');
+      A.ag = A.BitmapFactory.makeBitmap('archoniaGoo');
     },
     
     update: function() {

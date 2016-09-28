@@ -7,72 +7,74 @@
 
 var A = A || {};
 
-A.Bitmap = (function(A) {
+(function(A) {
   
-  return {
+  A.Bitmap = function(bm) {
+    this.bm = bm;
+    this.cx = bm.ctx;
+  };
   
-  aLine: function(from, to, style, width) {
-    if(style === undefined) { style = 'rgb(255, 255, 255)'; }
-    if(width === undefined) { width = 1; }
+  A.Bitmap.prototype = {
+    aLine: function(from, to, style, width) {
+      if(style === undefined) { style = 'rgb(255, 255, 255)'; }
+      if(width === undefined) { width = 1; }
 
-    this.ctx.strokeStyle = style;
-    this.ctx.lineWidth = width;
+      this.cx.strokeStyle = style;
+      this.cx.lineWidth = width;
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(from.x, from.y);
-    this.ctx.lineTo(to.x, to.y);
-    this.ctx.stroke();
-  },
-   
-  archonia: function() {
-    var bm = game.add.bitmapData(game.width, game.height);
-    var cx = bm.context;
-
-    var g = cx.createLinearGradient(game.width / 2, 0, game.width / 2, game.height);
-
-    g.addColorStop(0.00, 'hsl(202, 100%, 100%)');
-    g.addColorStop(0.40, 'hsl(202, 100%, 50%)');
-    g.addColorStop(0.70, 'hsl(202, 100%, 50%)');
-    g.addColorStop(0.90, 'hsl(218, 100%, 40%)');
-    g.addColorStop(1.00, 'hsl(218, 100%, 00%)');
-
-    cx.fillStyle = g;
-    cx.fillRect(0, 0, game.width, game.height);
-
-    bm.update();
-    game.add.image(0, 0, bm);
+      this.cx.beginPath();
+      this.cx.moveTo(from.x, from.y);
+      this.cx.lineTo(to.x, to.y);
+      this.cx.stroke();
+    },
+  
+    rLine: function(from, relativeTo, style, width) {
+      this.aLine(from, relativeTo.plus(from), style, width);
+    }
+  };
+  
+  A.BitmapFactory = {
     
-    return bm;
-  },
-  
-  archoniaGoo: function() {
-    var diameter = 100;
-    var radius = diameter / 2;
+    archonia: function() {
+      var bm = game.add.bitmapData(game.width, game.height);
+      var cx = bm.context;
 
-    var bm = game.add.bitmapData(diameter, diameter);
-    var cx = bm.context;
+      var g = cx.createLinearGradient(game.width / 2, 0, game.width / 2, game.height);
 
-    cx.beginPath();
-    bm.circle(radius, radius, radius, 'rgba(255, 255, 255, 1)');
-    cx.fill();
+      g.addColorStop(0.00, 'hsl(202, 100%, 100%)');
+      g.addColorStop(0.40, 'hsl(202, 100%, 50%)');
+      g.addColorStop(0.70, 'hsl(202, 100%, 50%)');
+      g.addColorStop(0.90, 'hsl(218, 100%, 40%)');
+      g.addColorStop(1.00, 'hsl(218, 100%, 00%)');
 
-    game.cache.addBitmapData('archoniaGoo', bm);
+      cx.fillStyle = g;
+      cx.fillRect(0, 0, game.width, game.height);
+
+      bm.update();
+      game.add.image(0, 0, bm);
     
-    return bm;
-  },
+      return new A.Bitmap(bm);
+    },
   
-  makeBitmap: function(whichBitmap) {
-    var b = A.Bitmap[whichBitmap]();
-    
-    b.aLine = A.Bitmap.aLine;
-    b.rLine = A.Bitmap.rLine;
-    
-    return b;
-  },
-  
-  rLine: function(from, relativeTo, style, width) {
-    this.aLine(from, relativeTo.plus(from), style, width);
-  }
-};
+    archoniaGoo: function() {
+      var diameter = 100;
+      var radius = diameter / 2;
 
+      var bm = game.add.bitmapData(diameter, diameter);
+      var cx = bm.context;
+
+      cx.beginPath();
+      bm.circle(radius, radius, radius, 'rgba(255, 255, 255, 1)');
+      cx.fill();
+
+      game.cache.addBitmapData('archoniaGoo', bm);
+    
+      return new A.Bitmap(bm);
+    },
+    
+    makeBitmap: function(type) {
+      return A.BitmapFactory[type]();
+    }
+    
+  };
 })(A);
