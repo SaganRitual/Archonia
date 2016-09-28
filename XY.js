@@ -45,7 +45,7 @@ A.XY.prototype = {
   normalize: function() { var s = this.getMagnitude(); if(s !== 0) { this.x /= s; this.y /= s; } },
   
   normalized: function() { var scratch = A.XY(this); scratch.normalize(); return scratch; },
-
+  
   reset: function() { this.set(0, 0); },
   
   scalarDivide: function(scalar) { this.x /= scalar; this.y /= scalar; },
@@ -115,6 +115,24 @@ A.XY.set = function(target, a1, a2) {
 
   target.x = scratch.x;
   target.y = scratch.y;
+};
+
+A.RandomXY = function() {
+  this.min = A.XY();
+  this.max = A.XY();
+  this.point = A.XY();
+};
+
+A.RandomXY.prototype = {
+  random: function() {
+    var x = A.integerInRange(this.min.x, this.max.x);
+    var y = A.integerInRange(this.min.y, this.max.y);
+    this.point.set(x, y);
+    return this.point;
+  },
+  
+  setMin: function(minX, minY) { this.min.set(minX, minY); },
+  setMax: function(maxX, maxY) { this.max.set(maxX, maxY); }
 };
 
 function getMagnitude(a1, a2) {
