@@ -18,7 +18,7 @@ if(typeof window === "undefined") {
 A.Phenotype = function(archon) {
   
   if(archon === undefined) {
-    throw new TypeError("Phenotype needs a genome");
+    throw new TypeError("Phenotype needs an archon");
   }
   
   this.archon = archon;
@@ -34,6 +34,20 @@ A.Phenotype.Ledger = function() {
 };
 
 A.Phenotype.Ledger.prototype = {
+  applyBenefit: function(bucket, benefit, threshold) {
+    this.benefit = benefit;
+    
+    bucket += this.benefit;
+    if(bucket > threshold) {
+      this.benefit = bucket - threshold;
+      bucket = threshold;
+    } else {
+      this.benefit = 0;
+    }
+    
+    return bucket;
+  },
+  
   applyCost: function(bucket, cost) {
     this.cost = cost;
     
@@ -48,7 +62,11 @@ A.Phenotype.Ledger.prototype = {
     return bucket;
   },
   
-  remainder: function() {
+  benefitRemainder: function() {
+    return this.benefit;
+  },
+  
+  costRemainder: function() {
     return this.cost;
   }
 };
@@ -59,13 +77,13 @@ A.Phenotype.prototype = {
   ledger: new A.Phenotype.Ledger(),
   
   breed: function() {
+
     var remainingReproductionCost = (
       this.genome.offspringMass.adultCalories + this.genome.offspringMass.larvalCalories
     ) * this.reproductionCostFactor;
     
     this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, remainingReproductionCost);
-    remainingReproductionCost = this.ledger.remainder();
-    
+    remainingReproductionCost = this.ledger.costRemainder();
     
     this.debit(remainingReproductionCost);
     
@@ -76,46 +94,44 @@ A.Phenotype.prototype = {
     if(this.adultCalorieBudget > 0) {
       this.archon.breed();
     }
-    
   },
   
   debit: function(costInCalories) {
     // Use up your baby fat reserves first
     this.larvalCalorieBudget = this.ledger.applyCost(this.larvalCalorieBudget, costInCalories);
-    costInCalories = this.ledger.remainder();
+    costInCalories = this.ledger.costRemainder();
 
     
     // if you're starving, you can reabsorb any embryo reserves
     // you've built up, but you don't get all the calories back
 
-    if(costInCalories > 0) {
-      this.embryoCalorieBudget *= 0.75;
+    if(costInCalories > 0 && this.embryoCalorieBudget > 0) {
+      var t = costInCalories * (4 / 3);
 
-      this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, costInCalories);
-      costInCalories = this.ledger.remainder();
+      this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, t);
+      costInCalories = this.ledger.costRemainder();
     }
     
-    this.adultCalorieBudget -= costInCalories;
-      
-    if(this.adultCalorieBudget < 0) { this.die(); }
-    
+    this.adultCalorieBudget = this.ledger.applyCost(this.adultCalorieBudget, costInCalories);
+    costInCalories = this.ledger.costRemainder();
+
+    if(this.adultCalorieBudget === 0) { this.die(); }
+  },
+  
+  die: function() {
+    // Dummy for talking to test harness until we have an archon to talk to
+    this.archon.die();
   },
 
   eat: function(food) {
     var benefit = food.calories;
 
-    this.adultCalorieBudget += benefit;
+    this.adultCalorieBudget = this.ledger.applyBenefit(this.adultCalorieBudget, benefit, this.genome.embryoThreshold);
+    benefit = this.ledger.benefitRemainder();
     
-    if(this.adultCalorieBudget > this.genome.embryoThreshold) {
-
-      benefit = this.adultCalorieBudget - this.genome.embryoThreshold;
-
-      this.adultCalorieBudget = this.genome.embryoThreshold;
-      
-      if(benefit > 0) {
-        this.embryoCalorieBudget += benefit;
-        benefit = 0;
-      }
+    if(benefit > 0) {
+      this.embryoCalorieBudget = this.ledger.applyBenefit(this.embryoCalorieBudget, benefit, Number.MAX_VALUE);
+      benefit = 0;
       
       if(this.embryoCalorieBudget > this.genome.reproductionThreshold) {
         this.breed();
@@ -145,11 +161,9 @@ A.Phenotype.prototype = {
     var s = m / A.archoniaGooDiameter;
     
     this.archon.phaseron.scale.setTo(s, s);
-    this.width = this.archon.phaseron.width;
-    this.radius = this.width / 2;
     
-    this.archon.phaseron.body.setSize(this.width, this.width);
-    this.archon.phaseron.body.setCircle(this.radius);
+    this.archon.phaseron.body.setSize(s, s);
+    this.archon.phaseron.body.setCircle(s / 2);
   }
 };
   
