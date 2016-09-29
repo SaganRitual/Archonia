@@ -1,5 +1,10 @@
-var A = require('../XY.js');
+var A = require('../Archonia.js');
+A.XY = require('../XY.js');
+A.Range = require('../Range.js');
+
 var chai = require('chai');
+
+A.prePhaserSetup();
 
 describe('XY', function() {
   describe('Test constructor:', function() {
