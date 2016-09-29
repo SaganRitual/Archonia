@@ -1,14 +1,16 @@
-var A = require('../Range.js');
+var A = require('../Archonia.js');
+A.Range = require('../Range.js');
+
 var data_driven = require('data-driven');
 var chai = require('chai');
 
-var zeroToOne = new Range(0, 1);
-var centeredZeroToOne = new Range(-0.5, 0.5);
-var temperatureRange = new Range(-1000, 1000);
-var foodDistanceRange = new Range(50, 0);
-var speedRange = new Range(-30, 30);
-var e10 = new Range(0, 10);
-var h10 = new Range(10, 0);
+var zeroToOne = new A.Range(0, 1);
+var centeredZeroToOne = new A.Range(-0.5, 0.5);
+var temperatureRange = new A.Range(-1000, 1000);
+var foodDistanceRange = new A.Range(50, 0);
+var speedRange = new A.Range(-30, 30);
+var e10 = new A.Range(0, 10);
+var h10 = new A.Range(10, 0);
 
 var tests = [
   {
