@@ -87,7 +87,6 @@ describe('Phenotype', function() {
       chai.expect(archon.spawned).false;              // But not yet
     });
     
-    
     it('Should interact properly with alternate genome settings', function() {
       archon.genome.embryoThreshold = 500;
       archon.genome.reproductionThreshold = 1000;
@@ -131,6 +130,24 @@ describe('Phenotype', function() {
       chai.expect(p.embryoCalorieBudget).equal(350);  // 200c baby + 25% entropy
       chai.expect(p.adultCalorieBudget).equal(400);   // No costs to adult fat; embryo budget covered all costs
       chai.expect(p.larvalCalorieBudget).equal(100);  // We haven't metabolized anything in this test suite yet
+      
+    });
+    
+    it('Should reproduce and incur excess costs', function() {
+      archon.genome.embryoThreshold = 400;
+      archon.genome.reproductionThreshold = 500;
+      archon.genome.birthMass.adultCalories = 100;
+      archon.genome.birthMass.larvalCalories = 100;
+      archon.genome.offspringMass.adultCalories = 100;
+      archon.genome.offspringMass.larvalCalories = 500;
+
+      var p = new A.Phenotype(archon); p.launch();
+      
+      eat(p, 900);
+      chai.expect(archon.spawned).true;
+      chai.expect(p.embryoCalorieBudget).equal(0);
+      chai.expect(p.adultCalorieBudget).equal(350);
+      chai.expect(p.larvalCalorieBudget).equal(0);
       
     });
   });

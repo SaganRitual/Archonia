@@ -29,22 +29,43 @@ A.Phenotype = function(archon) {
   
 };
 
+A.Phenotype.Ledger = function() {
+  
+};
+
+A.Phenotype.Ledger.prototype = {
+  applyCost: function(bucket, cost) {
+    this.cost = cost;
+    
+    bucket -= this.cost;
+    if(bucket < 0) {
+      this.cost = -bucket;
+      bucket = 0;
+    } else {
+      this.cost = 0;
+    }
+    
+    return bucket;
+  },
+  
+  remainder: function() {
+    return this.cost;
+  }
+};
+
 A.Phenotype.prototype = {
   
   reproductionCostFactor: 1.25,
+  ledger: new A.Phenotype.Ledger(),
   
   breed: function() {
     var remainingReproductionCost = (
       this.genome.offspringMass.adultCalories + this.genome.offspringMass.larvalCalories
     ) * this.reproductionCostFactor;
     
-    this.embryoCalorieBudget -= remainingReproductionCost;
+    this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, remainingReproductionCost);
+    remainingReproductionCost = this.ledger.remainder();
     
-    if(this.embryoCalorieBudget < 0) {
-      remainingReproductionCost = -this.embryoCalorieBudget;
-    } else {
-      remainingReproductionCost = 0;
-    }
     
     this.debit(remainingReproductionCost);
     
@@ -60,19 +81,18 @@ A.Phenotype.prototype = {
   
   debit: function(costInCalories) {
     // Use up your baby fat reserves first
-    if(this.larvalCalorieBudget > 0) {
-      this.larvalCalorieBudget -= costInCalories;
-      
-      if(this.larvalCalorieBudget < 0) { costInCalories = -this.larvalCalorieBudget; }
-    }
+    this.larvalCalorieBudget = this.ledger.applyCost(this.larvalCalorieBudget, costInCalories);
+    costInCalories = this.ledger.remainder();
+
     
     // if you're starving, you can reabsorb any embryo reserves
     // you've built up, but you don't get all the calories back
-    if(costInCalories > 0 && this.embryoCalorieBudget > 0) {
+
+    if(costInCalories > 0) {
       this.embryoCalorieBudget *= 0.75;
-      this.embryoCalorieBudget -= costInCalories;
-      
-      if(this.embryoCalorieBudget < 0) { costInCalories = -this.embryoCalorieBudget; }
+
+      this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, costInCalories);
+      costInCalories = this.ledger.remainder();
     }
     
     this.adultCalorieBudget -= costInCalories;
