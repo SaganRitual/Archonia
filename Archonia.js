@@ -120,11 +120,17 @@ var game = null;
   
 })();
 
-window.onload = function() {
-  game = new Phaser.Game(A.gameWidth, A.gameHeight, Phaser.CANVAS);
+if(typeof window === "undefined") {
 
-  game.state.add('Archonia', A, false);
-  game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
+  module.exports = A;
+  
+} else {
+  window.onload = function() {
+    game = new Phaser.Game(A.gameWidth, A.gameHeight, Phaser.CANVAS);
 
-  game.state.start('Archonia');
-};
+    game.state.add('Archonia', A, false);
+    game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
+
+    game.state.start('Archonia');
+  };
+}
