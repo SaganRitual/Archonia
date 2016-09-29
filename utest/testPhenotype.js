@@ -1,6 +1,16 @@
 var A = require('../Phenotype.js');
 var chai = require('chai');
 
+A.archoniaGooDiameter = 100;
+
+A.Sun = {
+  currentTemp: 451,
+  
+  getTemperature: function(where) {
+    return A.Sun.currentTemp;
+  }
+}
+
 var archon = {
   alive: true,
   spawned: false,
@@ -8,7 +18,8 @@ var archon = {
   genome: {
     embryoThreshold: 200, reproductionThreshold: 500,
     birthMass: { adultCalories: 100, larvalCalories: 100 },
-    offspringMass: { adultCalories: 125, larvalCalories: 75 }
+    offspringMass: { adultCalories: 125, larvalCalories: 75 },
+    optimalTemp: 200
   },
   
   phaseron: {
@@ -53,6 +64,51 @@ describe('Phenotype', function() {
   });
     
   describe('Individual functions', function() {
+    describe('getMotionCost()', function() {
+      it('Should be linearly proportional to mass', function() {
+        var p = new A.Phenotype(archon);
+
+        p.embryoCalorieBudget = 1000; p.larvalCalorieBudget = 0; p.adultCalorieBudget = 0;
+        chai.expect(p.getMotionCost().toFixed(2)).equal((1).toFixed(2));
+        
+        p.larvalCalorieBudget = 1000;
+        chai.expect(p.getMotionCost().toFixed(2)).equal((2).toFixed(2));
+
+        p.adultCalorieBudget = 100;
+        chai.expect(p.getMotionCost().toFixed(2)).equal((3).toFixed(2));
+      });
+    });
+    
+    describe('getTemperatureCost()', function() {
+      var p = new A.Phenotype(archon);
+      p.adultCalorieBudget = 100; p.embryoCalorieBudget = 0; p.larvalCalorieBudget = 0;
+
+      it('Should get the right cost, based on archon size, zero temp delta', function() {
+        A.Sun.currentTemp = archon.genome.optimalTemp;
+        
+        chai.expect(p.getTempCost()).equal(1);  // 1g, 1cal
+        
+        p.adultCalorieBudget = 200;
+        chai.expect(p.getTempCost().toFixed(4)).equal((1 + Math.log(2)).toFixed(4));
+      });
+      
+      it('Should get the right cost with non-zero temp delta', function() {
+        A.Sun.currentTemp = archon.genome.optimalTemp - 200;
+
+        var s = ((Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp) || 1) * Math.log(p.getMass())) + 1;
+
+        var c = p.getTempCost().toFixed(4);
+        chai.expect(c).equal(s.toFixed(4));
+        
+        A.Sun.currentTemp = archon.genome.optimalTemp + 500;
+        
+        var s = (Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp) || 1) * Math.log(p.getMass()) + 1;
+
+        var c = p.getTempCost().toFixed(4);
+        chai.expect(c).equal(s.toFixed(4));
+      });
+    });
+    
     describe('debit()', function() {
       var p = new A.Phenotype(archon);
       

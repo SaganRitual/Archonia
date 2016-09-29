@@ -29,52 +29,47 @@ A.Phenotype = function(archon) {
   
 };
 
-A.Phenotype.Ledger = function() {
-  
-};
-
-A.Phenotype.Ledger.prototype = {
-  applyBenefit: function(bucket, benefit, threshold) {
-    this.benefit = benefit;
-    
-    bucket += this.benefit;
-    if(bucket > threshold) {
-      this.benefit = bucket - threshold;
-      bucket = threshold;
-    } else {
-      this.benefit = 0;
-    }
-    
-    return bucket;
-  },
-  
-  applyCost: function(bucket, cost) {
-    this.cost = cost;
-    
-    bucket -= this.cost;
-    if(bucket < 0) {
-      this.cost = -bucket;
-      bucket = 0;
-    } else {
-      this.cost = 0;
-    }
-    
-    return bucket;
-  },
-  
-  benefitRemainder: function() {
-    return this.benefit;
-  },
-  
-  costRemainder: function() {
-    return this.cost;
-  }
-};
-
 A.Phenotype.prototype = {
   
   reproductionCostFactor: 1.25,
-  ledger: new A.Phenotype.Ledger(),
+
+  ledger: {
+    applyBenefit: function(bucket, benefit, threshold) {
+      this.benefit = benefit;
+    
+      bucket += this.benefit;
+      if(bucket > threshold) {
+        this.benefit = bucket - threshold;
+        bucket = threshold;
+      } else {
+        this.benefit = 0;
+      }
+    
+      return bucket;
+    },
+  
+    applyCost: function(bucket, cost) {
+      this.cost = cost;
+    
+      bucket -= this.cost;
+      if(bucket < 0) {
+        this.cost = -bucket;
+        bucket = 0;
+      } else {
+        this.cost = 0;
+      }
+    
+      return bucket;
+    },
+  
+    benefitRemainder: function() {
+      return this.benefit;
+    },
+  
+    costRemainder: function() {
+      return this.cost;
+    }
+  },
   
   breed: function() {
 
@@ -147,6 +142,19 @@ A.Phenotype.prototype = {
     var c = this.larvalCalorieBudget / larvaFatDensity;
     
     return a + b + c;
+  },
+  
+  getMotionCost: function() {
+    return this.getMass();
+  },
+
+  getTempCost: function() {
+    var t = A.Sun.getTemperature(this.archon);
+    var d = Math.abs(t - this.genome.optimalTemp);
+    var s = this.getMass();
+    var p = ((d || 1) * Math.log(s)) + 1;
+
+    return p;
   },
   
   launch: function() {
