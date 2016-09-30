@@ -67,25 +67,18 @@ var U = U || {};
     },
   
     slice: function(start, howMany) {
-      if(start === 0) {
-        // Start of zero means start at the oldest entry; only check is whether
-        // caller is asking for too many entries
-        if(howMany > this.elements.length) { throw new ReferenceError("Bad arguments"); }
-      } else {
-        if(start + howMany > 0 || Math.abs(start) > this.elements.length) { throw new ReferenceError("Bad arguments"); }
-        if(howMany > this.elements.length) { throw new ReferenceError("Bad arguments"); }
-        if(start >= 0) { throw new ReferenceError("Bad arguments"); }
-      }
-      
+      if(this.elements.length === 0) { throw new ReferenceError("Bad arguments"); }
       var ix = null;
       
-      if(start === 0) {
+      if(start >= 0) {
         ix = this.getIndexOfOldestElement();
       } else {
-        var s = this.getIndexOfNewestElement();
-        ix = this.add(s, start + 1);
+        ix = this.getIndexOfNewestElement();
+        ix = this.add(ix, 1);
       }
       
+      ix = this.add(ix, start);
+
       var slice = [];
       for(var i = 0; i < howMany; i++) {
         slice.push(this.elements[ix]);
