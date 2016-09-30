@@ -9,29 +9,27 @@ describe('Utilities', function() {
       chai.expect(c).to.not.throw();
       chai.expect(A.Utilities).to.have.property('Rounder');
     });
-    
-    describe('#functions exist', function() {
-      it('#forEach()', function() {
-        var r = new A.Utilities.Rounder(10);
-        chai.expect(r).to.have.property('forEach');
-        chai.assert.typeOf(r.forEach, 'Function');
-      });
-      
-      it('#store()', function() {
-        var r = new A.Utilities.Rounder(10);
-        chai.expect(r).to.have.property('store');
-        chai.assert.typeOf(r.store, 'Function');
-      });
-      
-      it('#deepForEach()', function() {
-        var r = new A.Utilities.Rounder(10);
-        chai.expect(r).to.have.property('deepForEach');
-        chai.assert.typeOf(r.deepForEach, 'Function');
-      });
-    });
   });
   
-  describe('Functionality', function() {
+  describe('Rounder', function() {
+    describe('#Public functions exist', function() {
+      var names = [
+        'forEach', 'store', 'deepForEach', 'slice'
+      ];
+      
+      for(var n in names) {
+        var name = names[n];
+
+        (function(name) {
+          it('#' + name + '()', function() {
+            var r = new A.Utilities.Rounder(10);
+            chai.expect(r).to.have.property(name);
+            chai.assert.typeOf(r[name], 'Function');
+          });
+        })(name);
+      }
+    });
+
     describe('#forEach()', function() {
       it('#iterating callback, proper roundering, various array sizes', function() {
         for(var fillCount = 1; fillCount < 10; fillCount++) {
@@ -87,6 +85,7 @@ describe('Utilities', function() {
         chai.expect(total).equal(0);
       });
     });
+    
     describe('#deepForEach()', function() {
       it('#change internal values', function() {
         var r = new A.Utilities.Rounder(10);
@@ -152,6 +151,46 @@ describe('Utilities', function() {
         
         r.store(132);
         chai.expect(r.elements[0]).equal(132);
+      });
+    });
+    
+    describe('#slice()', function() {
+      it('#throws appropriately', function() {
+        var r = new A.Utilities.Rounder(5);
+        
+        var arrayEmpty = function() { r.slice(1, 1); }
+        chai.expect(arrayEmpty).to.throw(ReferenceError, "Bad arguments");
+
+        for(var i = 0; i < 5; i++) { r.store(i); }
+        
+        var positiveIndex = function() { r.slice(1, 1); }
+        var toofarNegativeStart = function() { r.slice(-6, 1); }
+        var futureEntries = function() { r.slice(-1, 3); }
+        var thisShouldWorkFamousLastWords = function() { r.slice(-5, 1); }
+        
+        chai.expect(positiveIndex).to.throw(ReferenceError, "Bad arguments");
+        chai.expect(toofarNegativeStart).to.throw(ReferenceError, "Bad arguments");
+        chai.expect(futureEntries).to.throw(ReferenceError, "Bad arguments");
+        chai.expect(thisShouldWorkFamousLastWords).to.not.throw();
+      })
+      
+      it('#returns expected sections of its array', function() {
+        var howManyEntries = 10;
+        var r = new A.Utilities.Rounder(howManyEntries);
+        
+        for(var i = 0; i < howManyEntries; i++) { r.store(i); }
+        
+        var s = r.slice(-2, 2);
+        
+        chai.assert.typeOf(s, "Array");
+        chai.expect(s).eql([ 8, 9 ]);
+        
+        s = r.slice(-5, 3);
+        chai.expect(s).eql([ 5, 6, 7 ]);
+        
+        r.store(42);
+        s = r.slice(-5, 5);
+        chai.expect(s).eql([ 6, 7, 8, 9, 42 ]);
       });
     });
   });
