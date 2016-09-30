@@ -6,8 +6,8 @@
 var U = U || {};
 
 (function(U) {
-
-  U.Rounder = function(howManyElements) {
+  
+    U.Rounder = function(howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length rounder"); }
 
     this.elements = [];
@@ -21,8 +21,8 @@ var U = U || {};
       if(context === undefined) { context = this; }
 
       this.forEach(function(ix) {
-        if(callback(ix, this.elements) === false) { return false; }
-      }, context);
+        if(callback.call(context, ix, this.elements) === false) { return false; }
+      }, this); // Obviously we need to pass 'this' -- so much to learn still about js
     },
     
     forEach: function(callback, context) {
@@ -48,7 +48,7 @@ var U = U || {};
 
       this.indexForNextElement = (this.indexForNextElement + 1) % this.howManyElements;
     }
-    
+
   };
   
 })(U);
