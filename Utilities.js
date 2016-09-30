@@ -17,6 +17,14 @@ var U = U || {};
   
   U.Rounder.prototype = {
     
+    deepForEach: function(callback, context) {
+      if(context === undefined) { context = this; }
+
+      this.forEach(function(ix) {
+        if(callback(ix, this.elements) === false) { return false; }
+      }, context);
+    },
+    
     forEach: function(callback, context) {
       if(context === undefined) { context = this; }
       
@@ -25,7 +33,7 @@ var U = U || {};
       for(var i = 0; i < this.elements.length; i++) {
         var valueToPass = this.elements[ix];
 
-        if(callback.call(context, ix, valueToPass) === false) { break; }
+        if(callback.call(context, ix, valueToPass) === false) { return false; }
 
         ix = (ix + 1) % this.elements.length;
       }
