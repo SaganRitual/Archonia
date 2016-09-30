@@ -14,7 +14,7 @@ describe('Utilities', function() {
   describe('Rounder', function() {
     describe('#Public functions exist', function() {
       var names = [
-        'forEach', 'store', 'deepForEach', 'slice'
+        'deepForEach', 'forEach', 'reset', 'slice', 'store'
       ];
       
       for(var n in names) {
@@ -194,6 +194,30 @@ describe('Utilities', function() {
         
         s = r.slice(0, 5);
         chai.expect(s).eql([ 1, 2, 3, 4, 5 ]);
+      });
+    });
+    
+    describe('#reset', function() {
+      it('#discard internal array, reset index', function() {
+        var howManyEntries = 10;
+        var r = new A.Utilities.Rounder(howManyEntries);
+        var total = 0;
+        
+        for(var i = 0; i < howManyEntries; i++) { r.store(i); total += i; }
+
+        var check = 0;
+        r.forEach(function(ix, val) { check += val; });
+        
+        chai.expect(check).equal(total);
+        
+        check = 0;
+        r.reset();
+        r.store(42);
+        r.forEach(function(ix, val) { check += val; });
+        
+        chai.expect(check).equal(42);
+        chai.expect(function() { r.slice(); }).to.not.throw();
+        chai.expect(function() { r.slice(-2, 1); }).to.throw(ReferenceError, "Bad arguments");
       });
     });
   });
