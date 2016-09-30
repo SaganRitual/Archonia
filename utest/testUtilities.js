@@ -1,25 +1,32 @@
-var U = {};
+var A = {};
 
 var chai = require('chai');
 
 describe('Utilities', function() {
   describe('Smoke test', function() {
     it('#Module exists', function() {
-      var c = function() { U = require('../Utilities.js'); }
+      var c = function() { A.Utilities = require('../Utilities.js'); }
       chai.expect(c).to.not.throw();
-      chai.expect(U).to.have.property('Rounder');
+      chai.expect(A.Utilities).to.have.property('Rounder');
     });
     
-    it('#functions exist', function() {
-      var r = new U.Rounder(10);
+    describe('#functions exist', function() {
       it('#forEach()', function() {
+        var r = new A.Utilities.Rounder(10);
         chai.expect(r).to.have.property('forEach');
         chai.assert.typeOf(r.forEach, 'Function');
       });
       
       it('#store()', function() {
+        var r = new A.Utilities.Rounder(10);
         chai.expect(r).to.have.property('store');
         chai.assert.typeOf(r.store, 'Function');
+      });
+      
+      it('#deepForEach()', function() {
+        var r = new A.Utilities.Rounder(10);
+        chai.expect(r).to.have.property('deepForEach');
+        chai.assert.typeOf(r.deepForEach, 'Function');
       });
     });
   });
@@ -35,7 +42,7 @@ describe('Utilities', function() {
 
             var r = null;
           
-            var s = function() { r = new U.Rounder(arraySize); };
+            var s = function() { r = new A.Utilities.Rounder(arraySize); };
           
             chai.expect(s).to.not.throw();
 
@@ -71,7 +78,7 @@ describe('Utilities', function() {
       });
       
       it('#quit loop if callback returns false', function() {
-        var r = new U.Rounder(10);
+        var r = new A.Utilities.Rounder(10);
         var total = 0;
 
         for(var i = 0; i < 5; i++) { r.store(i); }
@@ -80,10 +87,41 @@ describe('Utilities', function() {
         chai.expect(total).equal(0);
       });
     });
+    describe('#deepForEach()', function() {
+      it('#change internal values', function() {
+        var r = new A.Utilities.Rounder(10);
+        
+        for(var i = 0; i < 10; i++) { r.store(42); }
+        
+        var total = 0;
+        r.forEach(function(ix, value) { total += value; });
+        
+        chai.expect(total).equal(42 * 10);
+        
+        r.deepForEach(function(ix, array) { array[ix] -= 5; });
+
+        var total = 0;
+        r.forEach(function(ix, value) { total += value; });
+        
+        chai.expect(total).equal((42 - 5) * 10);
+      });
+      
+      it('#quit loop if callback returns false', function() {
+        var r = new A.Utilities.Rounder(10);
+        
+        for(var i = 0; i < 10; i++) { r.store(42); }
+        
+        r.deepForEach(function(ix, array) { array[ix] -= 5; return false; });
+        
+        var total = 0;
+        r.forEach(function(ix, value) { total += value; });
+        chai.expect(total).equal((42 * 10) - 5);
+      });
+    });
 
     describe('#store()', function() {
       it('#stores values, tracks index', function() {
-        var r = new U.Rounder(2);
+        var r = new A.Utilities.Rounder(2);
         
         r.store(42);
         chai.expect(r.elements.length).equal(1);
@@ -102,7 +140,7 @@ describe('Utilities', function() {
       });
       
       it('#tracks on arrays larger than two elements', function() {
-        var r = new U.Rounder(17);
+        var r = new A.Utilities.Rounder(17);
         
         for(var i = 0; i < 17; i++) { r.store(i); }
 
