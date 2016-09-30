@@ -191,6 +191,9 @@ describe('Utilities', function() {
         r.store(42);
         s = r.slice(-5, 5);
         chai.expect(s).eql([ 6, 7, 8, 9, 42 ]);
+        
+        s = r.slice(0, 5);
+        chai.expect(s).eql([ 1, 2, 3, 4, 5 ]);
       });
     });
   });
