@@ -160,18 +160,6 @@ describe('Utilities', function() {
         
         var arrayEmpty = function() { r.slice(1, 1); }
         chai.expect(arrayEmpty).to.throw(ReferenceError, "Bad arguments");
-
-        for(var i = 0; i < 5; i++) { r.store(i); }
-        
-        var positiveIndex = function() { r.slice(1, 1); }
-        var toofarNegativeStart = function() { r.slice(-6, 1); }
-        var futureEntries = function() { r.slice(-1, 3); }
-        var thisShouldWorkFamousLastWords = function() { r.slice(-5, 1); }
-        
-        chai.expect(positiveIndex).to.throw(ReferenceError, "Bad arguments");
-        chai.expect(toofarNegativeStart).to.throw(ReferenceError, "Bad arguments");
-        chai.expect(futureEntries).to.throw(ReferenceError, "Bad arguments");
-        chai.expect(thisShouldWorkFamousLastWords).to.not.throw();
       })
       
       it('#returns expected sections of its array', function() {
@@ -185,15 +173,18 @@ describe('Utilities', function() {
         chai.assert.typeOf(s, "Array");
         chai.expect(s).eql([ 8, 9 ]);
         
-        s = r.slice(-5, 3);
-        chai.expect(s).eql([ 5, 6, 7 ]);
+        s = r.slice(-5, 3); chai.expect(s).eql([ 5, 6, 7 ]);
         
-        r.store(42);
-        s = r.slice(-5, 5);
-        chai.expect(s).eql([ 6, 7, 8, 9, 42 ]);
+        r.store(42); 
+        s = r.slice(-5, 5); chai.expect(s).eql([ 6, 7, 8, 9, 42 ]);
         
-        s = r.slice(0, 5);
-        chai.expect(s).eql([ 1, 2, 3, 4, 5 ]);
+        s = r.slice(0, 5); chai.expect(s).eql([ 1, 2, 3, 4, 5 ]);
+        
+        s = r.slice(1, 1); chai.expect(s).eql([ 2 ]);
+        
+        s = r.slice(-11, 3); chai.expect(s).eql([ 42, 1, 2 ]);
+        
+        s = r.slice(-5, 8); chai.expect(s).eql([ 6, 7, 8, 9, 42, 1, 2, 3 ]);
       });
     });
     
@@ -217,7 +208,7 @@ describe('Utilities', function() {
         
         chai.expect(check).equal(42);
         chai.expect(function() { r.slice(); }).to.not.throw();
-        chai.expect(function() { r.slice(-2, 1); }).to.throw(ReferenceError, "Bad arguments");
+        chai.expect(r.slice(-2, 1)).eql([ 42 ]);
       });
     });
   });
