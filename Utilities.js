@@ -10,9 +10,8 @@ var U = U || {};
     U.Rounder = function(howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length rounder"); }
 
-    this.elements = [];
+    this.reset();
     this.howManyElements = howManyElements;
-    this.indexForNextElement = 0;
   };
   
   U.Rounder.prototype = {
@@ -60,6 +59,11 @@ var U = U || {};
     getIndexOfOldestElement: function() {
       if(this.elements.length === 0) { throw new ReferenceError("getIndexOfOldestElement() can't work with an empty Rounder"); }
       return (this.elements.length === this.howManyElements) ? this.indexForNextElement : 0;
+    },
+    
+    reset: function() {
+      this.indexForNextElement = 0;
+      this.elements = [];
     },
   
     slice: function(start, howMany) {
