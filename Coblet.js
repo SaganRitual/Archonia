@@ -15,8 +15,9 @@ if(typeof window === "undefined") {
 
   var roundersRunningAverageDepth = 10;
 
-A.Coblet = function(howManyPoints, gatherer, valuesRangeLo, valuesRangeHi, decayRate) {
+A.Coblet = function(howManyPoints, gatherer, callbackContext, valuesRangeLo, valuesRangeHi, decayRate) {
   this.gatherer = gatherer;
+  this.callbackContext = callbackContext;
   this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
   this.howManyPoints = howManyPoints;
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
@@ -81,7 +82,7 @@ A.Coblet.prototype = {
   },
   
   tick: function() {
-    var p = this.gatherer();
+    var p = this.gatherer.call(this.callbackContext);
     
     if(!(p instanceof Array)) { throw new ReferenceError("Coblet callback must return an array"); }
     if(p.length > this.rounders.length) { throw new ReferenceError("Coblet callback returned bad array"); }
