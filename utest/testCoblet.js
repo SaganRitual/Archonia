@@ -8,18 +8,14 @@ A.integerInRange = function(lo, hi) {
 
 var chai = require('chai');
 
-var archon = {
-  genome: {
-    weightFood: 1, weightTemperature: 1, weightPredators: 1, weightToxins: 1, weightInertia: 1, weightFatigue: 1
-  }
-};
-
-var calculateDecayedSignal = function(signals, howManyTicks) {
+var calculateDecayedSignal = function(signals, howManyTicks, decayRate) {
+  if(decayRate === undefined) { decayRate = 1; }
   var results = Array(signals.length).fill(0);
   
   for(i = 0; i < howManyTicks; i++) {
     for(j = 0; j < results.length; j++) {
-      signals[j] -= 1;
+      signals[j] -= decayRate * 100;
+      signals[j] = A.clamp(signals[j], 0, 100);
       results[j] += signals[j];
       results[j] = Math.max(results[j], 0);
     }
@@ -31,7 +27,7 @@ var calculateDecayedSignal = function(signals, howManyTicks) {
   }
   
   return weight / (100 * howManyTicks * results.length);
-}
+};
 
 describe('Coblet', function() {
   describe('Smoke test', function() {
@@ -87,22 +83,28 @@ describe('Coblet', function() {
     });
     
     it('#decay/basic getSignal()', function() {
-      var c = new A.Coblet(1, function() { return [100]; }, 0, 100);
+      for(decayRate = 1; decayRate < 5; decayRate++) {
+        (function(decayRate) {
+          var c = new A.Coblet(1, function() { return [100]; }, 0, 100, decayRate);;
+          
+          var howManyTicks = 10;
+          for(var i = 0; i < howManyTicks; i++) { c.tick(c); }
       
-      for(var i = 0; i < 10; i++) { c.tick.call(c); }
+          // Note: calling this after the tick means that the coblet will
+          // already have decayed. To make the system work like the utest,
+          // I'll have to make sure all the coblets tick at the beginning
+          // of the update, so anyone who calls getBestSignal() will get
+          // the post-decay value
+          var weight = calculateDecayedSignal([100], howManyTicks, decayRate);
       
-      // Note: calling this after the tick means that the coblet will
-      // already have decayed. To make the system work like the utest,
-      // I'll have to make sure all the coblets tick at the beginning
-      // of the update, so anyone who calls getBestSignal() will get
-      // the post-decay value
-      var weight = (0.99 + 0.98 + 0.97 + 0.96 + 0.95 + 0.94 + 0.93 + 0.92 + 0.91 + 0.90) / 10;
-      
-      chai.expect(c.getBestSignal(1)).to.include({ direction: 0, weight: weight });
+          chai.expect(c.getBestSignal(1)).to.include({ direction: 0 });
+          chai.expect(c.getBestSignal(1).weight.toFixed(4)).equal(weight.toFixed(4));
+        })(decayRate);
+      }
     });
     
     it('#getBestSignal with multiple inputs', function() {
-      var c = new A.Coblet(5, function() { return [50, 27, 80, 70, 60]; }, 0, 100);
+      var c = new A.Coblet(5, function() { return [50, 27, 80, 70, 60]; }, 0, 100, 1);
       
       var howManyTicks = 11;
       for(var i = 0; i < howManyTicks; i++) { c.tick(); }
@@ -117,39 +119,41 @@ describe('Coblet', function() {
       chai.expect(c.getBestSignal(1).weight.toFixed(2)).equal(weight.toFixed(2));
     });
 
-    it('#getBestSignal with spread', function() {
+    it('#getBestSignal with spread, varying decay rates', function() {
       // Note: calling the signal function after the tick means that the coblet will
       // already have decayed. To make the system work like the utest,
       // I'll have to make sure all the coblets tick at the beginning
       // of the update, so anyone who calls getBestSignal() will get
       // the post-decay value
 
-      var c = new A.Coblet(6, function() { return [60, 60, 10, 80, 1, 20]; }, 0, 100);
+      for(var decayRate = -0.01; decayRate < 0.05; decayRate++) {
+        var c = new A.Coblet(6, function() { return [60, 60, 10, 80, 1, 20]; }, 0, 100, decayRate);
 
-      var howManyTicks = 1;
-      for(var i = 0; i < howManyTicks; i++) { c.tick(); }
+        var howManyTicks = 1;
+        for(var i = 0; i < howManyTicks; i++) { c.tick(); }
       
-      var weight = null;
+        var weight = null;
 
-      weight = calculateDecayedSignal([80], howManyTicks);
-      chai.expect(c.getBestSignal(1).direction).equal(3);
-      chai.expect(c.getBestSignal(1).weight.toFixed(2)).equal(weight.toFixed(2));
+        weight = calculateDecayedSignal([80], howManyTicks, decayRate);
+        chai.expect(c.getBestSignal(1).direction).equal(3);
+        chai.expect(c.getBestSignal(1).weight.toFixed(4)).equal(weight.toFixed(4));
 
-      weight = calculateDecayedSignal([60, 60], howManyTicks);
-      chai.expect(c.getBestSignal(2).direction).within(0, 1);
-      chai.expect(c.getBestSignal(2).weight.toFixed(2)).equal(weight.toFixed(2));
+        weight = calculateDecayedSignal([60, 60], howManyTicks, decayRate);
+        chai.expect(c.getBestSignal(2).direction).within(0, 1);
+        chai.expect(c.getBestSignal(2).weight.toFixed(4)).equal(weight.toFixed(4));
 
-      weight = calculateDecayedSignal([60, 10, 80], howManyTicks);
-      chai.expect(c.getBestSignal(3).direction).equal(2);
-      chai.expect(c.getBestSignal(3).weight.toFixed(2)).equal(weight.toFixed(2));
+        weight = calculateDecayedSignal([60, 10, 80], howManyTicks, decayRate);
+        chai.expect(c.getBestSignal(3).direction).equal(2);
+        chai.expect(c.getBestSignal(3).weight.toFixed(4)).equal(weight.toFixed(4));
 
-      weight = calculateDecayedSignal([60, 60, 10, 80], howManyTicks);
-      chai.expect(c.getBestSignal(4).direction).within(1, 2);
-      chai.expect(c.getBestSignal(4).weight.toFixed(2)).equal(weight.toFixed(2));
+        weight = calculateDecayedSignal([60, 60, 10, 80], howManyTicks, decayRate);
+        chai.expect(c.getBestSignal(4).direction).within(1, 2);
+        chai.expect(c.getBestSignal(4).weight.toFixed(4)).equal(weight.toFixed(4));
 
-      weight = calculateDecayedSignal([20, 60, 60, 10, 80], howManyTicks);
-      chai.expect(c.getBestSignal(5).direction).equal(1);
-      chai.expect(c.getBestSignal(5).weight.toFixed(2)).equal(weight.toFixed(2));
+        weight = calculateDecayedSignal([20, 60, 60, 10, 80], howManyTicks, decayRate);
+        chai.expect(c.getBestSignal(5).direction).equal(1);
+        chai.expect(c.getBestSignal(5).weight.toFixed(4)).equal(weight.toFixed(4));
+      }
     });
   });
 });

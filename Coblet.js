@@ -14,12 +14,12 @@ if(typeof window === "undefined") {
 (function(A) {
 
   var roundersRunningAverageDepth = 10;
-  var decayRate = 0.01;
 
-A.Coblet = function(howManyPoints, gatherer, valuesRangeLo, valuesRangeHi) {
+A.Coblet = function(howManyPoints, gatherer, valuesRangeLo, valuesRangeHi, decayRate) {
   this.gatherer = gatherer;
   this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
   this.howManyPoints = howManyPoints;
+  this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   this.rounders = [];
   
   for(var i = 0; i < howManyPoints; i++) {
@@ -90,9 +90,9 @@ A.Coblet.prototype = {
       rounder.store(s);
     
       rounder.deepForEach(function(ix, points) {
-        points[ix] -= decayRate;
+        points[ix] -= this.decayRate;
         points[ix] = A.clamp(points[ix], 0, 1);
-      });
+      }, this);
     }
   }
 };
