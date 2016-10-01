@@ -161,32 +161,50 @@ describe('Coblet', function() {
       // the post-decay value
 
       for(var decayRate = -0.01; decayRate < 0.05; decayRate++) {
-        var f = new FakeCobber(6, function() { return [60, 60, 10, 80, 1, 20]; }, 0, 100, decayRate);
+        for(var howManyTicks = 1; howManyTicks < 10; howManyTicks++) {
+          var f = new FakeCobber(6, function() { return [60, 60, 10, 80, 1, 20]; }, 0, 100, decayRate);
 
-        var howManyTicks = 1;
-        for(var i = 0; i < howManyTicks; i++) { f.tick(); }
+          for(var i = 0; i < howManyTicks; i++) { f.tick(); }
       
-        var weight = null;
+          var weight = null;
 
-        weight = calculateDecayedSignal([80], howManyTicks, decayRate);
-        chai.expect(f.coblet.getBestSignal(1).direction).equal(3);
-        chai.expect(f.coblet.getBestSignal(1).weight.toFixed(4)).equal(weight.toFixed(4));
+          weight = calculateDecayedSignal([80], howManyTicks, decayRate);
+          chai.expect(f.coblet.getBestSignal(1).direction).equal(3);
+          chai.expect(f.coblet.getBestSignal(1).weight.toFixed(4)).equal(weight.toFixed(4));
 
-        weight = calculateDecayedSignal([60, 60], howManyTicks, decayRate);
-        chai.expect(f.coblet.getBestSignal(2).direction).within(0, 1);
-        chai.expect(f.coblet.getBestSignal(2).weight.toFixed(4)).equal(weight.toFixed(4));
+          weight = calculateDecayedSignal([60, 60], howManyTicks, decayRate);
+          chai.expect(f.coblet.getBestSignal(2).direction).within(0, 1);
+          chai.expect(f.coblet.getBestSignal(2).weight.toFixed(4)).equal(weight.toFixed(4));
 
-        weight = calculateDecayedSignal([60, 10, 80], howManyTicks, decayRate);
-        chai.expect(f.coblet.getBestSignal(3).direction).equal(2);
-        chai.expect(f.coblet.getBestSignal(3).weight.toFixed(4)).equal(weight.toFixed(4));
+          weight = calculateDecayedSignal([60, 10, 80], howManyTicks, decayRate);
+          chai.expect(f.coblet.getBestSignal(3).direction).equal(2);
+          chai.expect(f.coblet.getBestSignal(3).weight.toFixed(4)).equal(weight.toFixed(4));
 
-        weight = calculateDecayedSignal([60, 60, 10, 80], howManyTicks, decayRate);
-        chai.expect(f.coblet.getBestSignal(4).direction).within(1, 2);
-        chai.expect(f.coblet.getBestSignal(4).weight.toFixed(4)).equal(weight.toFixed(4));
+          weight = calculateDecayedSignal([60, 60, 10, 80], howManyTicks, decayRate);
+          chai.expect(f.coblet.getBestSignal(4).direction).within(1, 2);
+          chai.expect(f.coblet.getBestSignal(4).weight.toFixed(4)).equal(weight.toFixed(4));
 
-        weight = calculateDecayedSignal([20, 60, 60, 10, 80], howManyTicks, decayRate);
-        chai.expect(f.coblet.getBestSignal(5).direction).equal(1);
-        chai.expect(f.coblet.getBestSignal(5).weight.toFixed(4)).equal(weight.toFixed(4));
+          weight = calculateDecayedSignal([20, 60, 60, 10, 80], howManyTicks, decayRate);
+          chai.expect(f.coblet.getBestSignal(5).direction).equal(1);
+          chai.expect(f.coblet.getBestSignal(5).weight.toFixed(4)).equal(weight.toFixed(4));
+        }
+      }
+    });
+    
+    it('#getBestSignal, decay with changing input values', function() {
+      // Send it an 80 at first, then zeros after, make sure the signal
+      // decays as expected -- rapidly, that is
+      var decayRate = 0.01;
+      var values = [80];
+      var f = new FakeCobber(1, function() { return values.slice(); }, 0, 100, decayRate);
+
+      
+      for(var i = 0; i < 10; i++) {
+        var expectedValue = (0.79 - (i * 0.01)) / (i + 1);
+        f.tick();
+        chai.expect(f.coblet.getBestSignal(1).weight.toFixed(4)).equal(expectedValue.toFixed(4));
+        
+        values = [0];
       }
     });
   });

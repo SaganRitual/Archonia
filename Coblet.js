@@ -16,6 +16,9 @@ if(typeof window === "undefined") {
   var roundersRunningAverageDepth = 10;
 
 A.Coblet = function(howManyPoints, gatherer, callbackContext, valuesRangeLo, valuesRangeHi, decayRate) {
+  if(valuesRangeLo === undefined) { valuesRangeLo = 0; }
+  if(valuesRangeHi === undefined) { valuesRangeHi = 1; }
+
   this.gatherer = gatherer;
   this.callbackContext = callbackContext;
   this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
