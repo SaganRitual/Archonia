@@ -20,13 +20,8 @@ A.Coblet = function(howManyPoints, gatherer, valuesRangeLo, valuesRangeHi, decay
   this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
   this.howManyPoints = howManyPoints;
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
-  this.rounders = [];
   
-  for(var i = 0; i < howManyPoints; i++) {
-    this.rounders.push(new A.Utilities.Rounder(roundersRunningAverageDepth));
-  }
-  
-  this.averageRounder = new A.Utilities.Rounder(howManyPoints);
+  this.reset();
 };
 
 A.Coblet.prototype = {
@@ -73,13 +68,25 @@ A.Coblet.prototype = {
     return average / spread;
   },
   
-  reset: function() { for(var i = 0; i < this.points.length; i++) { this.points[i] = 0; } },
+  reset: function() {
+    this.rounders = [];
+    this.isEmpty = true;
+    this.rounders = [];
+  
+    for(var i = 0; i < this.howManyPoints; i++) {
+      this.rounders.push(new A.Utilities.Rounder(roundersRunningAverageDepth));
+    }
+  
+    this.averageRounder = new A.Utilities.Rounder(this.howManyPoints);
+  },
   
   tick: function() {
     var p = this.gatherer();
     
     if(!(p instanceof Array)) { throw new ReferenceError("Coblet callback must return an array"); }
     if(p.length > this.rounders.length) { throw new ReferenceError("Coblet callback returned bad array"); }
+    
+    this.isEmpty = false;
     
     for(var i = 0; i < this.rounders.length; i++) {
       var rounder = this.rounders[i];

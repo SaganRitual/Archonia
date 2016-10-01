@@ -43,7 +43,7 @@ describe('Coblet', function() {
   });
   
   describe('#public functions exist', function() {
-    var names = [ 'gatherer', 'getAverages', 'getBestSignal', 'tick' ];
+    var names = [ 'gatherer', 'getAverages', 'getBestSignal', 'reset', 'tick' ];
       
     for(var n in names) {
       var name = names[n];
@@ -52,10 +52,39 @@ describe('Coblet', function() {
         it('#' + name + '()', function() {
           var cc = new A.Coblet(1, function() {});
           chai.expect(cc).to.have.property(name);
-          chai.assert.typeOf(cc[name], "Function");
+          chai.assert.isFunction(cc[name]);
         });
       })(name);
     }
+  });
+
+  describe('#public properties exist', function() {
+    var names = [ 'isEmpty' ];
+    
+    for(var n in names) {
+      var name = names[n];
+    
+      (function(name) {
+        it('#' + name, function() {
+          var c = new A.Coblet(1, function() {});
+          chai.expect(c).to.have.property(name);
+          chai.assert.isNotFunction(c[name]);
+        });
+      })(name);
+    }
+  });
+
+  describe('#public properties behave', function() {
+    it('#empty/not empty', function() {
+      var c = new A.Coblet(1, function() { return []; });
+      chai.assert(c.isEmpty, 'isEmpty should be true');
+    
+      c.tick();
+      chai.assert(!c.isEmpty, 'isEmpty should be false');
+
+      c.reset();
+      chai.assert(c.isEmpty, 'isEmpty should be true');
+    });
   });
   
   describe('Cost/benefit functionality', function() {
