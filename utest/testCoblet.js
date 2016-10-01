@@ -33,43 +33,21 @@ var calculateDecayedSignal = function(signals, howManyTicks) {
   return weight / (100 * howManyTicks * results.length);
 }
 
-describe('Cobber', function() {
-  describe('Smoke test', function() {
-    it('#Module exists', function() {
-      var c = function() { A.Cobber = require('../Cobber.js'); };
-      chai.expect(c).to.not.throw();
-      chai.expect(A).to.have.property('Cobber');
-    });
-    
-    it('#Object exists', function() {
-      chai.assert.typeOf(A.Cobber, "Function");
-    });
-    
-    it('#Object initializes', function() {
-      var c = new A.Cobber(archon);
-      chai.expect(c).to.have.property('inputs');
-      chai.expect(c.inputs).to.include({ food: null, temperature: null, predators: null, prey: null, hunger: null, toxins: null, inertia: null, fatigue: null });
-    });
-  });
-});
-
 describe('Coblet', function() {
   describe('Smoke test', function() {
+    it('#Module exists', function() {
+      var c = function() { A.Coblet = require('../Coblet.js'); };
+      chai.expect(c).to.not.throw();
+      chai.expect(A).to.have.property('Coblet');
+    });
+
     it('#Object exists', function() {
       chai.assert.typeOf(A.Coblet, "Function");
-    });
-    
-    it('#Object initializes', function() {
-      var howManyPoints = 12;
-      var cc = new A.Coblet(howManyPoints, function() {});
-      chai.expect(cc).to.have.property('rounders');
-      chai.expect(cc.rounders instanceof Array).true;
-      chai.expect(cc).to.have.property('valuesRange');
     });
   });
   
   describe('#public functions exist', function() {
-    var names = [ 'gatherer', 'tick', 'getAverages', 'getBestSignal' ];
+    var names = [ 'gatherer', 'getAverages', 'getBestSignal', 'tick' ];
       
     for(var n in names) {
       var name = names[n];

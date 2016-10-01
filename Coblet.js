@@ -15,10 +15,8 @@ if(typeof window === "undefined") {
 
   var roundersRunningAverageDepth = 10;
   var decayRate = 0.01;
-  var id = 0;
 
 A.Coblet = function(howManyPoints, gatherer, valuesRangeLo, valuesRangeHi) {
-  this.id = id++;
   this.gatherer = gatherer;
   this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
   this.howManyPoints = howManyPoints;
@@ -96,27 +94,11 @@ A.Coblet.prototype = {
         points[ix] = A.clamp(points[ix], 0, 1);
       });
     }
-  },
-  
-  toWTF: function() { return "Coblet " + this.id; }
-};
-
-A.Cobber = function(archon) {
-  this.genome = archon.genome;
-  
-  this.inputs = {
-    food: null, temperature: null, predators: null, prey: null, hunger: null, toxins: null, inertia: null, fatigue: null
-  };
-};
-
-A.Cobber.prototype = {
-  launch: function() {
-    
   }
 };
 
 })(A);
 
 if(typeof window === "undefined") {
-  module.exports = A.Cobber;
+  module.exports = A.Coblet;
 }
