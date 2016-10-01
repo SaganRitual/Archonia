@@ -15,22 +15,24 @@ if(typeof window === "undefined") {
 
   var roundersRunningAverageDepth = 10;
   var decayRate = 0.01;
+  var id = 0;
 
 A.Coblet = function(howManyPoints, gatherer, valuesRangeLo, valuesRangeHi) {
-  gatherer.call(this);
+  this.id = id++;
   this.gatherer = gatherer;
   this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
+  this.howManyPoints = howManyPoints;
   this.rounders = [];
   
   for(var i = 0; i < howManyPoints; i++) {
     this.rounders.push(new A.Utilities.Rounder(roundersRunningAverageDepth));
   }
+  
+  this.averageRounder = new A.Utilities.Rounder(howManyPoints);
 };
 
 A.Coblet.prototype = {
   getAverages: function() {
-    var averages = [];
-
     for(var i = 0; i < this.rounders.length; i++) {
       var rounder = this.rounders[i];
       var total = 0;
@@ -38,17 +40,25 @@ A.Coblet.prototype = {
       
       rounder.forEach(function(ix, value) { total += value; valuesCount++; }, rounder);
       
-      averages.push(total / valuesCount);
+      this.averageRounder.store(total / valuesCount);
     }
-
-    return averages;
   },
   
-  getBestSignal: function() {
-    var averages = this.getAverages(), bestValue = null, bestDirection = null;
+  getBestSignal: function(spread) {
+    var bestValue = null, bestDirection = null;
     
-    for(var i = 0; i < averages.length; i++) {
-      var value = averages[i];
+    this.getAverages();
+    
+    // We want to return an index that is in the middle of the
+    // spread. If the spread is even, randomly choose one or the
+    // other element. If odd, just choose the center
+    var center = Math.floor(spread / 2);
+    if(spread % 2 === 0) {
+      center += A.integerInRange(-1, 0);
+    }
+    
+    for(var i = 0; i < this.howManyPoints; i++) {
+      var value = this.getSpreadAverage(i - center, spread);
       
       if(bestValue === null || value > bestValue) { bestValue = value; bestDirection = i; }
     }
@@ -56,14 +66,24 @@ A.Coblet.prototype = {
     return { direction: bestDirection, weight: bestValue };
   },
   
+  getSpreadAverage: function(index, spread) {
+    var slice = this.averageRounder.slice(index, spread), average = 0;
+    for(var i = 0; i < spread; i++) {
+      average += slice[i];
+    }
+    
+    return average / spread;
+  },
+  
   reset: function() { for(var i = 0; i < this.points.length; i++) { this.points[i] = 0; } },
   
   tick: function() {
-    var p = this.gatherer.call(this);
+    var p = this.gatherer();
     
     if(!(p instanceof Array)) { throw new ReferenceError("Coblet callback must return an array"); }
+    if(p.length > this.rounders.length) { throw new ReferenceError("Coblet callback returned bad array"); }
     
-    for(var i = 0; i < p.length; i++) {
+    for(var i = 0; i < this.rounders.length; i++) {
       var rounder = this.rounders[i];
       var s = A.zeroToOneRange.convertPoint(p[i], this.valuesRange);
   
@@ -74,9 +94,11 @@ A.Coblet.prototype = {
       rounder.deepForEach(function(ix, points) {
         points[ix] -= decayRate;
         points[ix] = A.clamp(points[ix], 0, 1);
-      }, this);
+      });
     }
-  }
+  },
+  
+  toWTF: function() { return "Coblet " + this.id; }
 };
 
 A.Cobber = function(archon) {
