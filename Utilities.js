@@ -62,6 +62,7 @@ var U = U || {};
     },
     
     reset: function() {
+      this.isEmpty = true;
       this.indexForNextElement = 0;
       this.elements = [];
     },
@@ -89,6 +90,7 @@ var U = U || {};
     },
     
     store: function(valueToStore) {
+      this.isEmpty = false;
       if(this.elements.length < this.howManyElements) {
         this.elements.push(valueToStore);
       } else {
