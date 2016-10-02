@@ -3,18 +3,22 @@
 
 "use strict";
 
-var U = U || {};
+var A = A || {};
 
-(function(U) {
+if(typeof window === "undefined") {
+  A = require('./Archonia.js');
+}
+
+(function(A) {
   
-    U.Rounder = function(howManyElements) {
+    A.Rounder = function(howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length rounder"); }
 
     this.reset();
     this.howManyElements = howManyElements;
   };
   
-  U.Rounder.prototype = {
+  A.Rounder.prototype = {
     add: function(index, howMany) {
       if(this.elements.length === 0) { throw new ReferenceError("plus() can't work with an empty Rounder"); }
       return (index + howMany + this.elements.length) % this.elements.length;
@@ -102,9 +106,9 @@ var U = U || {};
 
   };
   
-})(U);
+})(A);
 
 
 if(typeof window === "undefined") {
-  module.exports = U;
+  module.exports = A.Rounder;
 }
