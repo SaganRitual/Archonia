@@ -11,7 +11,10 @@ if(typeof window === "undefined") {
 
 (function(A) {
   
-    A.Rounder = function(howManyElements) {
+  var id = 0;
+  
+  A.Rounder = function(howManyElements) {
+    this.id = id++;
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length rounder"); }
 
     this.reset();
@@ -63,6 +66,27 @@ if(typeof window === "undefined") {
     getIndexOfOldestElement: function() {
       if(this.elements.length === 0) { throw new ReferenceError("getIndexOfOldestElement() can't work with an empty Rounder"); }
       return (this.elements.length === this.howManyElements) ? this.indexForNextElement : 0;
+    },
+    
+    getSpreadAt: function(index, spread) {
+      if(this.elements.length < spread) { console.log("Warning: array smaller than spread size"); }
+      
+      // We want to return an index that is in the middle of the
+      // spread. If the spread is even, randomly choose one or the
+      // other element. If odd, just choose the center
+      var center = Math.floor(spread / 2);
+
+      if(spread % 2 === 0) {
+        center += A.integerInRange(-1, 0);
+      }
+    
+      var result = [];
+      for(var i = 0; i < spread; i++) {
+        var ix = this.add(index, i - center);
+        result.push(this.elements[ix]);
+      }
+      
+      return result;
     },
     
     reset: function() {

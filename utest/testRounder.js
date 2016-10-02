@@ -16,7 +16,7 @@ describe('Utilities', function() {
 describe('Rounder', function() {
   describe('#Public functions exist', function() {
     var names = [
-      'deepForEach', 'forEach', 'reset', 'slice', 'store'
+      'deepForEach', 'forEach', 'getSpreadAt', 'reset', 'slice', 'store'
     ];
     
     for(var n in names) {
@@ -219,7 +219,7 @@ describe('Rounder', function() {
     });
   });
   
-  describe('#reset', function() {
+  describe('#reset()', function() {
     it('#discard internal array, reset index', function() {
       var howManyEntries = 10;
       var r = new A.Rounder(howManyEntries);
@@ -240,6 +240,26 @@ describe('Rounder', function() {
       chai.expect(check).equal(42);
       chai.expect(function() { r.slice(); }).to.not.throw();
       chai.expect(r.slice(-2, 1)).eql([ 42 ]);
+    });
+  });
+  
+  describe('#getSpreadAt()', function() {
+    it('#cross boundary back to zero', function() {
+      var howManyEntries = 10, result = null;
+      var r = new A.Rounder(howManyEntries);
+    
+      for(var i = 0; i < howManyEntries; i++) { r.store(i); }
+    
+      chai.expect(r.getSpreadAt(0, 3)).eql([9, 0, 1]);
+      chai.expect(r.getSpreadAt(1, 3)).eql([0, 1, 2]);
+      chai.expect(r.getSpreadAt(2, 3)).eql([1, 2, 3]);
+      chai.expect(r.getSpreadAt(3, 3)).eql([2, 3, 4]);
+      chai.expect(r.getSpreadAt(4, 3)).eql([3, 4 ,5]);
+      chai.expect(r.getSpreadAt(5, 3)).eql([4, 5, 6]);
+      chai.expect(r.getSpreadAt(6, 3)).eql([5, 6, 7]);
+      chai.expect(r.getSpreadAt(7, 3)).eql([6, 7, 8]);
+      chai.expect(r.getSpreadAt(8, 3)).eql([7, 8, 9]);
+      chai.expect(r.getSpreadAt(9, 3)).eql([8, 9, 0]);
     });
   });
 });
