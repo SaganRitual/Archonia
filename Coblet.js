@@ -8,7 +8,7 @@ var A = A || {};
 if(typeof window === "undefined") {
   A = require('./Archonia.js');
   A.Range = require('./Range.js');
-  A.Utilities = require('./Utilities.js');
+  A.Rounder = require('./Rounder.js');
 }
 
 (function(A) {
@@ -78,10 +78,10 @@ A.Coblet.prototype = {
     this.rounders = [];
   
     for(var i = 0; i < this.howManyPoints; i++) {
-      this.rounders.push(new A.Utilities.Rounder(roundersRunningAverageDepth));
+      this.rounders.push(new A.Rounder(roundersRunningAverageDepth));
     }
   
-    this.averageRounder = new A.Utilities.Rounder(this.howManyPoints);
+    this.averageRounder = new A.Rounder(this.howManyPoints);
   },
   
   tick: function() {
