@@ -30,6 +30,35 @@ describe('Utilities', function() {
       }
     });
 
+    describe('#public properties exist', function() {
+      var names = [ 'isEmpty' ];
+      
+      for(var n in names) {
+        var name = names[n];
+      
+        (function(name) {
+          it('#' + name, function() {
+            var r = new A.Utilities.Rounder(1);
+            chai.expect(r).to.have.property(name);
+            chai.assert.isNotFunction(r[name]);
+          });
+        })(name);
+      }
+    });
+
+    describe('#public properties behave', function() {
+      it('#empty/not empty', function() {
+        var r = new A.Utilities.Rounder(1);
+        chai.assert(r.isEmpty, 'isEmpty should be true');
+      
+        r.store(1);
+        chai.assert(!r.isEmpty, 'isEmpty should be false');
+
+        r.reset();
+        chai.assert(r.isEmpty, 'isEmpty should be true');
+      });
+    });
+
     describe('#forEach()', function() {
       it('#iterating callback, proper roundering, various array sizes', function() {
         for(var fillCount = 1; fillCount < 10; fillCount++) {
