@@ -7,104 +7,59 @@ var A = A || {};
 
 if(typeof window === "undefined") {
   A = require('./Archonia.js');
-  A.Range = require('./Range.js');
-  A.Rounder = require('./Rounder.js');
+  A.Ramper = require('./Ramper.js');
 }
 
 (function(A) {
 
-  var roundersRunningAverageDepth = 10;
-
-A.Coblet = function(howManyPoints, gatherer, callbackContext, valuesRangeLo, valuesRangeHi, decayRate) {
-  if(valuesRangeLo === undefined) { valuesRangeLo = 0; }
-  if(valuesRangeHi === undefined) { valuesRangeHi = 1; }
-
-  this.gatherer = gatherer;
-  this.callbackContext = callbackContext;
-  this.valuesRange = new A.Range(valuesRangeLo, valuesRangeHi);
-  this.howManyPoints = howManyPoints;
-  this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
+A.Coblet = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
+  this.howManyMeasurementPoints = howManyMeasurementPoints;
   
-  this.reset();
+  this.rampers = [];
+  
+  for(var i = 0; i < howManyMeasurementPoints; i++) {
+    this.rampers.push(new A.Ramper(measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
+  }
+  
+  this.averagesRounder = new A.Rounder(howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
+  
 };
 
 A.Coblet.prototype = {
-  getAverages: function() {
-    for(var i = 0; i < this.rounders.length; i++) {
-      var rounder = this.rounders[i];
-      var total = 0;
-      var valuesCount = 0;
-      
-      rounder.forEach(function(ix, value) { total += value; valuesCount++; }, rounder);
-      
-      this.averageRounder.store(total / valuesCount);
-    }
+  getAverage: function(index, spread) {
+    var e = this.averagesRounder.getSpreadAt(index, spread);
+    
+    var t = 0;
+    for(var i = 0; i < spread; i++) { t += e[i]; }
+    
+    return t / spread;
   },
   
   getBestSignal: function(spread) {
-    var bestValue = null, bestDirection = null;
+    if(spread === undefined) { spread = 1; }
     
-    this.getAverages();
+    var i = null;
     
-    // We want to return an index that is in the middle of the
-    // spread. If the spread is even, randomly choose one or the
-    // other element. If odd, just choose the center
-    var center = Math.floor(spread / 2);
-    if(spread % 2 === 0) {
-      center += A.integerInRange(-1, 0);
+    // The rampers are in a cicle around us, so we
+    // need a wheel to get the spread averages and
+    // identify the index of the best one
+    for(i = 0; i < this.howManyMeasurementPoints; i++) {
+      this.averagesRounder.store(this.rampers[i].getSignalStrength());
     }
+  
+    var result = { direction: null, weight: null };
     
-    for(var i = 0; i < this.howManyPoints; i++) {
-      var value = this.getSpreadAverage(i - center, spread);
-      
-      if(bestValue === null || value > bestValue) { bestValue = value; bestDirection = i; }
+    for(i = 0; i < this.howManyMeasurementPoints; i++) {
+      var r = this.getAverage(i, spread);
+
+      if(result.weight === null || r > result.weight) { result.direction = i; result.weight = r; }
     }
-    
-    return { direction: bestDirection, weight: bestValue };
+  
+    return result;
   },
-  
-  getSpreadAverage: function(index, spread) {
-    var slice = this.averageRounder.slice(index, spread), average = 0;
-    for(var i = 0; i < spread; i++) {
-      average += slice[i];
-    }
-    
-    return average / spread;
-  },
-  
-  reset: function() {
-    this.rounders = [];
-    this.isEmpty = true;
-    this.rounders = [];
-  
-    for(var i = 0; i < this.howManyPoints; i++) {
-      this.rounders.push(new A.Rounder(roundersRunningAverageDepth));
-    }
-  
-    this.averageRounder = new A.Rounder(this.howManyPoints);
-  },
-  
-  tick: function() {
-    var p = this.gatherer.call(this.callbackContext);
-    
-    if(!(p instanceof Array)) { throw new ReferenceError("Coblet callback must return an array"); }
-    if(p.length > this.rounders.length) { throw new ReferenceError("Coblet callback returned bad array"); }
-    
-    this.isEmpty = false;
-    
-    for(var i = 0; i < this.rounders.length; i++) {
-      var rounder = this.rounders[i];
-      var s = A.zeroToOneRange.convertPoint(p[i], this.valuesRange);
-  
-      s = A.clamp(s, 0, 1);
-    
-      rounder.store(s);
-    
-      rounder.deepForEach(function(ix, points) {
-        points[ix] -= this.decayRate;
-        points[ix] = A.clamp(points[ix], 0, 1);
-      }, this);
-    }
+
+  store: function(where, value) {
+    this.rampers[where].store(value);
   }
 };
 
