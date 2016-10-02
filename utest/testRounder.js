@@ -244,12 +244,23 @@ describe('Rounder', function() {
   });
   
   describe('#getSpreadAt()', function() {
-    it('#cross boundary back to zero', function() {
+    it('#cross boundary back to zero when necessary', function() {
       var howManyEntries = 10, result = null;
       var r = new A.Rounder(howManyEntries);
     
       for(var i = 0; i < howManyEntries; i++) { r.store(i); }
-    
+      
+      chai.expect(r.getSpreadAt(0, 1)).eql([0]);
+      chai.expect(r.getSpreadAt(1, 1)).eql([1]);
+      chai.expect(r.getSpreadAt(2, 1)).eql([2]);
+      chai.expect(r.getSpreadAt(3, 1)).eql([3]);
+      chai.expect(r.getSpreadAt(4, 1)).eql([4]);
+      chai.expect(r.getSpreadAt(5, 1)).eql([5]);
+      chai.expect(r.getSpreadAt(6, 1)).eql([6]);
+      chai.expect(r.getSpreadAt(7, 1)).eql([7]);
+      chai.expect(r.getSpreadAt(8, 1)).eql([8]);
+      chai.expect(r.getSpreadAt(9, 1)).eql([9]);
+
       chai.expect(r.getSpreadAt(0, 3)).eql([9, 0, 1]);
       chai.expect(r.getSpreadAt(1, 3)).eql([0, 1, 2]);
       chai.expect(r.getSpreadAt(2, 3)).eql([1, 2, 3]);
@@ -260,6 +271,17 @@ describe('Rounder', function() {
       chai.expect(r.getSpreadAt(7, 3)).eql([6, 7, 8]);
       chai.expect(r.getSpreadAt(8, 3)).eql([7, 8, 9]);
       chai.expect(r.getSpreadAt(9, 3)).eql([8, 9, 0]);
+
+      chai.expect(r.getSpreadAt(0, 5)).eql([8, 9, 0, 1, 2]);
+      chai.expect(r.getSpreadAt(1, 5)).eql([9, 0, 1, 2, 3]);
+      chai.expect(r.getSpreadAt(2, 5)).eql([0, 1, 2, 3, 4]);
+      chai.expect(r.getSpreadAt(3, 5)).eql([1, 2, 3, 4, 5]);
+      chai.expect(r.getSpreadAt(4, 5)).eql([2, 3, 4 ,5, 6]);
+      chai.expect(r.getSpreadAt(5, 5)).eql([3, 4, 5, 6, 7]);
+      chai.expect(r.getSpreadAt(6, 5)).eql([4, 5, 6, 7, 8]);
+      chai.expect(r.getSpreadAt(7, 5)).eql([5, 6, 7, 8, 9]);
+      chai.expect(r.getSpreadAt(8, 5)).eql([6, 7, 8, 9, 0]);
+      chai.expect(r.getSpreadAt(9, 5)).eql([7, 8, 9, 0, 1]);
     });
   });
 });
