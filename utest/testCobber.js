@@ -1,4 +1,6 @@
 var A = require('../Archonia.js');
+A.Ramper = require('../Ramper.js');
+A.Rounder = require('../Rounder.js');
 
 A.prePhaserSetup();
 
@@ -10,22 +12,24 @@ var chai = require('chai');
 
 var archon = {
   genome: {
-    optimalTemp: -200, optimalTempRange: 400,
-    cobs: {}
+    optimalTemp: 0, optimalTempRange: 1, 
+    offspringMass: { adultCalories: 100, larvalCalories: 100 },
+    reproductionThreshold: 500, embryoThreshold: 200,
+    senseMeasurementDepth: 10,
+    senses: {}
   }
 };
 
-var cobNames = [ 'fatigue', 'food', 'inertia', 'predators', 'prey', 'hunger', 'temperature', 'toxins' ];
+var reproductionCostFactor = 1.25;
 
-for(var i = 0; i < cobNames.length; i++) {
-  var name = cobNames[i];
-  archon.genome.cobs[name] = { threshold: 0.5, multiplier: 1, decayRate: 0.01 };
+var senseNames = [ 'fatigue', 'food', 'inertia', 'predators', 'prey', 'hunger', 'temperature', 'toxins' ];
+
+for(var i = 0; i < senseNames.length; i++) {
+  var name = senseNames[i];
+  archon.genome.senses[name] = { threshold: 0.5, multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 };
 }
 
-archon.genome.cobs.inertia.decayRate = 0;
-
-var tempRangeRadius = archon.genome.optimalTempRange / 2;
-archon.genome.cobs.temperature = { threshold: 0.5, multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: tempRangeRadius };
+archon.genome.senses.inertia.decayRate = 0;
 
 describe('Cobber', function() {
   describe('Smoke test', function() {
@@ -41,7 +45,7 @@ describe('Cobber', function() {
   
     describe('#public functions exist', function() {
       var names = [
-        'chooseAction', 'launch', 'senseArchon', 'senseFood', 'senseTemperature', 'tick'
+        'chooseAction', 'launch', 'senseArchon', 'senseFood', 'senseTemperature'
       ];
       
       for(var n in names) {
@@ -58,40 +62,69 @@ describe('Cobber', function() {
     });
   });
   
-  describe('Per function', function() {
-  });
-  
   describe('Functionality', function() {
     describe('#chooseAction()', function() {
-      it('#default action is encapsulate', function() {
+      it('#default action is launch', function() {
         var c = new A.Cobber(archon);
-        chai.expect(c.chooseAction()).to.include({ action: 'encapsulate', direction: 0 });
+        chai.expect(c.chooseAction()).to.include({ action: 'launch', direction: 0 });
       });
       
-      it('#maxed-out temperature - state change, then revert', function() {
+      it('#inertia vs various sense dimensions', function() {
         var c = new A.Cobber(archon), i = null;
-
-        for(i = 0; i < 5; i++) {
-          // The high temp will cause an emergency, but it will take a few
-          // ticks for the sense input to actually ramp up. Make it ramp
-          // up here, simulating that it's taking some time to get away
-          // from the bad temp zone, so we can watch it ramp down in the next loop
-          c.senseTemperature(archon.genome.optimalTemp + tempRangeRadius, 0);
-
-          c.tick();
-          chai.expect(c.chooseAction()).to.include({ action: 'move', direction: 0 });
-        }
         
-        // At a decay rate of 0.01, it will take us 6 ticks for the temperature
-        // signal to go below the inertia threshold
-        for(i = 0; i < 4; i++) {
-          c.senseTemperature(archon.genome.optimalTemp, 0);
-          c.tick();
-          chai.expect(c.chooseAction()).to.include({ action: 'move', direction: 0 });
-        }
+        var senseInfo = [
+          // Some senses are non-spatial, so they have only one input, eg, hunger
+          { dimension: 1, senseName: 'Hunger', action: 'searchForFood', deliveryHi: 1, deliveryLo: 0 },
+          
+          // Temp has only two: up and down
+          { dimension: 2, senseName: 'Temperature', action: 'findGoodTemp', deliveryHi: 1, deliveryLo: 0 },
+          
+          // Spatial senses have 12 inputs
+          { dimension: 12, senseName: 'Food', action: 'eat', deliveryHi: {calories: 1}, deliveryLo: {calories: 0} }
+        ];
+
+        var i = null, j = null, k = null;
         
-        c.tick();
-        chai.expect(c.chooseAction()).to.include({ action: 'encapsulate', direction: 0 });
+        for(j = 0; j < senseInfo.length; j++) {
+          // Do nothing until input ramps past the inertial threshold
+          for(i = 0; i < 5; i++) {
+            for(k = 0; k < senseInfo[j].dimension; k++) {
+              c['sense' + senseInfo[j].senseName](k, senseInfo[j].deliveryHi);
+            }
+
+            chai.expect(c.chooseAction()).to.include({ action: 'launch', direction: 0 });
+          }
+
+          // Fill the inputs with max values to extend the decay period
+          for(i = 0; i < 10; i++) {
+            for(k = 0; k < senseInfo[j].dimension; k++) {
+              c['sense' + senseInfo[j].senseName](k, senseInfo[j].deliveryHi);
+            }
+
+            chai.expect(c.chooseAction()).to.include({ action: senseInfo[j].action, direction: 0 });
+          }
+        
+          // Move until just before the input drops below the inertial threshold
+          for(i = 0; i < 4; i++) {
+            for(k = 0; k < senseInfo[j].dimension; k++) {
+              c['sense' + senseInfo[j].senseName](k, senseInfo[j].deliveryLo);
+            }
+
+            chai.expect(c.chooseAction()).to.include({ action: senseInfo[j].action, direction: 0 });
+          }
+
+          // Drop one more time and we should go back to sleep
+          for(k = 0; k < senseInfo[j].dimension; k++) {
+            c['sense' + senseInfo[j].senseName](k, senseInfo[j].deliveryLo);
+          }
+
+          chai.expect(c.chooseAction()).to.include({ action: 'launch', direction: 0 });
+
+          // Get rid of all the other signals; we just want to test them one at a time
+          var senseName = senseInfo[j].senseName;
+          c.senses[senseName.toLowerCase()].coblet.reset();
+          
+        }
       });
     });
   });

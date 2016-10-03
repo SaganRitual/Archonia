@@ -15,96 +15,72 @@ if(typeof window === "undefined") {
 A.Cobber = function(archon) {
   this.archon = archon;
   
-  this.encapsulateAction = { action: 'encapsulate', direction: 0 };
-  this.currentAction = this.encapsulateAction;
-  
-  this.cobs = {}; var gcobs = archon.genome.cobs, pcobs = this.cobs;
+  this.senses = {}; var gSenses = archon.genome.senses, pSenses = this.senses;
 
-  var cobExtras = {
-    fatigue: { howManyPoints: 1 }, food: { howManyPoints: 12 }, inertia: { howManyPoints: 1 },
-    predators: { howManyPoints: 12 }, prey: { howManyPoints: 12 }, hunger: { howManyPoints: 1 },
-    temperature: { howManyPoints: 2 }, toxins: { howManyPoints: 12 }
+  this.inertiaAction = {
+    action: 'launch', direction: 0,
+    signalWeight: gSenses.inertia.threshold * gSenses.inertia.multiplier
   };
   
-  for(var gc in gcobs) {
-    pcobs[gc] = {};
+  this.currentAction = Object.assign({}, this.inertiaAction);
+  
+  var senseAddons = {
+    fatigue:     { howManyPoints:  1, signalSpread:  1, action: 'moveToSafety' },
+    food:        { howManyPoints: 12, signalSpread: 12, action: 'eat' },
+    inertia:     { howManyPoints:  1, signalSpread:  1, action: 'sleep?' },
+    predators:   { howManyPoints: 12, signalSpread: 12, action: 'flee' },
+    prey:        { howManyPoints: 12, signalSpread: 12, action: 'pursue' },
+    hunger:      { howManyPoints:  1, signalSpread:  1, action: 'searchForFood' },
+    temperature: { howManyPoints:  2, signalSpread:  2, action: 'findGoodTemp' },
+    toxins:      { howManyPoints: 12, signalSpread: 12, action: 'move' }
+  };
+  
+  for(var gs in gSenses) {
+    pSenses[gs] = {};
     
-    var gcob = gcobs[gc], pcob = pcobs[gc], extra = cobExtras[gc];
+    var gSense = gSenses[gs], pSense = pSenses[gs], extra = senseAddons[gs];
+    
+    for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
-    var callbackName = 'gather' + gc.substr(0, 1).toUpperCase() + gc.substr(1);
-    var callback = this[callbackName];
-
-    pcobs[gc].coblet = new A.Coblet(
-      extra.howManyPoints, callback, this, gcob.valuesRangeLo, gcob.valuesRangeHi, gcob.decayRate
+    pSenses[gs].coblet = new A.Coblet(
+      extra.howManyPoints, this.archon.genome.senseMeasurementDepth, gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
     
-    pcobs[gc].measurements = Array(extra.howManyPoints).fill(0);
-
-    for(var gg in gcob) {
-      var gene = gcob[gg];
+    for(var gg in gSense) {
+      var gene = gSense[gg];
       
-      pcob[gg] = gene;
+      pSense[gg] = gene;
     }
   }
   
-  pcobs.temperature.isEmergency = false;
+  pSenses.temperature.isEmergency = false;
 };
 
 A.Cobber.prototype = {
-  currentAction: null,
-  
   chooseAction: function() {
-    var tempSignal_ = null, tempSignal = 0, actionSelected = false;
     
-    if(!this.cobs.temperature.coblet.isEmpty) {
-      tempSignal_ = this.cobs.temperature.coblet.getBestSignal(1);
-      tempSignal = tempSignal_.weight * this.cobs.temperature.multiplier;
+    this.currentAction = Object.assign({}, this.inertiaAction);
+
+    for(var s in this.senses) {
+      var sense = this.senses[s], inputSignal = null;
+      
+      if(!sense.coblet.isEmpty()) {
+        
+        inputSignal = sense.coblet.getBestSignal(sense.signalSpread);
+        
+        var effectiveSignalStrength = inputSignal.weight * sense.multiplier;
+
+        if(effectiveSignalStrength > this.currentAction.signalWeight) {
+
+          this.currentAction.signalWeight = effectiveSignalStrength;
+          this.currentAction.action = sense.action;
+          this.currentAction.direction = inputSignal.direction;
+
+        }
+      }
     }
-    
-    if(this.cobs.temperature.isEmergency || tempSignal > this.cobs.inertia.threshold * this.cobs.inertia.multiplier) {
-      actionSelected = true;
-      this.currentAction = { action: 'move', direction: tempSignal_.direction };
-    }
-    
-    if(!actionSelected) { this.currentAction = this.encapsulateAction; }
 
     return this.currentAction;
-  },
-
-  gatherArchon: function(/*who*/) {
-    return this.cobs.archon.measurements;
-  },
-
-  gatherFatigue: function() {
-    return this.cobs.fatigue.measurements;
-  },
-
-  gatherHunger: function() {
-    return this.cobs.hunger.measurements;
-  },
-
-  gatherInertia: function() {
-    return this.cobs.inertia.measurements;
-  },
-
-  gatherFood: function(/*what*/) {
-    return this.cobs.food.measurements;
-  },
-  
-  gatherPredators: function() {
-    return this.cobs.predators.measurements;
-  },
-  
-  gatherPrey: function() {
-    return this.cobs.prey.measurements;
-  },
-  
-  gatherTemperature: function() {
-    return this.cobs.temperature.measurements.slice();
-  },
-
-  gatherToxins: function() {
-    return this.cobs.toxins.measurements;
   },
   
   launch: function() {
@@ -119,25 +95,22 @@ A.Cobber.prototype = {
     
   },
   
-  senseHunger: function() {
-    
+  senseHunger: function(where, hunger) {
+    this.senses.hunger.coblet.store(where, hunger);
   },
   
   senseInertia: function() {
     
   },
   
-  senseFood: function(/*what*/) {
-    
+  senseFood: function(where, food) {
+    this.senses.food.coblet.store(where, food.calories);
   },
   
-  senseTemperature: function(temp, where) {
+  senseTemperature: function(where, temp) {
     var deltaFromOptimal = Math.abs(temp - this.archon.genome.optimalTemp);
-    var rangeRadius = this.archon.genome.optimalTempRange / 2;
     
-    this.cobs.temperature.isEmergency = deltaFromOptimal >= rangeRadius;
-
-    this.cobs.temperature.measurements[where] = deltaFromOptimal;
+    this.senses.temperature.coblet.store(where, deltaFromOptimal);
   },
   
   senseToxins: function() {
@@ -145,7 +118,7 @@ A.Cobber.prototype = {
   },
   
   tick: function() {
-    for(var c in this.cobs) { var cob = this.cobs[c]; cob.coblet.tick(); }
+
   }
 };
   
