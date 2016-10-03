@@ -6,13 +6,13 @@
 var A = A || {};
 
 if(typeof window === "undefined") {
-  A = require('./Archonia.js');
-  A.Ramper = require('./Ramper.js');
+  A = require('../Archonia.js');
+  A.Ramper = require('./SignalSmoother.js');
 }
 
 (function(A) {
 
-A.Coblet = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
+A.SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
   this.empty = true;
   this.howManyMeasurementPoints = howManyMeasurementPoints;
   
@@ -26,7 +26,7 @@ A.Coblet = function(howManyMeasurementPoints, measurementDepth, decayRate, value
   
 };
 
-A.Coblet.prototype = {
+A.SensorArray.prototype = {
   getAverage: function(index, spread) {
     var e = this.averagesRounder.getSpreadAt(index, spread);
     
@@ -76,5 +76,5 @@ A.Coblet.prototype = {
 })(A);
 
 if(typeof window === "undefined") {
-  module.exports = A.Coblet;
+  module.exports = A.SensorArray;
 }

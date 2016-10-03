@@ -7,12 +7,12 @@ var A = A || {};
 
 if(typeof window === "undefined") {
   A = require('./Archonia.js');
-  A.Coblet = require('./Coblet.js');
+  A.sensorArray = require('./widgets/SensorArray.js');
 }
 
 (function(A) {
 
-A.Cobber = function(archon) {
+A.Brain = function(archon) {
   this.id = A.archoniaUniqueObjectId++;
   this.archon = archon;
   
@@ -40,7 +40,7 @@ A.Cobber = function(archon) {
     
     for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
-    pSenses[gs].coblet = new A.Coblet(
+    pSenses[gs].sensorArray = new A.sensorArray(
       extra.howManyPoints, this.archon.genome.senseMeasurementDepth, gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
     
@@ -52,7 +52,7 @@ A.Cobber = function(archon) {
   }
 };
 
-A.Cobber.prototype = {
+A.Brain.prototype = {
   chooseAction: function() {
     
     this.currentAction = Object.assign({}, this.inertiaAction);
@@ -60,11 +60,11 @@ A.Cobber.prototype = {
     for(var s in this.senses) {
       var sense = this.senses[s], inputSignal = null;
       
-      if(sense.coblet.isEmpty()) {
+      if(sense.sensorArray.isEmpty()) {
         throw new Error("Sensors should never be empty");
       } else {
         
-        inputSignal = sense.coblet.getBestSignal(sense.signalSpread);
+        inputSignal = sense.sensorArray.getBestSignal(sense.signalSpread);
         
         var effectiveSignalStrength = inputSignal.weight * sense.multiplier;
 
@@ -86,35 +86,35 @@ A.Cobber.prototype = {
   },
   
   senseFatigue: function(where, fatigue) {
-    this.senses.fatigue.coblet.store(where, fatigue);
+    this.senses.fatigue.sensorArray.store(where, fatigue);
   },
   
   senseHunger: function(where, hunger) {
-    this.senses.hunger.coblet.store(where, hunger);
+    this.senses.hunger.sensorArray.store(where, hunger);
   },
   
   senseFood: function(where, food) {
-    this.senses.food.coblet.store(where, food.calories);
+    this.senses.food.sensorArray.store(where, food.calories);
   },
   
   senseInertia: function(where, inertia) {
-    this.senses.inertia.coblet.store(where, inertia);
+    this.senses.inertia.sensorArray.store(where, inertia);
   },
 
   sensePredator: function(where, predator) {
-    this.senses.predators.coblet.store(where, predator);
+    this.senses.predators.sensorArray.store(where, predator);
   },
 
   sensePrey: function(where, prey) {
-    this.senses.prey.coblet.store(where, prey);
+    this.senses.prey.sensorArray.store(where, prey);
   },
   
   senseTemperature: function(where, temp) {
-    this.senses.temperature.coblet.store(where, temp);
+    this.senses.temperature.sensorArray.store(where, temp);
   },
   
   senseToxins: function(where, toxin) {
-    this.senses.toxins.coblet.store(where, toxin);
+    this.senses.toxins.sensorArray.store(where, toxin);
   },
   
   tick: function() {
@@ -125,5 +125,5 @@ A.Cobber.prototype = {
 })(A);
 
 if(typeof window === "undefined") {
-  module.exports = A.Cobber;
+  module.exports = A.Brain;
 }

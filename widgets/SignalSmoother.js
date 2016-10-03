@@ -6,9 +6,9 @@
 var A = A || {};
 
 if(typeof window === "undefined") {
-  A = require('./Archonia.js');
+  A = require('../Archonia.js');
   A.Range = require('./Range.js');
-  A.Rounder = require('./Rounder.js');
+  A.Cbuffer = require('./Cbuffer.js');
 }
 
 (function(A) {
@@ -24,7 +24,7 @@ A.Ramper = function(depth, decayRate, rangeLo, rangeHi) {
 
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   
-  this.rounder = new A.Rounder(depth);
+  this.Cbuffer = new A.Cbuffer(depth);
   this.valuesRange = new A.Range(rangeLo, rangeHi);
 };
 
@@ -32,7 +32,7 @@ A.Ramper.prototype = {
   getSignalStrength: function() {
     var signalStrength = 0;
     
-    this.rounder.forEach(function(ix, value) {
+    this.Cbuffer.forEach(function(ix, value) {
       signalStrength += value;
     });
 
@@ -42,7 +42,7 @@ A.Ramper.prototype = {
   isEmpty: function() { return this.empty; },
 
   reset: function() {
-    this.rounder.reset();
+    this.Cbuffer.reset();
     this.empty = true;
   },
   
@@ -51,9 +51,9 @@ A.Ramper.prototype = {
 
     s = A.clamp(s, 0, 1);
   
-    this.rounder.store(s);
+    this.Cbuffer.store(s);
   
-    this.rounder.deepForEach(function(ix, points) {
+    this.Cbuffer.deepForEach(function(ix, points) {
       points[ix] -= this.decayRate;
       points[ix] = A.clamp(points[ix], 0, 1);
     }, this);

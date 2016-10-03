@@ -1,6 +1,6 @@
 var A = require('../Archonia.js');
-A.XY = require('../XY.js');
-A.Range = require('../Range.js');
+A.XY = require('../widgets/XY.js');
+A.Range = require('../widgets/Range.js');
 
 var chai = require('chai');
 
@@ -139,7 +139,6 @@ describe('XY', function() {
     var angleFromP2ToP1 = oppositeAngle(angleFromP1ToP2), p2p1lo = angleFromP2ToP1 * (1 - 1e-5), p2p1hi = angleFromP2ToP1 * (1 + 1e-5);
     
     var p0 = A.XY(), p1 = A.XY.fromPolar(p1Radius, angleFromP0ToP1), p2 = A.XY.fromPolar(p2Radius, angleFromP0ToP2);
-    console.log(p0, p1, p2);
     
     it('Angle from origin to p1', function() { chai.expect(p1.getAngleFrom(p0)).to.equal(angleFromP0ToP1); });
     it('Angle to origin from p2', function() { chai.expect(p2.getAngleTo(p0)).to.be.within(p2p0lo, p2p0hi); });

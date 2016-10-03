@@ -1,10 +1,10 @@
 var A = require('../Archonia.js');
-A.Ramper = require('../Ramper.js');
-A.Rounder = require('../Rounder.js');
+A.SignalSmoother = require('../widgets/SignalSmoother.js');
+A.Cbuffer = require('../widgets/Cbuffer.js');
 
 var game = require('./phaser.js').game;
 
-var testData = require('./testCobber-data.js');
+var testData = require('./testBrain-data.js');
 var archon = testData.archon;
 
 A.prePhaserSetup();
@@ -12,41 +12,41 @@ A.prePhaserSetup();
 var data_driven = require('data-driven');
 var chai = require('chai');
 
-var pushSingleSet = function(cobber, singleInputSet, senseName) {
+var pushSingleSet = function(Brain, singleInputSet, senseName) {
   var fn = 'sense' + senseName.substr(0, 1).toUpperCase() + senseName.substr(1);
 
   for(var where = 0; where < singleInputSet.length; where++) {
     var signalValue = singleInputSet[where];
-    cobber[fn](where, signalValue);
+    Brain[fn](where, signalValue);
   }
 }
 
-var pushInputs = function(cobber, singleInputSet) {
+var pushInputs = function(Brain, singleInputSet) {
 
   for(var senseName in singleInputSet) {
     
     var senseData = singleInputSet[senseName];
     
     if(senseName === 'archon') {
-      pushSingleSet(cobber, senseData.predator.inputs, 'predator');
-      pushSingleSet(cobber, senseData.prey.inputs, 'prey');
+      pushSingleSet(Brain, senseData.predator.inputs, 'predator');
+      pushSingleSet(Brain, senseData.prey.inputs, 'prey');
     } else {
-      pushSingleSet(cobber, senseData.inputs, senseName);
+      pushSingleSet(Brain, senseData.inputs, senseName);
     }
 
   }
 }
 
-describe('Cobber', function() {
+describe('Brain', function() {
   describe('Smoke test', function() {
     it('#module exists', function() {
-      var c = function() { A.Cobber = require('../Cobber.js'); };
+      var c = function() { A.Brain = require('../Brain.js'); };
       chai.expect(c).to.not.throw();
-      chai.expect(A).to.have.property('Cobber');
+      chai.expect(A).to.have.property('Brain');
     });
     
     it('#object exists', function() {
-      chai.assert.typeOf(A.Cobber, "Function");
+      chai.assert.typeOf(A.Brain, "Function");
     });
   
     describe('#public functions exist', function() {
@@ -60,9 +60,9 @@ describe('Cobber', function() {
       
         (function(name) {
           it('#' + name + '()', function() {
-            testData.Cobber = new A.Cobber(archon);
-            chai.expect(testData.Cobber).to.have.property(name);
-            chai.assert.isFunction(testData.Cobber[name]);
+            testData.Brain = new A.Brain(archon);
+            chai.expect(testData.Brain).to.have.property(name);
+            chai.assert.isFunction(testData.Brain[name]);
           });
         })(name);
       }
@@ -72,7 +72,7 @@ describe('Cobber', function() {
   describe('Functionality', function() {
     describe('#chooseAction()', function() {
       it('#sensors should never be empty', function() {
-        var c = new A.Cobber(archon);
+        var c = new A.Brain(archon);
         var d = function() { c.chooseAction(); };
         
         chai.expect(d).to.throw(Error, "Sensors should never be empty");
@@ -81,7 +81,7 @@ describe('Cobber', function() {
       describe('#long-run', function() {
         data_driven(testData.senseTests, function() {
           it('#choose action as inputs vary', function(senseTest) {
-            var c = testData.Cobber;  // Note: using this one over and over for a long run
+            var c = testData.Brain;  // Note: using this one over and over for a long run
 
             for(var i = 0; i < senseTest.loopCount; i++) {
               pushInputs(c, senseTest.senses);

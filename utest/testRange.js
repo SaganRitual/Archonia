@@ -1,5 +1,5 @@
 var A = require('../Archonia.js');
-A.Range = require('../Range.js');
+A.Range = require('../widgets/Range.js');
 
 var data_driven = require('data-driven');
 var chai = require('chai');

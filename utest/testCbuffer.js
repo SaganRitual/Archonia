@@ -4,16 +4,16 @@ A.prePhaserSetup();
 
 var chai = require('chai');
 
-describe('Utilities', function() {
+describe('Cbuffer', function() {
   describe('Smoke test', function() {
     it('#Module exists', function() {
-      var c = function() { A.Rounder = require('../Rounder.js'); }
+      var c = function() { A.Cbuffer = require('../widgets/Cbuffer.js'); }
       chai.expect(c).to.not.throw();
     });
   });
 });
   
-describe('Rounder', function() {
+describe('Cbuffer', function() {
   describe('#Public functions exist', function() {
     var names = [
       'deepForEach', 'forEach', 'isEmpty', 'getSpreadAt', 'reset', 'slice', 'store'
@@ -24,7 +24,7 @@ describe('Rounder', function() {
 
       (function(name) {
         it('#' + name + '()', function() {
-          var r = new A.Rounder(10);
+          var r = new A.Cbuffer(10);
           chai.expect(r).to.have.property(name);
           chai.assert.isFunction(r[name]);
         });
@@ -34,7 +34,7 @@ describe('Rounder', function() {
 
   describe('#isEmpty()', function() {
     it('#empty/not empty', function() {
-      var r = new A.Rounder(1);
+      var r = new A.Cbuffer(1);
       chai.expect(r.isEmpty()).equal(true);
     
       r.store(1);
@@ -55,7 +55,7 @@ describe('Rounder', function() {
 
           var r = null;
         
-          var s = function() { r = new A.Rounder(arraySize); };
+          var s = function() { r = new A.Cbuffer(arraySize); };
         
           chai.expect(s).to.not.throw();
 
@@ -91,7 +91,7 @@ describe('Rounder', function() {
     });
     
     it('#quit loop if callback returns false', function() {
-      var r = new A.Rounder(10);
+      var r = new A.Cbuffer(10);
       var total = 0;
 
       for(var i = 0; i < 5; i++) { r.store(i); }
@@ -103,7 +103,7 @@ describe('Rounder', function() {
   
   describe('#deepForEach()', function() {
     it('#change internal values', function() {
-      var r = new A.Rounder(10);
+      var r = new A.Cbuffer(10);
       
       for(var i = 0; i < 10; i++) { r.store(42); }
       
@@ -121,7 +121,7 @@ describe('Rounder', function() {
     });
     
     it('#quit loop if callback returns false', function() {
-      var r = new A.Rounder(10);
+      var r = new A.Cbuffer(10);
       
       for(var i = 0; i < 10; i++) { r.store(42); }
       
@@ -135,7 +135,7 @@ describe('Rounder', function() {
 
   describe('#store()', function() {
     it('#stores values, tracks index', function() {
-      var r = new A.Rounder(2);
+      var r = new A.Cbuffer(2);
       
       r.store(42);
       chai.expect(r.elements.length).equal(1);
@@ -154,7 +154,7 @@ describe('Rounder', function() {
     });
     
     it('#tracks on arrays larger than two elements', function() {
-      var r = new A.Rounder(17);
+      var r = new A.Cbuffer(17);
       
       for(var i = 0; i < 17; i++) { r.store(i); }
 
@@ -171,7 +171,7 @@ describe('Rounder', function() {
   
   describe('#slice()', function() {
     it('#throws appropriately', function() {
-      var r = new A.Rounder(5);
+      var r = new A.Cbuffer(5);
       
       var arrayEmpty = function() { r.slice(1, 1); }
       chai.expect(arrayEmpty).to.throw(ReferenceError, "Bad arguments");
@@ -179,7 +179,7 @@ describe('Rounder', function() {
     
     it('#returns expected sections of its array', function() {
       var howManyEntries = 10;
-      var r = new A.Rounder(howManyEntries);
+      var r = new A.Cbuffer(howManyEntries);
       
       for(var i = 0; i < howManyEntries; i++) { r.store(i); }
       
@@ -206,7 +206,7 @@ describe('Rounder', function() {
   describe('#reset()', function() {
     it('#discard internal array, reset index', function() {
       var howManyEntries = 10;
-      var r = new A.Rounder(howManyEntries);
+      var r = new A.Cbuffer(howManyEntries);
       var total = 0;
       
       for(var i = 0; i < howManyEntries; i++) { r.store(i); total += i; }
@@ -230,7 +230,7 @@ describe('Rounder', function() {
   describe('#getSpreadAt()', function() {
     it('#cross boundary back to zero when necessary', function() {
       var howManyEntries = 10, result = null;
-      var r = new A.Rounder(howManyEntries);
+      var r = new A.Cbuffer(howManyEntries);
     
       for(var i = 0; i < howManyEntries; i++) { r.store(i); }
       

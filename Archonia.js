@@ -140,8 +140,8 @@ if(typeof window === "undefined") {
 
   module.exports = A;
 
-  A.XY = require('./XY.js');
-  A.Range = require('./Range.js');
+  A.XY = require('./widgets/XY.js');
+  A.Range = require('./widgets/Range.js');
   
 } else {
   window.onload = function() {
