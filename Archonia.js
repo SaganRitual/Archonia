@@ -15,6 +15,7 @@ var game = null;
     archoniaGooDiameter: 100,
     archoniaGooRadius: 50,
     bg: null,
+    buttonHueRange: null,
     darknessAlphaHi: 0.3,
     darknessAlphaLo: 0.0,
     darknessRange: null,
@@ -32,22 +33,18 @@ var game = null;
     worldColorRange: null,
     zeroToOneRange: null,
     
+    clamp: function(value, min, max) {
+      value = Math.max(value, min); value = Math.min(value, max); return value;
+    },
+    
     create: function() {
       game.physics.startSystem(Phaser.Physics.ARCADE);
-
-      A.gameCenter = A.XY(A.gameWidth / 2, A.gameHeight / 2);
-      A.gameRadius = A.gameWidth / 2;
 
       A.setupBitmaps();
       A.Sun.ignite();
       A.mannaGenerator = new A.MannaGenerator();
 
-      A.darknessRange = new A.Range(A.darknessAlphaHi, A.darknessAlphaLo);
-      A.oneToZeroRange = new A.Range(1, 0);
-      A.temperatureRange = new A.Range(A.temperatureLo, A.temperatureHi);
       A.worldColorRange = A.Sun.getWorldColorRange();
-      A.yAxisRange = new A.Range(A.gameHeight, 0);
-      A.zeroToOneRange = new A.Range(0, 1);
       
       A.cursors = game.input.keyboard.createCursorKeys();
       game.input.onUp.add(A.onMouseUp, A);
@@ -83,6 +80,20 @@ var game = null;
     
     integerInRange: function(lo, hi) {
       return game.rnd.integerInRange(lo, hi);
+    },
+    
+    prePhaserSetup: function() {
+
+      A.gameCenter = A.XY(A.gameWidth / 2, A.gameHeight / 2);
+      A.gameRadius = A.gameWidth / 2;
+
+  		A.buttonHueRange = new A.Range(240, 0);	// Blue (240) is cold, Red (0) is hot
+      A.darknessRange = new A.Range(A.darknessAlphaHi, A.darknessAlphaLo);
+      A.oneToZeroRange = new A.Range(1, 0);
+      A.temperatureRange = new A.Range(A.temperatureLo, A.temperatureHi);
+      A.yAxisRange = new A.Range(A.gameHeight, 0);
+      A.zeroToOneRange = new A.Range(0, 1);
+      
     },
     
     onMouseDown: function(/*pointer*/) {
@@ -123,9 +134,14 @@ var game = null;
 if(typeof window === "undefined") {
 
   module.exports = A;
+
+  A.XY = require('./XY.js');
+  A.Range = require('./Range.js');
   
 } else {
   window.onload = function() {
+    A.prePhaserSetup();
+    
     game = new Phaser.Game(A.gameWidth, A.gameHeight, Phaser.CANVAS);
 
     game.state.add('Archonia', A, false);
