@@ -6,7 +6,11 @@
 "use strict";
 
 var A = A || {};
-var game = null;
+var game = game || {};
+
+if(typeof window === "undefined") {
+  game = require('./utest/phaser.js').game;
+}
 
 (function() {
 
@@ -25,6 +29,7 @@ var game = null;
     gameHeight: 600,
     gameRadius: null,
     gameWidth: 600,
+    archoniaUniqueObjectId: 0,
     mouseUp: true,
     oneToZeroRange: null,
     temperatureHi: 1000,
