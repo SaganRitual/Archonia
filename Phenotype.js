@@ -7,6 +7,8 @@ var A = A || {};
 
 if(typeof window === "undefined") {
   A = require('./Archonia.js');
+  A.tinycolor = require('./widgets/tinycolor.js');
+  A.Range = require('./widgets/Range.js');
 }
 
 (function(A) {
@@ -27,48 +29,30 @@ A.Phenotype = function(archon) {
   this.larvalCalorieBudget = 0;
   this.adultCalorieBudget = 0;
   
+  this.optimalTempRange = new A.Range();
+  
 };
 
 A.Phenotype.prototype = {
   
   reproductionCostFactor: 1.25,
 
-  ledger: {
-    applyBenefit: function(bucket, benefit, threshold) {
-      this.benefit = benefit;
+  applyBenefit: function(bucket, benefit, threshold) {
+    this[bucket] += benefit;
     
-      bucket += this.benefit;
-      if(bucket > threshold) {
-        this.benefit = bucket - threshold;
-        bucket = threshold;
-      } else {
-        this.benefit = 0;
-      }
-    
-      return bucket;
-    },
+    if(this[bucket] > threshold) { benefit = this[bucket] - threshold; this[bucket] = threshold; }
+    else { benefit = 0; }
   
-    applyCost: function(bucket, cost) {
-      this.cost = cost;
+    return benefit;
+  },
+
+  applyCost: function(bucket, cost) {
+    this[bucket] -= cost;
     
-      bucket -= this.cost;
-      if(bucket < 0) {
-        this.cost = -bucket;
-        bucket = 0;
-      } else {
-        this.cost = 0;
-      }
-    
-      return bucket;
-    },
+    if(this[bucket] < 0) { cost = -this[bucket]; this[bucket] = 0; }
+    else { cost = 0; }
   
-    benefitRemainder: function() {
-      return this.benefit;
-    },
-  
-    costRemainder: function() {
-      return this.cost;
-    }
+    return cost;
   },
   
   breed: function() {
@@ -77,8 +61,7 @@ A.Phenotype.prototype = {
       this.genome.offspringMass.adultCalories + this.genome.offspringMass.larvalCalories
     ) * this.reproductionCostFactor;
     
-    this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, remainingReproductionCost);
-    remainingReproductionCost = this.ledger.costRemainder();
+    remainingReproductionCost = this.applyCost('embryoCalorieBudget', remainingReproductionCost);
     
     this.debit(remainingReproductionCost);
     
@@ -93,9 +76,7 @@ A.Phenotype.prototype = {
   
   debit: function(costInCalories) {
     // Use up your baby fat reserves first
-    this.larvalCalorieBudget = this.ledger.applyCost(this.larvalCalorieBudget, costInCalories);
-    costInCalories = this.ledger.costRemainder();
-
+    costInCalories = this.applyCost('larvalCalorieBudget', costInCalories);
     
     // if you're starving, you can reabsorb any embryo reserves
     // you've built up, but you don't get all the calories back
@@ -103,12 +84,10 @@ A.Phenotype.prototype = {
     if(costInCalories > 0 && this.embryoCalorieBudget > 0) {
       var t = costInCalories * (4 / 3);
 
-      this.embryoCalorieBudget = this.ledger.applyCost(this.embryoCalorieBudget, t);
-      costInCalories = this.ledger.costRemainder();
+      costInCalories = this.applyCost('embryoCalorieBudget', t);
     }
     
-    this.adultCalorieBudget = this.ledger.applyCost(this.adultCalorieBudget, costInCalories);
-    costInCalories = this.ledger.costRemainder();
+    costInCalories = this.applyCost('adultCalorieBudget', costInCalories);
 
     if(this.adultCalorieBudget === 0) { this.die(); }
   },
@@ -121,13 +100,11 @@ A.Phenotype.prototype = {
   eat: function(food) {
     var benefit = food.calories;
 
-    this.adultCalorieBudget = this.ledger.applyBenefit(this.adultCalorieBudget, benefit, this.genome.embryoThreshold);
-    benefit = this.ledger.benefitRemainder();
+    benefit = this.applyBenefit('adultCalorieBudget', benefit, this.genome.embryoThreshold);
     
     if(benefit > 0) {
-      this.embryoCalorieBudget = this.ledger.applyBenefit(this.embryoCalorieBudget, benefit, Number.MAX_VALUE);
-      benefit = 0;
-      
+      benefit = this.applyBenefit('embryoCalorieBudget', benefit, Number.MAX_VALUE);
+
       if(this.embryoCalorieBudget > this.genome.reproductionThreshold) {
         this.breed();
       }
@@ -152,7 +129,7 @@ A.Phenotype.prototype = {
     var t = A.Sun.getTemperature(this.archon);
     var d = Math.abs(t - this.genome.optimalTemp);
     var s = this.getMass();
-    var p = ((d || 1) * Math.log(s)) + 1;
+    var p = Math.log((d || 1) + 1) * Math.log(s + 1);
 
     return p;
   },
@@ -161,7 +138,27 @@ A.Phenotype.prototype = {
     this.larvalCalorieBudget = this.genome.birthMass.larvalCalories;
     this.adultCalorieBudget = this.genome.birthMass.adultCalories;
     
+    var tempRangeRadius = this.genome.optimalTempRangeWidth / 2;
+    this.optimalTempRange.set(this.genome.optimalTemp - tempRangeRadius, this.genome.optimalTemp + tempRangeRadius);
+    
     this.setSize();
+  },
+
+  setButtonColor: function(temp) {
+  	temp = A.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
+
+  	var hue = A.buttonHueRange.convertPoint(temp, this.optimalTempRange);
+  	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
+  	var rgb = A.tinycolor(hsl).toHex();
+  	var tint = parseInt(rgb, 16);
+
+  	this.archon.button.tint = tint;
+  },
+  
+  setColors: function() {
+    var t = A.Sun.getTemperature(this.archon);
+
+    this.setButtonColor(t);
   },
   
   setSize: function() {
@@ -178,5 +175,5 @@ A.Phenotype.prototype = {
 })(A);
 
 if(typeof window === "undefined") {
-  module.exports = A;
+  module.exports = A.Phenotype;
 }

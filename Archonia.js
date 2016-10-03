@@ -9,7 +9,7 @@ var A = A || {};
 var game = game || {};
 
 if(typeof window === "undefined") {
-  game = require('./utest/phaser.js').game;
+  game = require('./test/support/phaser.js').game;
 }
 
 (function() {

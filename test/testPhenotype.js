@@ -1,7 +1,10 @@
-var A = require('../Phenotype.js');
+var A = require('../Archonia.js');
+
+A.Phenotype = require('../Phenotype.js');
+
 var chai = require('chai');
 
-A.archoniaGooDiameter = 100;
+A.prePhaserSetup();
 
 A.Sun = {
   currentTemp: 451,
@@ -19,7 +22,11 @@ var archon = {
     embryoThreshold: 200, reproductionThreshold: 500,
     birthMass: { adultCalories: 100, larvalCalories: 100 },
     offspringMass: { adultCalories: 125, larvalCalories: 75 },
-    optimalTemp: 200
+    optimalTemp: 200, optimalTempRangeWidth: 400
+  },
+  
+  button: {
+    tint: 0
   },
   
   phaseron: {
@@ -64,6 +71,26 @@ describe('Phenotype', function() {
   });
     
   describe('Individual functions', function() {
+    describe('setColors()', function() {
+      it('Should set the button based on temp tolerance', function() {
+        var p = new A.Phenotype(archon); p.launch();
+        
+        archon.genome.optimalTemp = 200; archon.genome.optimalTempRangeWidth = 400;
+        
+        A.Sun.currentTemp = 200;
+        p.setColors();
+        chai.expect(archon.button.tint).equal(0x00FF00);
+        
+        A.Sun.currentTemp = -1;
+        p.setColors();
+        chai.expect(archon.button.tint).equal(0x0000FF);
+        
+        A.Sun.currentTemp = 401;
+        p.setColors();
+        chai.expect(archon.button.tint).equal(0xFF0000);
+      });
+    });
+    
     describe('getMotionCost()', function() {
       it('Should be linearly proportional to mass', function() {
         var p = new A.Phenotype(archon);
@@ -86,25 +113,29 @@ describe('Phenotype', function() {
       it('Should get the right cost, based on archon size, zero temp delta', function() {
         A.Sun.currentTemp = archon.genome.optimalTemp;
         
-        chai.expect(p.getTempCost()).equal(1);  // 1g, 1cal
+        chai.expect(p.getTempCost().toFixed(4)).equal((Math.log(2) * Math.log(2)).toFixed(4));
         
         p.adultCalorieBudget = 200;
-        chai.expect(p.getTempCost().toFixed(4)).equal((1 + Math.log(2)).toFixed(4));
+        chai.expect(p.getTempCost().toFixed(4)).equal((Math.log(2) * Math.log(3)).toFixed(4));
       });
       
       it('Should get the right cost with non-zero temp delta', function() {
         A.Sun.currentTemp = archon.genome.optimalTemp - 200;
 
-        var s = ((Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp) || 1) * Math.log(p.getMass())) + 1;
+        var r = Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp);
+        var s = Math.log((r || 1) + 1) * Math.log(p.getMass() + 1);
+        console.log(s);
 
         var c = p.getTempCost().toFixed(4);
         chai.expect(c).equal(s.toFixed(4));
         
         A.Sun.currentTemp = archon.genome.optimalTemp + 500;
         
-        var s = (Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp) || 1) * Math.log(p.getMass()) + 1;
+        r = Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp);
+        s = Math.log((r || 1) + 1) * Math.log(p.getMass() + 1);
+        console.log(s);
 
-        var c = p.getTempCost().toFixed(4);
+        c = p.getTempCost().toFixed(4);
         chai.expect(c).equal(s.toFixed(4));
       });
     });

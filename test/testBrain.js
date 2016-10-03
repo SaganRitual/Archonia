@@ -2,9 +2,9 @@ var A = require('../Archonia.js');
 A.SignalSmoother = require('../widgets/SignalSmoother.js');
 A.Cbuffer = require('../widgets/Cbuffer.js');
 
-var game = require('./phaser.js').game;
+var game = require('./support/phaser.js').game;
 
-var testData = require('./testBrain-data.js');
+var testData = require('./support/testBrain-data.js');
 var archon = testData.archon;
 
 A.prePhaserSetup();

@@ -19,7 +19,9 @@ PreCommit:
   JsHint:
     enabled: true
     on_warn: fail
-    exclude: 'utest/*'
+    exclude:
+      - 'test/*'
+      - 'widgets/tinycolor.js'
 
 #  RuboCop:
 #    enabled: true
