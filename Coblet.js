@@ -13,6 +13,7 @@ if(typeof window === "undefined") {
 (function(A) {
 
 A.Coblet = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
+  this.empty = true;
   this.howManyMeasurementPoints = howManyMeasurementPoints;
   
   this.rampers = [];
@@ -57,8 +58,17 @@ A.Coblet.prototype = {
   
     return result;
   },
+  
+  isEmpty: function() { return this.empty; },
+  
+  reset: function() {
+    for(var i = 0; i < this.howManyMeasurementPoints; i++) { this.rampers[i].reset(); }
+
+    this.empty = true;
+  },
 
   store: function(where, value) {
+    this.empty = false;
     this.rampers[where].store(value);
   }
 };

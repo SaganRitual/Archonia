@@ -17,6 +17,7 @@ A.Ramper = function(depth, decayRate, rangeLo, rangeHi) {
   if(rangeLo === undefined) { rangeLo = 0; }
   if(rangeHi === undefined) { rangeHi = 1; }
 
+  this.empty = true;
   this.depth = depth;
   this.rangeLo = rangeLo;
   this.rangeHi = rangeHi;
@@ -38,6 +39,13 @@ A.Ramper.prototype = {
     return signalStrength / this.depth;
   },
   
+  isEmpty: function() { return this.empty; },
+
+  reset: function() {
+    this.rounder.reset();
+    this.empty = true;
+  },
+  
   store: function(value) {
     var s = A.zeroToOneRange.convertPoint(value, this.valuesRange);
 
@@ -49,6 +57,8 @@ A.Ramper.prototype = {
       points[ix] -= this.decayRate;
       points[ix] = A.clamp(points[ix], 0, 1);
     }, this);
+    
+    this.empty = false;
   }
 };
 

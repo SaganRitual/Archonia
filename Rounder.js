@@ -89,8 +89,12 @@ if(typeof window === "undefined") {
       return result;
     },
     
+    isEmpty: function() {
+      return this.empty;
+    },
+    
     reset: function() {
-      this.isEmpty = true;
+      this.empty = true;
       this.indexForNextElement = 0;
       this.elements = [];
     },
@@ -118,7 +122,7 @@ if(typeof window === "undefined") {
     },
     
     store: function(valueToStore) {
-      this.isEmpty = false;
+      this.empty = false;
       if(this.elements.length < this.howManyElements) {
         this.elements.push(valueToStore);
       } else {

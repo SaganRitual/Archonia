@@ -50,7 +50,7 @@ describe('Coblet', function() {
   });
   
   describe('#public functions exist', function() {
-    var names = [ 'getBestSignal', 'store' ];
+    var names = [ 'getBestSignal', 'isEmpty', 'reset', 'store' ];
       
     for(var n in names) {
       var name = names[n];
@@ -63,6 +63,24 @@ describe('Coblet', function() {
         });
       })(name);
     }
+  });
+  
+  describe('#reset(), isEmpty()', function() {
+    it('#before store, after store, after reset', function() {
+      var measurementDepth = 10, howManyMeasurementPoints = 1, valueRangeLo = 0, valueRangeHi = 100, decayRate = 0.01;
+      var c = new A.Coblet(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+      
+      chai.expect(c.isEmpty()).equal(true);
+      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.rampers[i].isEmpty()).equal(true); }
+      
+      c.store(0);
+      chai.expect(c.isEmpty()).equal(false);
+      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.rampers[i].isEmpty()).equal(false); }
+      
+      c.reset();
+      chai.expect(c.isEmpty()).equal(true);
+      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.rampers[i].isEmpty()).equal(true); }
+    });
   });
   
   describe('Cost/benefit functionality', function() {

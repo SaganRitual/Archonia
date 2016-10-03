@@ -16,7 +16,7 @@ describe('Utilities', function() {
 describe('Rounder', function() {
   describe('#Public functions exist', function() {
     var names = [
-      'deepForEach', 'forEach', 'getSpreadAt', 'reset', 'slice', 'store'
+      'deepForEach', 'forEach', 'isEmpty', 'getSpreadAt', 'reset', 'slice', 'store'
     ];
     
     for(var n in names) {
@@ -26,38 +26,22 @@ describe('Rounder', function() {
         it('#' + name + '()', function() {
           var r = new A.Rounder(10);
           chai.expect(r).to.have.property(name);
-          chai.assert.typeOf(r[name], 'Function');
+          chai.assert.isFunction(r[name]);
         });
       })(name);
     }
   });
 
-  describe('#public properties exist', function() {
-    var names = [ 'isEmpty' ];
-    
-    for(var n in names) {
-      var name = names[n];
-    
-      (function(name) {
-        it('#' + name, function() {
-          var r = new A.Rounder(1);
-          chai.expect(r).to.have.property(name);
-          chai.assert.isNotFunction(r[name]);
-        });
-      })(name);
-    }
-  });
-
-  describe('#public properties behave', function() {
+  describe('#isEmpty()', function() {
     it('#empty/not empty', function() {
       var r = new A.Rounder(1);
-      chai.assert(r.isEmpty, 'isEmpty should be true');
+      chai.expect(r.isEmpty()).equal(true);
     
       r.store(1);
-      chai.assert(!r.isEmpty, 'isEmpty should be false');
+      chai.expect(r.isEmpty()).equal(false);
 
       r.reset();
-      chai.assert(r.isEmpty, 'isEmpty should be true');
+      chai.expect(r.isEmpty()).equal(true);
     });
   });
 
