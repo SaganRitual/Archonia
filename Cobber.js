@@ -13,14 +13,12 @@ if(typeof window === "undefined") {
 (function(A) {
 
 A.Cobber = function(archon) {
+  this.id = A.archoniaUniqueObjectId++;
   this.archon = archon;
   
   this.senses = {}; var gSenses = archon.genome.senses, pSenses = this.senses;
 
-  this.inertiaAction = {
-    action: 'launch', direction: 0,
-    signalWeight: gSenses.inertia.threshold * gSenses.inertia.multiplier
-  };
+  this.inertiaAction = { action: 'sleep?', direction: 0, signalWeight: 0 };
   
   this.currentAction = Object.assign({}, this.inertiaAction);
   
@@ -31,7 +29,7 @@ A.Cobber = function(archon) {
     predators:   { howManyPoints: 12, signalSpread: 12, action: 'flee' },
     prey:        { howManyPoints: 12, signalSpread: 12, action: 'pursue' },
     hunger:      { howManyPoints:  1, signalSpread:  1, action: 'searchForFood' },
-    temperature: { howManyPoints:  2, signalSpread:  2, action: 'findGoodTemp' },
+    temperature: { howManyPoints:  2, signalSpread:  2, action: 'findSafeTemp' },
     toxins:      { howManyPoints: 12, signalSpread: 12, action: 'move' }
   };
   
@@ -52,8 +50,6 @@ A.Cobber = function(archon) {
       pSense[gg] = gene;
     }
   }
-  
-  pSenses.temperature.isEmergency = false;
 };
 
 A.Cobber.prototype = {
@@ -64,7 +60,9 @@ A.Cobber.prototype = {
     for(var s in this.senses) {
       var sense = this.senses[s], inputSignal = null;
       
-      if(!sense.coblet.isEmpty()) {
+      if(sense.coblet.isEmpty()) {
+        throw new Error("Sensors should never be empty");
+      } else {
         
         inputSignal = sense.coblet.getBestSignal(sense.signalSpread);
         
@@ -87,34 +85,36 @@ A.Cobber.prototype = {
     
   },
   
-  senseArchon: function(/*who*/) {
-    
-  },
-  
-  senseFatigue: function() {
-    
+  senseFatigue: function(where, fatigue) {
+    this.senses.fatigue.coblet.store(where, fatigue);
   },
   
   senseHunger: function(where, hunger) {
     this.senses.hunger.coblet.store(where, hunger);
   },
   
-  senseInertia: function() {
-    
-  },
-  
   senseFood: function(where, food) {
     this.senses.food.coblet.store(where, food.calories);
   },
   
-  senseTemperature: function(where, temp) {
-    var deltaFromOptimal = Math.abs(temp - this.archon.genome.optimalTemp);
-    
-    this.senses.temperature.coblet.store(where, deltaFromOptimal);
+  senseInertia: function(where, inertia) {
+    this.senses.inertia.coblet.store(where, inertia);
+  },
+
+  sensePredator: function(where, predator) {
+    this.senses.predators.coblet.store(where, predator);
+  },
+
+  sensePrey: function(where, prey) {
+    this.senses.prey.coblet.store(where, prey);
   },
   
-  senseToxins: function() {
-    
+  senseTemperature: function(where, temp) {
+    this.senses.temperature.coblet.store(where, temp);
+  },
+  
+  senseToxins: function(where, toxin) {
+    this.senses.toxins.coblet.store(where, toxin);
   },
   
   tick: function() {
