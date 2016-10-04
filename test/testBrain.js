@@ -9,13 +9,15 @@ var data_driven = require('data-driven');
 var chai = require('chai');
 
 var loadBrainWithMockups = function() {
-    A.Brain = require('../Brain.js');
-    A.SensorArray = require('./support/mockSensorArray.js');
+  A.Brain = require('../Brain.js');
+  A.SensorArray = require('./support/mockSensorArray.js');
+  A.Body = require('./support/mockBody.js');
 };
 
 var loadBrainWithRealSensors = function() {
   A.Brain = require('../Brain.js');
   A.SensorArray = require('../widgets/SensorArray.js');
+  A.Body = require('./support/mockBody.js');
 };
 
 var simulateBrain = function(whichSense) {
@@ -43,7 +45,12 @@ var simulateBrain = function(whichSense) {
   
   sensorArrays[whichSense].store(-2, { weight: 1, direction: 0 });
   
-  return b.chooseAction();
+  b.tick();
+  
+  var r = b.chooseAction();
+
+  r.xy = b.body.movementTarget;
+  return r;
 };
 
 var simulateCompetition = function(testInfo) {
@@ -80,7 +87,12 @@ var simulateCompetition = function(testInfo) {
     sensorArrays[testInfo.loser].store(-2, { weight: 1, direction: 0,  multiplier: archon.genome.senses[testInfo.loser].multiplier });
   }
   
-  return b.chooseAction();
+  b.tick();
+
+  var r = b.chooseAction();
+
+  r.xy = b.body.movementTarget;
+  return r;
 };
 
 var rampSensors = function(brain, sense, value, howManyMeasurementPoints) {
@@ -88,6 +100,18 @@ var rampSensors = function(brain, sense, value, howManyMeasurementPoints) {
   
   for(var i = 0; i < howManyMeasurementPoints; i++) {
     brain[fn](i, value);
+  }
+};
+
+var rampSensorsDirectional = function(brain, sense, values) {
+  var fn = 'sense' + sense.substr(0, 1).toUpperCase() + sense.substr(1);
+  
+  if(Array.isArray(values)) {
+    for(var i = 0; i < values.length; i++) {
+      brain[fn](i, values[i]);
+    }
+  } else {
+    brain[fn](0, values);
   }
 };
 
@@ -110,7 +134,7 @@ describe('Brain', function() {
       var functionNames = [
         { functionName: 'chooseAction' }, { functionName: 'launch' }, { functionName: 'sensePredator' },
         { functionName: 'sensePrey' }, { functionName: 'senseFood' }, { functionName: 'senseHunger' },
-        { functionName: 'senseTemperature' }, { functionName: 'senseToxin' }
+        { functionName: 'senseTemperature' }, { functionName: 'senseToxin', functionName: 'tick' }
       ];
 
       data_driven(functionNames, function() {
@@ -200,6 +224,11 @@ describe('Brain', function() {
         rampSensors(b, 'toxin', 0.8, 12);
         rampSensors(b, 'food', 75, 12);
 
+        b.tick();
+        
+        // Brain wants to go to point 0 on the sensor array; that's (1, 0) on the x/y plane
+        chai.expect(b.body.movementTarget).to.include({ x: 1, y: 0 });
+
         r = b.chooseAction();
         chai.expect(r).to.include({ action: 'moveToSecure', direction: 0});
       }
@@ -215,6 +244,9 @@ describe('Brain', function() {
       rampSensors(b, 'toxin', 0.5, 12);
       rampSensors(b, 'food', 50, 12);
 
+      b.tick();
+      chai.expect(b.body.movementTarget).to.include({ x: 1, y: 0 });
+
       r = b.chooseAction();
       chai.expect(r).to.include({ action: 'moveToSecure', direction: 0});
       
@@ -227,8 +259,74 @@ describe('Brain', function() {
       rampSensors(b, 'toxin', 0.5, 12);
       rampSensors(b, 'food', 50, 12);
 
+      b.tick();
+      chai.expect(b.body.movementTarget).to.include({ x: 1, y: 0 });
+
       r = b.chooseAction();
       chai.expect(r).to.include({ action: 'toxinDefense', direction: 0});
     });
   });
+  
+  describe('Spread averaging', function() {
+    it('#size 1 for temp, 3 for other spatial, 1 for non-spatial', function() {
+      loadBrainWithRealSensors();
+      
+      var b = new A.Brain(archon), r = null;
+      
+      var hunger = archon.genome.embryoThreshold + archon.genome.reproductionThreshold;
+      var temp = archon.genome.optimalTemp;
+      var food = 50;
+      
+      rampSensorsDirectional(b, 'hunger', [ hunger ]);
+
+      rampSensorsDirectional( b, 'temperature', [ temp, temp ] );
+      rampSensorsDirectional( b, 'food', [ food, 0, 0, 0, food, 0, food, 0, food, 0, food, food ] );
+      rampSensorsDirectional( b, 'fatigue',  [ 0 ] );
+      rampSensorsDirectional( b, 'predator', [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+      rampSensorsDirectional( b, 'prey',     [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+      rampSensorsDirectional( b, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+      
+      var r = b.chooseAction();
+      chai.expect(r).to.include({ action: 'eat', direction: 11 });
+
+      rampSensorsDirectional( b, 'temperature', [ temp, temp + archon.genome.optimalTempRange ] );
+      
+      var r = b.chooseAction();
+      chai.expect(r).to.include({ action: 'findSafeTemp', direction: 1 });
+
+      rampSensorsDirectional( b, 'fatigue',  [ 1 ] );
+      
+      var r = b.chooseAction();
+      chai.expect(r).to.include({ action: 'moveToSecure', direction: 0 });
+    });
+  });
+
+  describe('Movement instructions to body', function() {
+    it('#calculate movement target from sensor input', function() {
+      loadBrainWithRealSensors();
+      
+      var b = new A.Brain(archon), r = null;
+      
+      var hunger = archon.genome.embryoThreshold + archon.genome.reproductionThreshold;
+      var temp = archon.genome.optimalTemp;
+      var food = 50;
+      
+      rampSensorsDirectional(b, 'hunger', [ hunger ]);
+
+      rampSensorsDirectional( b, 'temperature', [ temp, temp ] );
+      rampSensorsDirectional( b, 'food', [ food, 0, 0, 0, food, 0, food, 0, food, 0, food, food ] );
+      rampSensorsDirectional( b, 'fatigue',  [ 0 ] );
+      rampSensorsDirectional( b, 'predator', [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+      rampSensorsDirectional( b, 'prey',     [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+      rampSensorsDirectional( b, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+
+      b.tick();
+
+      var r = b.chooseAction(), theta = A.computerizeAngle(11 * (2 * Math.PI / 12));
+      
+      chai.expect(r).to.include({ action: 'eat', direction: 11 });
+      chai.expect(b.body.movementTarget).to.include(A.XY.fromPolar(1, theta));
+    });
+  });
+
 });

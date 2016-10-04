@@ -41,6 +41,16 @@ if(typeof window === "undefined") {
     clamp: function(value, min, max) {
       value = Math.max(value, min); value = Math.min(value, max); return value;
     },
+
+    computerizeAngle: function(robalizedAngle) {
+      while(robalizedAngle > 2 * Math.PI) {
+        robalizedAngle -= 2 * Math.PI;
+      }
+  
+      var a = (robalizedAngle > Math.PI) ? 2 * Math.PI - robalizedAngle : -robalizedAngle;
+  
+      return a;
+    },
     
     create: function() {
       game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -119,6 +129,16 @@ if(typeof window === "undefined") {
     
     render: function() {
       A.mannaGenerator.render();
+    },
+
+    robalizeAngle: function(computerizedAngle) {
+      var a = (computerizedAngle < 0) ? -computerizedAngle : 2 * Math.PI - computerizedAngle;
+  
+      while(a < 2 * Math.PI) {
+        a += 2 * Math.PI;
+      }
+  
+      return a;
     },
 
     setupBitmaps: function() {

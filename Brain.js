@@ -8,13 +8,18 @@ var A = A || {};
 if(typeof window === "undefined") {
   A = require('./Archonia.js');
   A.SensorArray = require('./widgets/SensorArray.js');
+  A.Body = require('./Body.js');
 }
 
 (function(A) {
+  
+  var howManyPointsForSpatialInputs = 12;
 
 A.Brain = function(archon) {
   this.id = A.archoniaUniqueObjectId++;
   this.archon = archon;
+  
+  this.body = new A.Body();
   
   var gSenses = archon.genome.senses;
 
@@ -23,13 +28,13 @@ A.Brain = function(archon) {
   this.currentAction = Object.assign({}, this.defaultAction);
   
   var senseAddons = {
-    fatigue:     { howManyPoints:  1, signalSpread:  1, action: 'moveToSecure' },
-    food:        { howManyPoints: 12, signalSpread: 12, action: 'eat' },
-    predator:    { howManyPoints: 12, signalSpread: 12, action: 'flee' },
-    prey:        { howManyPoints: 12, signalSpread: 12, action: 'pursue' },
-    hunger:      { howManyPoints:  1, signalSpread:  1, action: 'searchForFood' },
-    temperature: { howManyPoints:  2, signalSpread:  2, action: 'findSafeTemp' },
-    toxin:       { howManyPoints: 12, signalSpread: 12, action: 'toxinDefense' }
+    fatigue:     { howManyPoints:  1, signalSpread: 1, action: 'moveToSecure' },
+    food:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'eat' },
+    predator:    { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'flee' },
+    prey:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'pursue' },
+    hunger:      { howManyPoints:  1, signalSpread: 1, action: 'searchForFood' },
+    temperature: { howManyPoints:  2, signalSpread: 1, action: 'findSafeTemp' },
+    toxin:       { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'toxinDefense' }
   };
   
   this.senseControls = {};
@@ -111,7 +116,32 @@ A.Brain.prototype = {
   },
   
   tick: function() {
-
+    var computerizedAngle = null, robalizedAngle = null;
+    
+    this.chooseAction();
+    
+    switch(this.currentAction.action) {
+    case "moveToSecure":
+    case "pursue":
+    case "flee":
+    case "eat":
+      robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
+      computerizedAngle = A.computerizeAngle(robalizedAngle);
+      break;
+      
+    case "findSafeTemp":
+      robalizedAngle = (this.currentAction.direction * Math.PI) + (Math.PI / 2);
+      computerizedAngle = A.computerizeAngle(robalizedAngle);
+      break;
+      
+    default:
+      robalizedAngle = 0;
+      computerizedAngle = 0;
+      break;
+    }
+    
+    var xy = A.XY.fromPolar(1, computerizedAngle);
+    this.body.setMovementTarget(xy);
   }
 };
   
