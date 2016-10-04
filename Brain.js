@@ -7,7 +7,7 @@ var A = A || {};
 
 if(typeof window === "undefined") {
   A = require('./Archonia.js');
-  A.sensorArray = require('./widgets/SensorArray.js');
+  A.SensorArray = require('./widgets/SensorArray.js');
 }
 
 (function(A) {
@@ -40,7 +40,7 @@ A.Brain = function(archon) {
     
     for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
-    pSenses[gs].sensorArray = new A.sensorArray(
+    pSenses[gs].sensorArray = new A.SensorArray(
       extra.howManyPoints, this.archon.genome.senseMeasurementDepth, gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
     
