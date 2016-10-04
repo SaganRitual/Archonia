@@ -7,22 +7,24 @@ var A = A || {};
 
 if(typeof window === "undefined") {
   A = require('../Archonia.js');
-  A.Ramper = require('./SignalSmoother.js');
+  A.SignalSmoother = require('./SignalSmoother.js');
 }
 
 (function(A) {
 
 A.SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
+  this.id = A.archoniaUniqueObjectId++;
+
   this.empty = true;
   this.howManyMeasurementPoints = howManyMeasurementPoints;
   
-  this.rampers = [];
+  this.signalSmoothers = [];
   
   for(var i = 0; i < howManyMeasurementPoints; i++) {
-    this.rampers.push(new A.Ramper(measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
+    this.signalSmoothers.push(new A.SignalSmoother(measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
   }
   
-  this.averagesRounder = new A.Rounder(howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
+  this.averagesRounder = new A.Cbuffer(howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
   
 };
 
@@ -41,11 +43,11 @@ A.SensorArray.prototype = {
     
     var i = null;
     
-    // The rampers are in a cicle around us, so we
+    // The signalSmoothers are in a cicle around us, so we
     // need a wheel to get the spread averages and
     // identify the index of the best one
     for(i = 0; i < this.howManyMeasurementPoints; i++) {
-      this.averagesRounder.store(this.rampers[i].getSignalStrength());
+      this.averagesRounder.store(this.signalSmoothers[i].getSignalStrength());
     }
   
     var result = { direction: null, weight: null };
@@ -62,14 +64,14 @@ A.SensorArray.prototype = {
   isEmpty: function() { return this.empty; },
   
   reset: function() {
-    for(var i = 0; i < this.howManyMeasurementPoints; i++) { this.rampers[i].reset(); }
+    for(var i = 0; i < this.howManyMeasurementPoints; i++) { this.signalSmoothers[i].reset(); }
 
     this.empty = true;
   },
 
   store: function(where, value) {
     this.empty = false;
-    this.rampers[where].store(value);
+    this.signalSmoothers[where].store(value);
   }
 };
 

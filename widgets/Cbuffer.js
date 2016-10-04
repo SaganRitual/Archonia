@@ -11,19 +11,17 @@ if(typeof window === "undefined") {
 
 (function(A) {
   
-  var id = 0;
-  
-  A.Rounder = function(howManyElements) {
-    this.id = id++;
-    if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length rounder"); }
+  A.Cbuffer = function(howManyElements) {
+    if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length Cbuffer"); }
 
+    this.archoniaUniqueObjectId = A.archoniaUniqueObjectId++;
     this.reset();
     this.howManyElements = howManyElements;
   };
   
-  A.Rounder.prototype = {
+  A.Cbuffer.prototype = {
     add: function(index, howMany) {
-      if(this.elements.length === 0) { throw new ReferenceError("plus() can't work with an empty Rounder"); }
+      if(this.elements.length === 0) { throw new ReferenceError("plus() can't work with an empty Cbuffer"); }
       return (index + howMany + this.elements.length) % this.elements.length;
     },
 
@@ -59,12 +57,12 @@ if(typeof window === "undefined") {
     },
     
     getIndexOfNewestElement: function() {
-      if(this.elements.length === 0) { throw new ReferenceError("getIndexOfNewestElement() can't work with an empty Rounder"); }
+      if(this.elements.length === 0) { throw new ReferenceError("getIndexOfNewestElement() can't work with an empty Cbuffer"); }
       return (this.indexForNextElement + this.elements.length - 1) % this.elements.length;
     },
     
     getIndexOfOldestElement: function() {
-      if(this.elements.length === 0) { throw new ReferenceError("getIndexOfOldestElement() can't work with an empty Rounder"); }
+      if(this.elements.length === 0) { throw new ReferenceError("getIndexOfOldestElement() can't work with an empty Cbuffer"); }
       return (this.elements.length === this.howManyElements) ? this.indexForNextElement : 0;
     },
     
@@ -138,5 +136,5 @@ if(typeof window === "undefined") {
 
 
 if(typeof window === "undefined") {
-  module.exports = A.Rounder;
+  module.exports = A.Cbuffer;
 }

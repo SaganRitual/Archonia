@@ -12,8 +12,8 @@ if(typeof window === "undefined") {
 }
 
 (function(A) {
-
-A.Ramper = function(depth, decayRate, rangeLo, rangeHi) {
+  
+A.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   if(rangeLo === undefined) { rangeLo = 0; }
   if(rangeHi === undefined) { rangeHi = 1; }
 
@@ -24,15 +24,15 @@ A.Ramper = function(depth, decayRate, rangeLo, rangeHi) {
 
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   
-  this.Cbuffer = new A.Cbuffer(depth);
+  this.cbuffer = new A.Cbuffer(depth);
   this.valuesRange = new A.Range(rangeLo, rangeHi);
 };
 
-A.Ramper.prototype = {
+A.SignalSmoother.prototype = {
   getSignalStrength: function() {
     var signalStrength = 0;
     
-    this.Cbuffer.forEach(function(ix, value) {
+    this.cbuffer.forEach(function(ix, value) {
       signalStrength += value;
     });
 
@@ -42,7 +42,7 @@ A.Ramper.prototype = {
   isEmpty: function() { return this.empty; },
 
   reset: function() {
-    this.Cbuffer.reset();
+    this.cbuffer.reset();
     this.empty = true;
   },
   
@@ -51,9 +51,9 @@ A.Ramper.prototype = {
 
     s = A.clamp(s, 0, 1);
   
-    this.Cbuffer.store(s);
-  
-    this.Cbuffer.deepForEach(function(ix, points) {
+    this.cbuffer.store(s);
+
+    this.cbuffer.deepForEach(function(ix, points) {
       points[ix] -= this.decayRate;
       points[ix] = A.clamp(points[ix], 0, 1);
     }, this);
@@ -65,5 +65,5 @@ A.Ramper.prototype = {
 })(A);
 
 if(typeof window === "undefined") {
-  module.exports = A.Ramper;
+  module.exports = A.SignalSmoother;
 }

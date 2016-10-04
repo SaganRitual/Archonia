@@ -43,15 +43,15 @@ describe('SensorArray', function() {
       var c = new A.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
       chai.expect(c.isEmpty()).equal(true);
-      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.rampers[i].isEmpty()).equal(true); }
+      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.signalSmoothers[i].isEmpty()).equal(true); }
       
       c.store(0);
       chai.expect(c.isEmpty()).equal(false);
-      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.rampers[i].isEmpty()).equal(false); }
+      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.signalSmoothers[i].isEmpty()).equal(false); }
       
       c.reset();
       chai.expect(c.isEmpty()).equal(true);
-      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.rampers[i].isEmpty()).equal(true); }
+      for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.signalSmoothers[i].isEmpty()).equal(true); }
     });
   });
   
