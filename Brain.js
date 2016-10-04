@@ -26,11 +26,11 @@ A.Brain = function(archon) {
     fatigue:     { howManyPoints:  1, signalSpread:  1, action: 'moveToSafety' },
     food:        { howManyPoints: 12, signalSpread: 12, action: 'eat' },
     inertia:     { howManyPoints:  1, signalSpread:  1, action: 'sleep?' },
-    predators:   { howManyPoints: 12, signalSpread: 12, action: 'flee' },
+    predator:    { howManyPoints: 12, signalSpread: 12, action: 'flee' },
     prey:        { howManyPoints: 12, signalSpread: 12, action: 'pursue' },
     hunger:      { howManyPoints:  1, signalSpread:  1, action: 'searchForFood' },
     temperature: { howManyPoints:  2, signalSpread:  2, action: 'findSafeTemp' },
-    toxins:      { howManyPoints: 12, signalSpread: 12, action: 'move' }
+    toxin:       { howManyPoints: 12, signalSpread: 12, action: 'move' }
   };
   
   for(var gs in gSenses) {
@@ -102,7 +102,7 @@ A.Brain.prototype = {
   },
 
   sensePredator: function(where, predator) {
-    this.senses.predators.sensorArray.store(where, predator);
+    this.senses.predator.sensorArray.store(where, predator);
   },
 
   sensePrey: function(where, prey) {
@@ -113,8 +113,8 @@ A.Brain.prototype = {
     this.senses.temperature.sensorArray.store(where, temp);
   },
   
-  senseToxins: function(where, toxin) {
-    this.senses.toxins.sensorArray.store(where, toxin);
+  senseToxin: function(where, toxin) {
+    this.senses.toxin.sensorArray.store(where, toxin);
   },
   
   tick: function() {

@@ -26,11 +26,11 @@ module.exports = {
         fatigue:     { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 },
         food:        { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: caloriesPerManna },
         inertia:     { threshold: 0.5, multiplier: 1, decayRate: 0.00, valuesRangeLo: 0, valuesRangeHi: 1 },
-        predators:   { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 },
+        predator:    { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 },
         prey:        { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 },
         hunger:      { multiplier: 1, decayRate: 0.01, valuesRangeLo: hungerLo, valuesRangeHi: hungerHi },
         temperature: { multiplier: 1, decayRate: 0.01, valuesRangeLo: tempLo, valuesRangeHi: tempHi },
-        toxins:      { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 }
+        toxin:       { multiplier: 1, decayRate: 0.01, valuesRangeLo: 0, valuesRangeHi: 1 }
       }
     }
   },
