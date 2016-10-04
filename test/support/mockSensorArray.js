@@ -1,5 +1,6 @@
 var SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
   this.empty = true;
+  this.mockup = true;
 };
 
 SensorArray.prototype = {

@@ -16,63 +16,59 @@ A.Brain = function(archon) {
   this.id = A.archoniaUniqueObjectId++;
   this.archon = archon;
   
-  this.senses = {}; var gSenses = archon.genome.senses, pSenses = this.senses;
+  var gSenses = archon.genome.senses;
 
-  this.inertiaAction = { action: 'sleep?', direction: 0, signalWeight: 0 };
+  this.defaultAction = { action: 'searchForFood', direction: 0, signalWeight: 0 };
   
-  this.currentAction = Object.assign({}, this.inertiaAction);
+  this.currentAction = Object.assign({}, this.defaultAction);
   
   var senseAddons = {
-    fatigue:     { howManyPoints:  1, signalSpread:  1, action: 'moveToSafety' },
+    fatigue:     { howManyPoints:  1, signalSpread:  1, action: 'moveToSecure' },
     food:        { howManyPoints: 12, signalSpread: 12, action: 'eat' },
-    inertia:     { howManyPoints:  1, signalSpread:  1, action: 'sleep?' },
     predator:    { howManyPoints: 12, signalSpread: 12, action: 'flee' },
     prey:        { howManyPoints: 12, signalSpread: 12, action: 'pursue' },
     hunger:      { howManyPoints:  1, signalSpread:  1, action: 'searchForFood' },
     temperature: { howManyPoints:  2, signalSpread:  2, action: 'findSafeTemp' },
-    toxin:       { howManyPoints: 12, signalSpread: 12, action: 'move' }
+    toxin:       { howManyPoints: 12, signalSpread: 12, action: 'toxinDefense' }
   };
   
-  for(var gs in gSenses) {
-    pSenses[gs] = {};
+  this.senseControls = {};
+  
+  for(var senseNameInGenome in gSenses) {
+    this.senseControls[senseNameInGenome] = {};
     
-    var gSense = gSenses[gs], pSense = pSenses[gs], extra = senseAddons[gs];
+    var gSense = gSenses[senseNameInGenome], pSense = this.senseControls[senseNameInGenome], extra = senseAddons[senseNameInGenome];
     
     for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
-    pSenses[gs].sensorArray = new A.SensorArray(
+    this.senseControls[senseNameInGenome].sensorArray = new A.SensorArray(
       extra.howManyPoints, this.archon.genome.senseMeasurementDepth, gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
-    
-    for(var gg in gSense) {
-      var gene = gSense[gg];
-      
-      pSense[gg] = gene;
-    }
   }
 };
 
 A.Brain.prototype = {
   chooseAction: function() {
     
-    this.currentAction = Object.assign({}, this.inertiaAction);
+    this.currentAction = Object.assign({}, this.defaultAction);
 
-    for(var s in this.senses) {
-      var sense = this.senses[s], inputSignal = null;
+    for(var s in this.senseControls) {
+      var genomeSenseControls = this.archon.genome.senses[s];
+      var brainSenseControls = this.senseControls[s];
+      var inputSignal = null;
       
-      if(sense.sensorArray.isEmpty()) {
+      if(brainSenseControls.sensorArray.isEmpty()) {
         throw new Error("Sensors should never be empty");
       } else {
         
-        inputSignal = sense.sensorArray.getBestSignal(sense.signalSpread);
+        inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
         
-        //console.log('srslywtf', s, 'barf', sense, 'carf', sense.multiplier);
-        var effectiveSignalStrength = inputSignal.weight * sense.multiplier;
+        var effectiveSignalStrength = inputSignal.weight * genomeSenseControls.multiplier;
 
-        if(effectiveSignalStrength > this.currentAction.signalWeight) {
+        if(effectiveSignalStrength > this.currentAction.signalWeight + this.archon.genome.inertialDamper) {
 
           this.currentAction.signalWeight = effectiveSignalStrength;
-          this.currentAction.action = sense.action;
+          this.currentAction.action = brainSenseControls.action;
           this.currentAction.direction = inputSignal.direction;
 
         }
@@ -87,35 +83,31 @@ A.Brain.prototype = {
   },
   
   senseFatigue: function(where, fatigue) {
-    this.senses.fatigue.sensorArray.store(where, fatigue);
+    this.senseControls.fatigue.sensorArray.store(where, fatigue);
   },
   
   senseHunger: function(where, hunger) {
-    this.senses.hunger.sensorArray.store(where, hunger);
+    this.senseControls.hunger.sensorArray.store(where, hunger);
   },
   
   senseFood: function(where, food) {
-    this.senses.food.sensorArray.store(where, food.calories);
-  },
-  
-  senseInertia: function(where, inertia) {
-    this.senses.inertia.sensorArray.store(where, inertia);
+    this.senseControls.food.sensorArray.store(where, food);
   },
 
   sensePredator: function(where, predator) {
-    this.senses.predator.sensorArray.store(where, predator);
+    this.senseControls.predator.sensorArray.store(where, predator);
   },
 
   sensePrey: function(where, prey) {
-    this.senses.prey.sensorArray.store(where, prey);
+    this.senseControls.prey.sensorArray.store(where, prey);
   },
   
   senseTemperature: function(where, temp) {
-    this.senses.temperature.sensorArray.store(where, temp);
+    this.senseControls.temperature.sensorArray.store(where, temp);
   },
   
   senseToxin: function(where, toxin) {
-    this.senses.toxin.sensorArray.store(where, toxin);
+    this.senseControls.toxin.sensorArray.store(where, toxin);
   },
   
   tick: function() {
