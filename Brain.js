@@ -66,6 +66,7 @@ A.Brain.prototype = {
         
         inputSignal = sense.sensorArray.getBestSignal(sense.signalSpread);
         
+        //console.log('srslywtf', s, 'barf', sense, 'carf', sense.multiplier);
         var effectiveSignalStrength = inputSignal.weight * sense.multiplier;
 
         if(effectiveSignalStrength > this.currentAction.signalWeight) {
