@@ -3,11 +3,9 @@ var chai = require('chai');
 var Cbuffer = null;
 
 describe('Cbuffer', function() {
-  describe('Smoke test', function() {
-    it('#Module exists', function() {
-      var c = function() { Cbuffer = require('../widgets/Cbuffer.js'); }
-      chai.expect(c).to.not.throw();
-    });
+  it('#module exists', function() {
+    var c = function() { Cbuffer = require('../widgets/Cbuffer.js'); };
+    chai.expect(c).to.not.throw();
   });
 });
   
