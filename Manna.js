@@ -1,15 +1,26 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global game, Phaser */
+  "use strict";
 
-"use strict";
+var Archotype = Archotype || {};
+var Phaser = Phaser || {};
 
-var A = A || {};
-
-(function(A) {
+if(typeof window === "undefined") {
+  Archotype = require('./Archonia.js');
   
-  A.MannaGenerator = function() {
+  var xy = require('./widgets/XY.js');
+  Archotype.XY = xy.XY;
+  Archotype.RandomXY = xy.RandomXY;
+  
+  Phaser = require('./test/support/Phaser.js');
+}
+
+(function(Archotype) {
+  
+  Archotype.MannaGenerator = function(A) {
+    this.A = A;
+    
     var morselScale = 0.05;
     
     this.howManyMorsels = 500;
@@ -19,25 +30,25 @@ var A = A || {};
     this.bellCurveHeight = 5;
     
     var stopBelow = 0.01, xOffset = 0, width = 2;
-    this.bellCurve = A.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
+    this.bellCurve = this.A.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
     if(this.bellCurve.length % 2 === 1) { this.bellCurve.push(0); }
     this.bellCurveRadius = this.bellCurve.length / 2;
     
-    this.randomPoint = new A.RandomXY();
+    this.randomPoint = new Archotype.RandomXY();
     this.randomPoint.setMin(0, 0);
-    this.randomPoint.setMax(A.gameWidth, A.gameHeight);
+    this.randomPoint.setMax(this.A.gameWidth, this.A.gameHeight);
     this.optimalTemp = 500;
     
-    // We make the game scale larger than the radius so the manna will go off
+    // We make the A.game scale larger than the radius so the manna will go off
     // the screen when the temps are extreme in either direction
-    this.tempScale = new A.Range(-1000, 1000);
-    this.gameScale = new A.Range(-A.gameRadius, A.gameRadius);
-    this.arrayScale = new A.Range(-this.bellCurveRadius, this.bellCurveRadius);
+    this.tempScale = new Archotype.Range(-1000, 1000);
+    this.gameScale = new Archotype.Range(-this.A.gameRadius, this.A.gameRadius);
+    this.arrayScale = new Archotype.Range(-this.bellCurveRadius, this.bellCurveRadius);
     
-    this.spriteGroup = game.add.group();
+    this.spriteGroup = this.A.game.add.group();
     this.spriteGroup.enableBody = true;
     this.spriteGroup.createMultiple(this.howManyMorsels, 'particles', 0, false);
-    game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
+    this.A.game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
 
     this.spriteGroup.forEach(function(m) {
       m.previousEmit = 0;
@@ -52,11 +63,11 @@ var A = A || {};
     }, this);
   };
   
-  A.MannaGenerator.prototype = {
+  Archotype.MannaGenerator.prototype = {
     
     giveth: function() {
       var thisParticle = null;
-      var temp = A.Sun.getTemperature(A.gameCenter);
+      var temp = this.A.sun.getTemperature(this.A.gameCenter);
       
       for(var i = 0; i < 10; i++) {
         this.randomPoint.random();
@@ -64,7 +75,7 @@ var A = A || {};
         var scaledY = this.arrayScale.convertPoint(this.randomPoint.point.y, this.gameScale);
         var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
         
-        if(A.realInRange(0, 1) < p) {
+        if(this.A.realInRange(0, 1) < p) {
 
           thisParticle = this.spriteGroup.getFirstDead();
           
@@ -73,7 +84,7 @@ var A = A || {};
           } else {
             this.randomPoint.point.y += this.gameScale.convertPoint(temp, this.tempScale);
           
-            if(this.randomPoint.point.y > 0 && this.randomPoint.point.y < A.gameHeight) {
+            if(this.randomPoint.point.y > 0 && this.randomPoint.point.y < this.A.gameHeight) {
               thisParticle.position.setTo(this.randomPoint.point.x, this.randomPoint.point.y);
               thisParticle.revive();
             }
@@ -87,10 +98,10 @@ var A = A || {};
       for(var i = 0; i < 10; i++) {
         var thisParticle = this.spriteGroup.getRandom();
         if(thisParticle.alive) {
-          var r = A.integerInRange(0, this.bellCurve.length);
+          var r = this.A.integerInRange(0, this.bellCurve.length);
           var p = this.bellCurve[r] / this.bellCurveHeight;
     
-          if(A.realInRange(0, 1) < p) {
+          if(this.A.realInRange(0, 1) < p) {
             thisParticle.kill();
           }
         }
@@ -102,8 +113,8 @@ var A = A || {};
 
     	if(showDebugOutlines) {
     		this.spritePool.forEachAlive(function(a) {
-    	    game.debug.body(a, 'yellow', false);
-    			game.debug.spriteBounds(a, 'blue', false);
+    	    this.A.game.debug.body(a, 'yellow', false);
+    			this.A.game.debug.spriteBounds(a, 'blue', false);
     		}, this);
     	}
     },
@@ -115,4 +126,8 @@ var A = A || {};
     
   };
   
-})(A);
+})(Archotype);
+
+if(typeof window === "undefined") {
+  module.exports = Archotype.MannaGenerator;
+}

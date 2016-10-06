@@ -1,10 +1,12 @@
-var A = require('../Archonia.js');
-A.XY = require('../widgets/XY.js');
+var A = {};
+var xy = require('../widgets/XY.js');
+
+A.XY = xy.XY;
+A.RandomXY = xy.RandomXY;
+
 A.Range = require('../widgets/Range.js');
 
 var chai = require('chai');
-
-A.prePhaserSetup();
 
 describe('XY', function() {
   describe('Test constructor:', function() {

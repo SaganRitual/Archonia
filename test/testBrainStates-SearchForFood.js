@@ -1,9 +1,15 @@
 var chai = require('chai');
 var data_driven = require('data-driven');
 
-var A = require('../Archonia.js');
+var Archotype = require('../Archonia.js');
+
+var A = new Archotype.Archonia(); A.go({});
+
 var BrainStates = require('../widgets/BrainStates.js');
-var XY = require('../widgets/XY.js');
+
+var xy = require('../widgets/XY.js');
+var XY = xy.XY;
+var RandomXY = xy.RandomXY;
 
 var archon = {
   genome: { foodSearchTimeBetweenTurns: 15 }, // Any number will do for our test
@@ -11,6 +17,7 @@ var archon = {
 };
 
 var Brain = function(archon) {
+  this.A = A;
   this.archon = archon;
   this.searchForFood = new BrainStates.SearchForFood(this);
   
@@ -50,7 +57,7 @@ Brain.prototype = {
 var theBrain = null;
 
 var checkTurn = function(turnAngle, direction, start) {
-  var computerizedAngle = null, robalizedAngle = null, xy = A.XY(), r = archon.phenotype.getSize(), a = null;
+  var computerizedAngle = null, robalizedAngle = null, xy = Archotype.XY(), r = archon.phenotype.getSize(), a = null;
   
   a = theBrain.chooseAction();
   chai.expect(a).to.have.property('action', 'continue');

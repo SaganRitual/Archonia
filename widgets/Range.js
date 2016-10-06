@@ -3,17 +3,17 @@
 
 "use strict";
 
-var A = A || {};
+var Archotype = Archotype || {};
 
-(function(A) {
+(function(Archotype) {
 
-A.Range = function(lo, hi) {
+Archotype.Range = function(lo, hi) {
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;
 };
 
-A.Range.prototype = {
+Archotype.Range.prototype = {
   // The reason for this class: scaling a point
   // in my range to a point in a different range
   convertPoint: function(thePointOnHisMap, hisRange) {
@@ -53,7 +53,7 @@ A.Range.prototype = {
   
   radial: function() {
     if(this.radialRange === null) {
-      this.radialRange = new A.Range(0, Math.abs(this.hi - this.lo) / 2);
+      this.radialRange = new Archotype.Range(0, Math.abs(this.hi - this.lo) / 2);
     }
     
     return this.radialRange;
@@ -67,8 +67,8 @@ A.Range.prototype = {
 };
 
   
-})(A);
+})(Archotype);
 
 if(typeof window === "undefined") {
-  module.exports = A.Range;
+  module.exports = Archotype.Range;
 }

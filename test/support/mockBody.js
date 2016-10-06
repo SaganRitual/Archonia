@@ -1,11 +1,11 @@
-var A = A || {};
+var Archotype = Archotype || {};
 
-if(A.XY === undefined) {
-  A.XY = require('../../widgets/XY.js');
+if(Archotype.XY === undefined) {
+  Archotype.XY = require('../../widgets/XY.js').XY;
 }
 
 var Body = function() {
-  this.movementTarget = A.XY();
+  this.movementTarget = Archotype.XY();
 };
 
 Body.prototype = {

@@ -1,20 +1,24 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global Phaser */
-
 "use strict";
 
 var A = A || {};
-var game = game || {};
+var Archotype = Archotype || {};
+var Phaser = Phaser || {};
+var config = config || {};
 
 if(typeof window === "undefined") {
-  game = require('./test/support/phaser.js').game;
+  Phaser = require('./test/support/Phaser.js');
+  config = require('./config.js');
 }
 
-(function() {
+(function(Archotype) {
+  
+  Archotype.Archonia = function() {
+  };
 
-  A = {
+  Archotype.Archonia.prototype = {
     ag: null,
     archoniaGooDiameter: 100,
     archoniaGooRadius: 50,
@@ -26,9 +30,9 @@ if(typeof window === "undefined") {
     dayLength: 60 * 1000,  // In ms, not ticks
     frameCount: 0,
     gameCenter: null,
-    gameHeight: 600,
+    gameHeight: null,
     gameRadius: null,
-    gameWidth: 600,
+    gameWidth: null,
     archoniaUniqueObjectId: 0,
     mouseUp: true,
     oneToZeroRange: null,
@@ -53,17 +57,17 @@ if(typeof window === "undefined") {
     },
     
     create: function() {
-      game.physics.startSystem(Phaser.Physics.ARCADE);
+      this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-      A.setupBitmaps();
-      A.Sun.ignite();
-      A.mannaGenerator = new A.MannaGenerator();
+      this.setupBitmaps();
+      this.sun.ignite();
+      this.mannaGenerator = new Archotype.MannaGenerator(this);
 
-      A.worldColorRange = A.Sun.getWorldColorRange();
+      this.worldColorRange = this.sun.getWorldColorRange();
       
-      A.cursors = game.input.keyboard.createCursorKeys();
-      game.input.onUp.add(A.onMouseUp, A);
-      game.input.onDown.add(A.onMouseDown, A);
+      this.cursors = this.game.input.keyboard.createCursorKeys();
+      this.game.input.onUp.add(this.onMouseUp, this);
+      this.game.input.onDown.add(this.onMouseDown, this);
     },
     
     generateBellCurve: function(stopBelow, height, xOffset, widthOfRange) {
@@ -88,47 +92,64 @@ if(typeof window === "undefined") {
 
       return a * Math.pow(Math.E, f / g);
     },
+    
+    go: function(config) {
+      this.prePhaserSetup(config);
+    
+      this.game = new Phaser.Game(this.gameWidth, this.gameHeight, Phaser.CANVAS);
+
+      this.game.state.add('Archonia', this, false);
+      this.game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
+
+      this.game.state.start('Archonia');
+    },
 
     handleClick: function(/*pointer*/) {
       
     },
     
     integerInRange: function(lo, hi) {
-      return game.rnd.integerInRange(lo, hi);
+      return Math.floor(this.game.rnd.integerInRange(lo, hi));
     },
     
-    prePhaserSetup: function() {
+    prePhaserSetup: function(config) {
+      for(var c in config) {
+        this[c] = config[c];
+      }
+      
+      this.bitmapFactory = new Archotype.BitmapFactory(this);
+      this.sun = new Archotype.Sun(this); 
 
-      A.gameCenter = A.XY(A.gameWidth / 2, A.gameHeight / 2);
-      A.gameRadius = A.gameWidth / 2;
+      this.gameCenter = Archotype.XY(this.gameWidth / 2, this.gameHeight / 2);
+      this.gameRadius = this.gameWidth / 2;
 
-  		A.buttonHueRange = new A.Range(240, 0);	// Blue (240) is cold, Red (0) is hot
-      A.darknessRange = new A.Range(A.darknessAlphaHi, A.darknessAlphaLo);
-      A.oneToZeroRange = new A.Range(1, 0);
-      A.temperatureRange = new A.Range(A.temperatureLo, A.temperatureHi);
-      A.yAxisRange = new A.Range(A.gameHeight, 0);
-      A.zeroToOneRange = new A.Range(0, 1);
+  		this.buttonHueRange = new Archotype.Range(240, 0);	// Blue (240) is cold, Red (0) is hot
+      this.darknessRange = new Archotype.Range(this.darknessAlphaHi, this.darknessAlphaLo);
+      this.oneToZeroRange = new Archotype.Range(1, 0);
+      this.temperatureRange = new Archotype.Range(this.temperatureLo, this.temperatureHi);
+      this.yAxisRange = new Archotype.Range(this.gameHeight, 0);
+      this.zeroToOneRange = new Archotype.Range(0, 1);
       
     },
     
     onMouseDown: function(/*pointer*/) {
-      A.mouseUp = false;
+      this.mouseUp = false;
     },
 
     onMouseUp: function(pointer) {
-      if(!A.mouseUp) { A.mouseUp = true; A.handleClick(pointer); }
+      if(!this.mouseUp) { this.mouseUp = true; this.handleClick(pointer); }
     },
 
     preload: function() {
-      game.load.image('particles', 'assets/sprites/pangball.png');
+      this.game.load.image('particles', 'assets/sprites/pangball.png');
     },
     
     realInRange: function(lo, hi) {
-      return game.rnd.realInRange(lo, hi);
+      return this.game.rnd.realInRange(lo, hi);
     },
     
     render: function() {
-      A.mannaGenerator.render();
+      this.mannaGenerator.render();
     },
 
     robalizeAngle: function(computerizedAngle) {
@@ -142,36 +163,38 @@ if(typeof window === "undefined") {
     },
 
     setupBitmaps: function() {
-      A.bg = A.BitmapFactory.makeBitmap('archonia');
-      A.ag = A.BitmapFactory.makeBitmap('archoniaGoo');
+      this.bg = this.bitmapFactory.makeBitmap('archonia');
+      this.ag = this.bitmapFactory.makeBitmap('archoniaGoo');
     },
     
     update: function() {
-      A.frameCount++;
+      this.frameCount++;
       
-      A.mannaGenerator.tick(A.frameCount);
+      this.mannaGenerator.tick(this.frameCount);
     }
     
   };
   
-})();
+})(Archotype);
 
 if(typeof window === "undefined") {
 
-  module.exports = A;
+  module.exports = Archotype;
 
-  A.XY = require('./widgets/XY.js');
-  A.Range = require('./widgets/Range.js');
+  Archotype.Range = require('./widgets/Range.js');
+  Archotype.Sun = require('./Sun.js');
   
+  var xy = require('./widgets/XY.js');
+  Archotype.XY = xy.XY;
+  Archotype.RandomXY = xy.RandomXY;
+
+  var b = require('./Bitmap.js');
+  Archotype.Bitmap = b.Bitmap;
+  Archotype.BitmapFactory = b.BitmapFactory;
+
 } else {
   window.onload = function() {
-    A.prePhaserSetup();
-    
-    game = new Phaser.Game(A.gameWidth, A.gameHeight, Phaser.CANVAS);
-
-    game.state.add('Archonia', A, false);
-    game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
-
-    game.state.start('Archonia');
+    var A = new Archotype.Archonia();
+    A.go(config);
   };
 }

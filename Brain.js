@@ -3,23 +3,24 @@
 
 "use strict";
 
-var A = A || {};
+var Archotype = Archotype || {};
 
 if(typeof window === "undefined") {
-  A = require('./Archonia.js');
-  A.SensorArray = require('./widgets/SensorArray.js');
-  A.Body = require('./Body.js');
+  Archotype = require('./Archonia.js');
+  Archotype.SensorArray = require('./widgets/SensorArray.js');
+  Archotype.Body = require('./Body.js');
 }
 
-(function(A) {
+(function(Archotype) {
   
   var howManyPointsForSpatialInputs = 12;
 
-A.Brain = function(archon) {
+Archotype.Brain = function(A, archon) {
+  this.A = A;
   this.id = A.archoniaUniqueObjectId++;
   this.archon = archon;
   
-  this.body = new A.Body();
+  this.body = new Archotype.Body();
   
   var gSenses = archon.genome.senses;
 
@@ -46,13 +47,14 @@ A.Brain = function(archon) {
     
     for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
-    this.senseControls[senseNameInGenome].sensorArray = new A.SensorArray(
-      extra.howManyPoints, this.archon.genome.senseMeasurementDepth, gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
+    this.senseControls[senseNameInGenome].sensorArray = new Archotype.SensorArray(
+      this.A, extra.howManyPoints, this.archon.genome.senseMeasurementDepth,
+      gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
   }
 };
 
-A.Brain.prototype = {
+Archotype.Brain.prototype = {
   chooseAction: function() {
     
     this.currentAction = Object.assign({}, this.defaultAction);
@@ -126,12 +128,12 @@ A.Brain.prototype = {
     case "flee":
     case "eat":
       robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
-      computerizedAngle = A.computerizeAngle(robalizedAngle);
+      computerizedAngle = this.A.computerizeAngle(robalizedAngle);
       break;
       
     case "findSafeTemp":
       robalizedAngle = (this.currentAction.direction * Math.PI) + (Math.PI / 2);
-      computerizedAngle = A.computerizeAngle(robalizedAngle);
+      computerizedAngle = this.A.computerizeAngle(robalizedAngle);
       break;
       
     default:
@@ -140,13 +142,13 @@ A.Brain.prototype = {
       break;
     }
     
-    var xy = A.XY.fromPolar(1, computerizedAngle);
+    var xy = Archotype.XY.fromPolar(1, computerizedAngle);
     this.body.setMovementTarget(xy);
   }
 };
   
-})(A);
+})(Archotype);
 
 if(typeof window === "undefined") {
-  module.exports = A.Brain;
+  module.exports = Archotype.Brain;
 }

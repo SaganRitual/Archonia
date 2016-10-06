@@ -3,37 +3,38 @@
 
 "use strict";
 
-var A = A || {};
+var Archotype = Archotype || {};
 
 if(typeof window === "undefined") {
-  A = require('./Archonia.js');
-  A.tinycolor = require('./widgets/tinycolor.js');
-  A.Range = require('./widgets/Range.js');
+  Archotype = require('./Archonia.js');
+  Archotype.tinycolor = require('./widgets/tinycolor.js');
+  Archotype.Range = require('./widgets/Range.js');
 }
 
-(function(A) {
+(function(Archotype) {
   
   var adultFatDensity = 100;  // 100 calories per gram
   var larvaFatDensity = 1000;
   var embryoFatDensity = 1000;
 
-A.Phenotype = function(archon) {
+Archotype.Phenotype = function(A, archon) {
   
   if(archon === undefined) {
     throw new TypeError("Phenotype needs an archon");
   }
   
+  this.A = A;
   this.archon = archon;
   this.genome = archon.genome;
   this.embryoCalorieBudget = 0;
   this.larvalCalorieBudget = 0;
   this.adultCalorieBudget = 0;
   
-  this.optimalTempRange = new A.Range();
+  this.optimalTempRange = new Archotype.Range();
   
 };
 
-A.Phenotype.prototype = {
+Archotype.Phenotype.prototype = {
   
   reproductionCostFactor: 1.25,
 
@@ -126,7 +127,7 @@ A.Phenotype.prototype = {
   },
 
   getTempCost: function() {
-    var t = A.Sun.getTemperature(this.archon);
+    var t = this.A.sun.getTemperature(this.archon);
     var d = Math.abs(t - this.genome.optimalTemp);
     var s = this.getMass();
     var p = Math.log((d || 1) + 1) * Math.log(s + 1);
@@ -145,25 +146,25 @@ A.Phenotype.prototype = {
   },
 
   setButtonColor: function(temp) {
-  	temp = A.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
+  	temp = this.A.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
 
-  	var hue = A.buttonHueRange.convertPoint(temp, this.optimalTempRange);
+  	var hue = this.A.buttonHueRange.convertPoint(temp, this.optimalTempRange);
   	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
-  	var rgb = A.tinycolor(hsl).toHex();
+  	var rgb = Archotype.tinycolor(hsl).toHex();
   	var tint = parseInt(rgb, 16);
 
   	this.archon.button.tint = tint;
   },
   
   setColors: function() {
-    var t = A.Sun.getTemperature(this.archon);
+    var t = this.A.sun.getTemperature(this.archon);
 
     this.setButtonColor(t);
   },
   
   setSize: function() {
     var m = this.getMass();
-    var s = m / A.archoniaGooDiameter;
+    var s = m / this.A.archoniaGooDiameter;
     
     this.archon.phaseron.scale.setTo(s, s);
     
@@ -172,8 +173,8 @@ A.Phenotype.prototype = {
   }
 };
   
-})(A);
+})(Archotype);
 
 if(typeof window === "undefined") {
-  module.exports = A.Phenotype;
+  module.exports = Archotype.Phenotype;
 }

@@ -1,30 +1,30 @@
-var A = require('../Archonia.js');
+var Archotype = require('../Archonia.js');
+
+var A = new Archotype.Archonia(); A.go({});
 
 var testData = require('./support/testBrain-data.js');
 var archon = testData.archon;
-
-A.prePhaserSetup();
 
 var data_driven = require('data-driven');
 var chai = require('chai');
 
 var loadBrainWithMockups = function() {
-  A.Brain = require('../Brain.js');
-  A.SensorArray = require('./support/mockSensorArray.js');
-  A.Body = require('./support/mockBody.js');
+  Archotype.Brain = require('../Brain.js');
+  Archotype.SensorArray = require('./support/mockSensorArray.js');
+  Archotype.Body = require('./support/mockBody.js');
 };
 
 var loadBrainWithRealSensors = function() {
-  A.Brain = require('../Brain.js');
-  A.SensorArray = require('../widgets/SensorArray.js');
-  A.Body = require('./support/mockBody.js');
+  Archotype.Brain = require('../Brain.js');
+  Archotype.SensorArray = require('../widgets/SensorArray.js');
+  Archotype.Body = require('./support/mockBody.js');
 };
 
 var simulateBrain = function(whichSense) {
   // Because mocha runs the tests in whichever order it likes
-  if(A.Brain === undefined) { loadBrainWithMockups(); }
+  if(Archotype.Brain === undefined) { loadBrainWithMockups(); }
   
-  var b = new A.Brain(archon), senseName = null, sensorArrays = {};
+  var b = new Archotype.Brain(A, archon), senseName = null, sensorArrays = {};
 
   for(senseName in archon.genome.senses) {
     var fn = 'sense' + senseName.substr(0, 1).toUpperCase() + senseName.substr(1);
@@ -55,9 +55,9 @@ var simulateBrain = function(whichSense) {
 
 var simulateCompetition = function(testInfo) {
   // Because mocha runs the tests in whichever order it likes
-  if(A.Brain === undefined) { loadBrainWithMockups(); }
+  if(Archotype.Brain === undefined) { loadBrainWithMockups(); }
   
-  var b = new A.Brain(archon), senseName = null, sensorArrays = {};
+  var b = new Archotype.Brain(A, archon), senseName = null, sensorArrays = {};
 
   for(senseName in archon.genome.senses) {
     var fn = 'sense' + senseName.substr(0, 1).toUpperCase() + senseName.substr(1);
@@ -120,13 +120,13 @@ describe('Brain', function() {
     describe('#module exists', function() {
       it("#require shouldn't complain", function() {
         chai.expect(loadBrainWithMockups).to.not.throw();
-        chai.expect(A).to.have.property('Brain');
+        chai.expect(Archotype).to.have.property('Brain');
       });
     });
     
     describe('#object exists', function() {
       it('#should look like a constructor', function() {
-        chai.assert.typeOf(A.Brain, "Function");
+        chai.assert.typeOf(Archotype.Brain, "Function");
       });
     });
   
@@ -139,7 +139,7 @@ describe('Brain', function() {
 
       data_driven(functionNames, function() {
         it('#{functionName}()', function(nameObject) {
-          var c = new A.Brain(archon);
+          var c = new Archotype.Brain(A, archon);
           chai.expect(c).to.have.property(nameObject.functionName);
           chai.assert.isFunction(c[nameObject.functionName]);
         });
@@ -210,7 +210,7 @@ describe('Brain', function() {
       loadBrainWithRealSensors();
       archon.genome.inertialDamper = 0.02;
 
-      var b = new A.Brain(archon), r = null;
+      var b = new Archotype.Brain(A, archon), r = null;
       
       for(var s in archon.genome.senses) { archon.genome.senses[s].multiplier = 1; }
       
@@ -271,7 +271,7 @@ describe('Brain', function() {
     it('#size 1 for temp, 3 for other spatial, 1 for non-spatial', function() {
       loadBrainWithRealSensors();
       
-      var b = new A.Brain(archon), r = null;
+      var b = new Archotype.Brain(A, archon), r = null;
       
       var hunger = archon.genome.embryoThreshold + archon.genome.reproductionThreshold;
       var temp = archon.genome.optimalTemp;
@@ -305,7 +305,7 @@ describe('Brain', function() {
     it('#calculate movement target from sensor input', function() {
       loadBrainWithRealSensors();
       
-      var b = new A.Brain(archon), r = null;
+      var b = new Archotype.Brain(A, archon), r = null;
       
       var hunger = archon.genome.embryoThreshold + archon.genome.reproductionThreshold;
       var temp = archon.genome.optimalTemp;
@@ -325,7 +325,7 @@ describe('Brain', function() {
       var r = b.chooseAction(), theta = A.computerizeAngle(11 * (2 * Math.PI / 12));
       
       chai.expect(r).to.include({ action: 'eat', direction: 11 });
-      chai.expect(b.body.movementTarget).to.include(A.XY.fromPolar(1, theta));
+      chai.expect(b.body.movementTarget).to.include(Archotype.XY.fromPolar(1, theta));
     });
   });
 

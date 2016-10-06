@@ -3,20 +3,21 @@
 
 "use strict";
 
-var A = A || {};
+var Archotype = Archotype || {};
 
 if(typeof window === "undefined") {
-  A = require('../Archonia.js');
-  A.Range = require('./Range.js');
-  A.Cbuffer = require('./Cbuffer.js');
+  Archotype = require('../Archonia.js');
+  Archotype.Range = require('./Range.js');
+  Archotype.Cbuffer = require('./Cbuffer.js');
 }
 
-(function(A) {
+(function(Archotype) {
   
-A.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
+Archotype.SignalSmoother = function(A, depth, decayRate, rangeLo, rangeHi) {
   if(rangeLo === undefined) { rangeLo = 0; }
   if(rangeHi === undefined) { rangeHi = 1; }
 
+  this.A = A;
   this.empty = true;
   this.depth = depth;
   this.rangeLo = rangeLo;
@@ -24,11 +25,11 @@ A.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
 
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   
-  this.cbuffer = new A.Cbuffer(depth);
-  this.valuesRange = new A.Range(rangeLo, rangeHi);
+  this.cbuffer = new Archotype.Cbuffer(this.A, depth);
+  this.valuesRange = new Archotype.Range(rangeLo, rangeHi);
 };
 
-A.SignalSmoother.prototype = {
+Archotype.SignalSmoother.prototype = {
   getSignalStrength: function() {
     var signalStrength = 0;
     
@@ -47,23 +48,23 @@ A.SignalSmoother.prototype = {
   },
   
   store: function(value) {
-    var s = A.zeroToOneRange.convertPoint(value, this.valuesRange);
+    var s = this.A.zeroToOneRange.convertPoint(value, this.valuesRange);
 
-    s = A.clamp(s, 0, 1);
+    s = this.A.clamp(s, 0, 1);
   
     this.cbuffer.store(s);
 
     this.cbuffer.deepForEach(function(ix, points) {
       points[ix] -= this.decayRate;
-      points[ix] = A.clamp(points[ix], 0, 1);
+      points[ix] = this.A.clamp(points[ix], 0, 1);
     }, this);
     
     this.empty = false;
   }
 };
 
-})(A);
+})(Archotype);
 
 if(typeof window === "undefined") {
-  module.exports = A.SignalSmoother;
+  module.exports = Archotype.SignalSmoother;
 }

@@ -1,20 +1,23 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global game */
-
 "use strict";
 
 var A = A || {};
+var Archotype = Archotype || {};
 
-(function(A) {
+if(typeof window === "undefined") {
+  Archotype = require('./Archonia.js');
+}
+
+(function(Archotype) {
   
-  A.Bitmap = function(bm) {
+  Archotype.Bitmap = function(bm) {
     this.bm = bm;
     this.cx = bm.ctx;
   };
   
-  A.Bitmap.prototype = {
+  Archotype.Bitmap.prototype = {
     aLine: function(from, to, style, width) {
       if(style === undefined) { style = 'rgb(255, 255, 255)'; }
       if(width === undefined) { width = 1; }
@@ -33,13 +36,17 @@ var A = A || {};
     }
   };
   
-  A.BitmapFactory = {
+  Archotype.BitmapFactory = function(A) {
+    this.A = A;
+  };
+  
+  Archotype.BitmapFactory.prototype = {
     
     archonia: function() {
-      var bm = game.add.bitmapData(game.width, game.height);
+      var bm = this.A.game.add.bitmapData(this.A.game.width, this.A.game.height);
       var cx = bm.context;
 
-      var g = cx.createLinearGradient(game.width / 2, 0, game.width / 2, game.height);
+      var g = cx.createLinearGradient(this.A.game.width / 2, 0, this.A.game.width / 2, this.A.game.height);
 
       g.addColorStop(0.00, 'hsl(202, 100%, 100%)');
       g.addColorStop(0.40, 'hsl(202, 100%, 50%)');
@@ -48,30 +55,34 @@ var A = A || {};
       g.addColorStop(1.00, 'hsl(218, 100%, 00%)');
 
       cx.fillStyle = g;
-      cx.fillRect(0, 0, game.width, game.height);
+      cx.fillRect(0, 0, this.A.game.width, this.A.game.height);
 
       bm.update();
-      game.add.image(0, 0, bm);
+      this.A.game.add.image(0, 0, bm);
     
-      return new A.Bitmap(bm);
+      return new Archotype.Bitmap(bm);
     },
   
     archoniaGoo: function() {
-      var bm = game.add.bitmapData(A.archoniaGooDiameter, A.archoniaGooDiameter);
+      var bm = this.A.game.add.bitmapData(this.A.archoniaGooDiameter, this.A.archoniaGooDiameter);
       var cx = bm.context;
 
       cx.beginPath();
-      bm.circle(A.archoniaGooRadius, A.archoniaGooRadius, A.archoniaGooRadius, 'rgba(255, 255, 255, 1)');
+      bm.circle(this.A.archoniaGooRadius, this.A.archoniaGooRadius, this.A.archoniaGooRadius, 'rgba(255, 255, 255, 1)');
       cx.fill();
 
-      game.cache.addBitmapData('archoniaGoo', bm);
+      this.A.game.cache.addBitmapData('archoniaGoo', bm);
     
-      return new A.Bitmap(bm);
+      return new Archotype.Bitmap(bm);
     },
     
     makeBitmap: function(type) {
-      return A.BitmapFactory[type]();
+      return this[type]();
     }
     
   };
-})(A);
+})(Archotype);
+
+if(typeof window === "undefined") {
+  module.exports = { Bitmap: Archotype.Bitmap, BitmapFactory: Archotype.BitmapFactory};
+}

@@ -3,23 +3,24 @@
 
 "use strict";
 
-var A = A || {};
+var Archotype = Archotype || {};
 
 if(typeof window === "undefined") {
-  A = require('../Archonia.js');
+  Archotype = require('../Archonia.js');
 }
 
-(function(A) {
+(function(Archotype) {
   
-  A.Cbuffer = function(howManyElements) {
+  Archotype.Cbuffer = function(A, howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length Cbuffer"); }
 
-    this.archoniaUniqueObjectId = A.archoniaUniqueObjectId++;
+    this.A = A;
+    this.archoniaUniqueObjectId = this.A.archoniaUniqueObjectId++;
     this.reset();
     this.howManyElements = howManyElements;
   };
   
-  A.Cbuffer.prototype = {
+  Archotype.Cbuffer.prototype = {
     add: function(index, howMany) {
       if(this.elements.length === 0) { throw new ReferenceError("plus() can't work with an empty Cbuffer"); }
       return (index + howMany + this.elements.length) % this.elements.length;
@@ -75,7 +76,7 @@ if(typeof window === "undefined") {
       var center = Math.floor(spread / 2);
 
       if(spread % 2 === 0) {
-        center += A.integerInRange(-1, 0);
+        center += this.A.integerInRange(-1, 0);
       }
     
       var result = [];
@@ -132,9 +133,9 @@ if(typeof window === "undefined") {
 
   };
   
-})(A);
+})(Archotype);
 
 
 if(typeof window === "undefined") {
-  module.exports = A.Cbuffer;
+  module.exports = Archotype.Cbuffer;
 }

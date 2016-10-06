@@ -3,46 +3,49 @@
 
 "use strict";
 
-var A = A || {};
+var Archotype = Archotype || {};
 
 if(typeof window === "undefined") {
-  A = require('../Archonia.js');
-  A.XY = require('../widgets/XY.js');
-  A.Cbuffer = require('../widgets/Cbuffer.js');
+  Archotype = require('../Archonia.js');
+  Archotype.Cbuffer = require('./Cbuffer.js');
+
+  var xy = require('./XY.js');
+  Archotype.XY = xy.XY;
+  Archotype.RandomXY = xy.RandomXY;
 }
 
-(function(A) {
+(function(Archotype) {
 
-A.BrainStates = {
+Archotype.BrainStates = {
   BrainState: function(brain) { this.brain = brain; }
 };
 
-A.BrainStates.BrainState.prototype.tick = function(frameCount) {
+Archotype.BrainStates.BrainState.prototype.tick = function(frameCount) {
   this.frameCount = frameCount;
 };
 
-A.BrainStates.Encyst = function(brain) {
-  A.BrainStates.BrainState.call(this, brain);
+Archotype.BrainStates.Encyst = function(brain) {
+  Archotype.BrainStates.BrainState.call(this, brain);
 };
 
-A.BrainStates.Encyst.prototype = Object.create(A.BrainStates.BrainState.prototype);
-A.BrainStates.Encyst.prototype.constructor = A.BrainStates.Encyst;
+Archotype.BrainStates.Encyst.prototype = Object.create(Archotype.BrainStates.BrainState.prototype);
+Archotype.BrainStates.Encyst.prototype.constructor = Archotype.BrainStates.Encyst;
 
-A.BrainStates.Encyst.prototype.tick = function(frameCount) {
-  A.BrainStates.BrainState.prototype.tick.call(this, frameCount);
+Archotype.BrainStates.Encyst.prototype.tick = function(frameCount) {
+  Archotype.BrainStates.BrainState.prototype.tick.call(this, frameCount);
 };
 
-A.BrainStates.FindSafeTemp = function(brain) {
-  A.BrainStates.BrainState.call(this, brain);
+Archotype.BrainStates.FindSafeTemp = function(brain) {
+  Archotype.BrainStates.BrainState.call(this, brain);
   
   this.brain = brain;
-  this.tempCheck = new A.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
+  this.tempCheck = new Archotype.Cbuffer(this.brain.A, this.brain.archon.genome.howLongBadTempToEncystment);
 };
 
-A.BrainStates.FindSafeTemp.prototype = Object.create(A.BrainStates.BrainState.prototype);
-A.BrainStates.FindSafeTemp.prototype.constructor = A.BrainStates.FindSafeTemp;
+Archotype.BrainStates.FindSafeTemp.prototype = Object.create(Archotype.BrainStates.BrainState.prototype);
+Archotype.BrainStates.FindSafeTemp.prototype.constructor = Archotype.BrainStates.FindSafeTemp;
 
-A.BrainStates.FindSafeTemp.prototype.chooseAction = function() {
+Archotype.BrainStates.FindSafeTemp.prototype.chooseAction = function() {
   var foundTolerableTemp = false, radius = this.brain.archon.genome.optimalTempRange / 2;
       
   this.tempCheck.forEach(function(ix, delta) {
@@ -52,21 +55,21 @@ A.BrainStates.FindSafeTemp.prototype.chooseAction = function() {
   return foundTolerableTemp ? 'move' : 'encyst';
 };
 
-A.BrainStates.FindSafeTemp.prototype.start = function() {
+Archotype.BrainStates.FindSafeTemp.prototype.start = function() {
   for(var i = 0; i < this.brain.archon.genome.howLongBadTempToEncystment; i++) {
     this.tempCheck.store(this.brain.archon.genome.optimalTemp);
   }
 };
 
-A.BrainStates.FindSafeTemp.prototype.tick = function(frameCount) {
-  A.BrainStates.BrainState.prototype.tick.call(this, frameCount);
+Archotype.BrainStates.FindSafeTemp.prototype.tick = function(frameCount) {
+  Archotype.BrainStates.BrainState.prototype.tick.call(this, frameCount);
 
   var delta = Math.abs(this.brain.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
   this.tempCheck.store(delta);
 };
 
-A.BrainStates.SearchForFood = function(brain) {
-  A.BrainStates.BrainState.call(this, brain);
+Archotype.BrainStates.SearchForFood = function(brain) {
+  Archotype.BrainStates.BrainState.call(this, brain);
   
   this.searching = false;
   this.startOfSearchPending = false;
@@ -76,10 +79,10 @@ A.BrainStates.SearchForFood = function(brain) {
   this.turnDirection = 1;
 };
 
-A.BrainStates.SearchForFood.prototype = Object.create(A.BrainStates.BrainState.prototype);
-A.BrainStates.SearchForFood.prototype.constructor = A.BrainStates.SearchForFood;
+Archotype.BrainStates.SearchForFood.prototype = Object.create(Archotype.BrainStates.BrainState.prototype);
+Archotype.BrainStates.SearchForFood.prototype.constructor = Archotype.BrainStates.SearchForFood;
 
-A.BrainStates.SearchForFood.prototype.ack = function(action) {
+Archotype.BrainStates.SearchForFood.prototype.ack = function(action) {
   if(this.ackValue === null || action !== this.ackValue) { throw(new Error("Ack '" + action + "' received out of order")); }
   
   switch(this.ackValue) {
@@ -98,7 +101,7 @@ A.BrainStates.SearchForFood.prototype.ack = function(action) {
   this.ackValue = null;
 };
 
-A.BrainStates.SearchForFood.prototype.chooseAction = function() {
+Archotype.BrainStates.SearchForFood.prototype.chooseAction = function() {
 
   if(this.startOfSearchPending) {
     
@@ -111,7 +114,12 @@ A.BrainStates.SearchForFood.prototype.chooseAction = function() {
     this.timeToTurn = this.frameCount + this.brain.archon.genome.foodSearchTimeBetweenTurns;
 
     if(this.brain.velocity.equals(0)) {
-      return { action: 'setMoveTarget', moveTo: A.XY(A.integerInRange(0, A.gameWidth), A.integerInRange(0, A.gameHeight)) };
+      return {
+        action: 'setMoveTarget',
+        moveTo: Archotype.XY(
+          this.brain.A.integerInRange(0, this.brain.A.gameWidth), this.brain.A.integerInRange(0, this.brain.A.gameHeight)
+        )
+      };
     } else {
       return { action: 'continue' };
     }
@@ -120,26 +128,26 @@ A.BrainStates.SearchForFood.prototype.chooseAction = function() {
 
     this.ackValue = 'turn';
     
-    var newTarget = A.XY(this.brain.velocity), computerizedAngle = null, robalizedAngle = null;
+    var newTarget = Archotype.XY(this.brain.velocity), computerizedAngle = null, robalizedAngle = null;
 
     computerizedAngle = newTarget.getAngleFrom(0);
-    robalizedAngle = A.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
-    computerizedAngle = A.computerizeAngle(robalizedAngle);
+    robalizedAngle = this.brain.A.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
+    computerizedAngle = this.brain.A.computerizeAngle(robalizedAngle);
     
-    return({ action: 'turn', moveTo: A.XY.fromPolar(this.brain.archon.phenotype.getSize(), computerizedAngle) });
+    return({ action: 'turn', moveTo: Archotype.XY.fromPolar(this.brain.archon.phenotype.getSize(), computerizedAngle) });
     
   } else {
     return { action: 'continue' };
   }
 };
 
-A.BrainStates.SearchForFood.prototype.start = function() {
+Archotype.BrainStates.SearchForFood.prototype.start = function() {
   this.startOfSearchPending = true;
   this.ackValue = 'start';
 };
 
-A.BrainStates.SearchForFood.prototype.tick = function(frameCount) {
-  A.BrainStates.BrainState.prototype.tick.call(this, frameCount);
+Archotype.BrainStates.SearchForFood.prototype.tick = function(frameCount) {
+  Archotype.BrainStates.BrainState.prototype.tick.call(this, frameCount);
   
   if(this.startOfSearchPending) {
 
@@ -156,8 +164,8 @@ A.BrainStates.SearchForFood.prototype.tick = function(frameCount) {
   } 
 };
   
-})(A);
+})(Archotype);
 
 if(typeof window === "undefined") {
-  module.exports = A.BrainStates;
+  module.exports = Archotype.BrainStates;
 }

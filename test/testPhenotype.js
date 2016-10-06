@@ -1,16 +1,16 @@
-var A = require('../Archonia.js');
+var Archotype = require('../Archonia.js');
 
-A.Phenotype = require('../Phenotype.js');
+var A = new Archotype.Archonia(); A.go({});
+
+Archotype.Phenotype = require('../Phenotype.js');
 
 var chai = require('chai');
 
-A.prePhaserSetup();
-
-A.Sun = {
+A.sun = {
   currentTemp: 451,
   
   getTemperature: function(where) {
-    return A.Sun.currentTemp;
+    return this.currentTemp;
   }
 }
 
@@ -64,7 +64,7 @@ var eat = function(phenotype, howManyCalories) {
 describe('Phenotype', function() {
   describe('Constructor', function() {
     it('Should throw an exception if no archon is passed', function() {
-      var makeBadPhenotype = function() { var p = new A.Phenotype(); };
+      var makeBadPhenotype = function() { var p = new Archotype.Phenotype(); };
       
       chai.expect(makeBadPhenotype).to.throw(TypeError, "Phenotype needs an archon");
     });
@@ -73,19 +73,19 @@ describe('Phenotype', function() {
   describe('Individual functions', function() {
     describe('setColors()', function() {
       it('Should set the button based on temp tolerance', function() {
-        var p = new A.Phenotype(archon); p.launch();
+        var p = new Archotype.Phenotype(A, archon); p.launch();
         
         archon.genome.optimalTemp = 200; archon.genome.optimalTempRangeWidth = 400;
         
-        A.Sun.currentTemp = 200;
+        A.sun.currentTemp = 200;
         p.setColors();
         chai.expect(archon.button.tint).equal(0x00FF00);
         
-        A.Sun.currentTemp = -1;
+        A.sun.currentTemp = -1;
         p.setColors();
         chai.expect(archon.button.tint).equal(0x0000FF);
         
-        A.Sun.currentTemp = 401;
+        A.sun.currentTemp = 401;
         p.setColors();
         chai.expect(archon.button.tint).equal(0xFF0000);
       });
@@ -93,7 +93,7 @@ describe('Phenotype', function() {
     
     describe('getMotionCost()', function() {
       it('Should be linearly proportional to mass', function() {
-        var p = new A.Phenotype(archon);
+        var p = new Archotype.Phenotype(A, archon);
 
         p.embryoCalorieBudget = 1000; p.larvalCalorieBudget = 0; p.adultCalorieBudget = 0;
         chai.expect(p.getMotionCost().toFixed(2)).equal((1).toFixed(2));
@@ -107,11 +107,11 @@ describe('Phenotype', function() {
     });
     
     describe('getTemperatureCost()', function() {
-      var p = new A.Phenotype(archon);
+      var p = new Archotype.Phenotype(A, archon);
       p.adultCalorieBudget = 100; p.embryoCalorieBudget = 0; p.larvalCalorieBudget = 0;
 
       it('Should get the right cost, based on archon size, zero temp delta', function() {
-        A.Sun.currentTemp = archon.genome.optimalTemp;
+        A.sun.currentTemp = archon.genome.optimalTemp;
         
         chai.expect(p.getTempCost().toFixed(4)).equal((Math.log(2) * Math.log(2)).toFixed(4));
         
@@ -120,18 +120,18 @@ describe('Phenotype', function() {
       });
       
       it('Should get the right cost with non-zero temp delta', function() {
-        A.Sun.currentTemp = archon.genome.optimalTemp - 200;
+        A.sun.currentTemp = archon.genome.optimalTemp - 200;
 
-        var r = Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp);
+        var r = Math.abs(A.sun.currentTemp - archon.genome.optimalTemp);
         var s = Math.log((r || 1) + 1) * Math.log(p.getMass() + 1);
         console.log(s);
 
         var c = p.getTempCost().toFixed(4);
         chai.expect(c).equal(s.toFixed(4));
         
-        A.Sun.currentTemp = archon.genome.optimalTemp + 500;
+        A.sun.currentTemp = archon.genome.optimalTemp + 500;
         
-        r = Math.abs(A.Sun.currentTemp - archon.genome.optimalTemp);
+        r = Math.abs(A.sun.currentTemp - archon.genome.optimalTemp);
         s = Math.log((r || 1) + 1) * Math.log(p.getMass() + 1);
         console.log(s);
 
@@ -141,7 +141,7 @@ describe('Phenotype', function() {
     });
     
     describe('debit()', function() {
-      var p = new A.Phenotype(archon);
+      var p = new Archotype.Phenotype(A, archon);
       
       it('Should draw from larval budget first', function() {
         p.larvalCalorieBudget = 1; p.embryoCalorieBudget = 2; p.adultCalorieBudget = 3;
@@ -199,7 +199,7 @@ describe('Phenotype', function() {
     });
     
     describe('getMass()', function() {
-      var p = new A.Phenotype(archon);
+      var p = new Archotype.Phenotype(A, archon);
       
       it('Should be correct when only adult budget > 0', function() {
         p.larvalCalorieBudget = 0;
@@ -231,7 +231,7 @@ describe('Phenotype', function() {
     });
     
     describe('setSize()', function() {
-      var p = new A.Phenotype(archon);
+      var p = new Archotype.Phenotype(A, archon);
       
       it('Should respond to differing mass values', function() {
         p.larvalCalorieBudget = 0; p.embryoCalorieBudget = 0; p.adultCalorieBudget = 0;
@@ -256,7 +256,7 @@ describe('Phenotype', function() {
         archon.genome.birthMass.adultCalories = 75;
         archon.genome.birthMass.larvalCalories = 200;
 
-        var p = new A.Phenotype(archon); p.launch();
+        var p = new Archotype.Phenotype(A, archon); p.launch();
         
         chai.expect(p.adultCalorieBudget).equal(75);
         chai.expect(p.larvalCalorieBudget).equal(200);
@@ -265,7 +265,7 @@ describe('Phenotype', function() {
         archon.genome.birthMass.adultCalories = 800;
         archon.genome.birthMass.larvalCalories = 100;
 
-        var p = new A.Phenotype(archon); p.launch();
+        var p = new Archotype.Phenotype(A, archon); p.launch();
         
         chai.expect(p.adultCalorieBudget).equal(800);
         chai.expect(p.larvalCalorieBudget).equal(100);
@@ -283,7 +283,7 @@ describe('Phenotype', function() {
         archon.genome.offspringMass.larvalCalories = 500;
         archon.spawned = false;
 
-        var p = new A.Phenotype(archon); p.launch();
+        var p = new Archotype.Phenotype(A, archon); p.launch();
       
         eat(p, 900);
         chai.expect(archon.spawned).true;
@@ -315,7 +315,7 @@ describe('Phenotype', function() {
         archon.genome.offspringMass.larvalCalories = 500;
         archon.spawned = false;
 
-        var p = new A.Phenotype(archon); p.launch();
+        var p = new Archotype.Phenotype(A, archon); p.launch();
       
         eat(p, 900);
         chai.expect(archon.spawned).true;
@@ -346,7 +346,7 @@ describe('Phenotype', function() {
       archon.genome.birthMass.larvalCalories = 100;
       archon.spawned = false;
 
-      var p = new A.Phenotype(archon); p.launch();
+      var p = new Archotype.Phenotype(A, archon); p.launch();
       
       eat(p, 100);
       chai.expect(p.adultCalorieBudget).equal(200); // Should increase the adult calorie budget
@@ -377,7 +377,7 @@ describe('Phenotype', function() {
       archon.genome.birthMass.larvalCalories = 100;
       archon.spawned = false;
 
-      var p = new A.Phenotype(archon); p.launch();
+      var p = new Archotype.Phenotype(A, archon); p.launch();
     
       eat(p, 400);
       chai.expect(p.adultCalorieBudget).equal(500); // Max out adult calorie budget; no embryo yet
@@ -405,7 +405,7 @@ describe('Phenotype', function() {
       archon.genome.offspringMass.larvalCalories = 75;
       archon.spawned = false;
 
-      var p = new A.Phenotype(archon); p.launch();
+      var p = new Archotype.Phenotype(A, archon); p.launch();
 
       eat(p, 800);
       chai.expect(archon.spawned).false;
@@ -427,7 +427,7 @@ describe('Phenotype', function() {
       archon.genome.offspringMass.larvalCalories = 500;
       archon.spawned = false;
 
-      var p = new A.Phenotype(archon); p.launch();
+      var p = new Archotype.Phenotype(A, archon); p.launch();
       
       eat(p, 900);
       chai.expect(archon.spawned).true;
