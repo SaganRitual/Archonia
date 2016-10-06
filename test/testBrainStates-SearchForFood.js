@@ -12,9 +12,7 @@ var archon = {
 
 var Brain = function(archon) {
   this.archon = archon;
-  this.encyst = new BrainStates.Encyst(this);
   this.searchForFood = new BrainStates.SearchForFood(this);
-  this.findSafeTemp = new BrainStates.FindSafeTemp(this);
   
   this.frameCount = 0;
   this.state = null;
@@ -27,8 +25,6 @@ var Brain = function(archon) {
 Brain.prototype = {
   ack: function(ackValue) {
     switch(this.state) {
-      case 'encyst':        this.encyst.ack(ackValue);        break;
-      case 'findSafeTemp':  this.findSafeTemp.ack(ackValue);  break;
       case 'searchForFood': this.searchForFood.ack(ackValue); break;
     }
     
@@ -37,21 +33,17 @@ Brain.prototype = {
   
   chooseAction: function() {
     switch(this.state) {
-      case 'encyst':        this.action = this.encyst.chooseAction();        break;
-      case 'findSafeTemp':  this.action = this.findSafeTemp.chooseAction();  break;
       case 'searchForFood': this.action = this.searchForFood.chooseAction(); break;
     }
     
     return this.action;
   },
   
-  startEncyst: function() { this.encyst.start(); this.state = 'encyst'; },
-  startFindSafeTemp: function() { this.findSafeTemp.start(); this.state = 'findSafeTemp'; },
   startSearchForFood: function() { this.searchForFood.start(); this.state = 'searchForFood'; },
   
   tick: function() {
     this.frameCount++;
-    this.encyst.tick(this.frameCount); this.findSafeTemp.tick(this.frameCount); this.searchForFood.tick(this.frameCount);
+    this.searchForFood.tick(this.frameCount);
   }
 };
 

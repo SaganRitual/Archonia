@@ -8,6 +8,7 @@ var A = A || {};
 if(typeof window === "undefined") {
   A = require('../Archonia.js');
   A.XY = require('../widgets/XY.js');
+  A.Cbuffer = require('../widgets/Cbuffer.js');
 }
 
 (function(A) {
@@ -33,13 +34,35 @@ A.BrainStates.Encyst.prototype.tick = function(frameCount) {
 
 A.BrainStates.FindSafeTemp = function(brain) {
   A.BrainStates.BrainState.call(this, brain);
+  
+  this.brain = brain;
+  this.tempCheck = new A.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
 };
 
 A.BrainStates.FindSafeTemp.prototype = Object.create(A.BrainStates.BrainState.prototype);
 A.BrainStates.FindSafeTemp.prototype.constructor = A.BrainStates.FindSafeTemp;
 
+A.BrainStates.FindSafeTemp.prototype.chooseAction = function() {
+  var foundTolerableTemp = false, radius = this.brain.archon.genome.optimalTempRange / 2;
+      
+  this.tempCheck.forEach(function(ix, delta) {
+    if(delta < radius) { foundTolerableTemp = true; return false; }
+  });
+  
+  return foundTolerableTemp ? 'move' : 'encyst';
+};
+
+A.BrainStates.FindSafeTemp.prototype.start = function() {
+  for(var i = 0; i < this.brain.archon.genome.howLongBadTempToEncystment; i++) {
+    this.tempCheck.store(this.brain.archon.genome.optimalTemp);
+  }
+};
+
 A.BrainStates.FindSafeTemp.prototype.tick = function(frameCount) {
   A.BrainStates.BrainState.prototype.tick.call(this, frameCount);
+
+  var delta = Math.abs(this.brain.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
+  this.tempCheck.store(delta);
 };
 
 A.BrainStates.SearchForFood = function(brain) {
