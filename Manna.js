@@ -1,11 +1,17 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global game, Phaser */
-
-"use strict";
+  "use strict";
 
 var A = A || {};
+var Phaser = Phaser || {};
+
+if(typeof window === "undefined") {
+  A = require('./Archonia.js');
+  A.XY = require('./widgets/XY.js');
+  
+  Phaser = require('./test/support/Phaser.js');
+}
 
 (function(A) {
   
@@ -28,16 +34,16 @@ var A = A || {};
     this.randomPoint.setMax(A.gameWidth, A.gameHeight);
     this.optimalTemp = 500;
     
-    // We make the game scale larger than the radius so the manna will go off
+    // We make the A.game scale larger than the radius so the manna will go off
     // the screen when the temps are extreme in either direction
     this.tempScale = new A.Range(-1000, 1000);
     this.gameScale = new A.Range(-A.gameRadius, A.gameRadius);
     this.arrayScale = new A.Range(-this.bellCurveRadius, this.bellCurveRadius);
     
-    this.spriteGroup = game.add.group();
+    this.spriteGroup = A.game.add.group();
     this.spriteGroup.enableBody = true;
     this.spriteGroup.createMultiple(this.howManyMorsels, 'particles', 0, false);
-    game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
+    A.game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
 
     this.spriteGroup.forEach(function(m) {
       m.previousEmit = 0;
@@ -102,8 +108,8 @@ var A = A || {};
 
     	if(showDebugOutlines) {
     		this.spritePool.forEachAlive(function(a) {
-    	    game.debug.body(a, 'yellow', false);
-    			game.debug.spriteBounds(a, 'blue', false);
+    	    A.game.debug.body(a, 'yellow', false);
+    			A.game.debug.spriteBounds(a, 'blue', false);
     		}, this);
     	}
     },
@@ -116,3 +122,7 @@ var A = A || {};
   };
   
 })(A);
+
+if(typeof window === "undefined") {
+  module.exports = A.MannaGenerator;
+}

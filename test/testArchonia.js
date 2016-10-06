@@ -1,7 +1,10 @@
 var chai = require('chai');
+var should = chai.should();
 var data_driven = require('data-driven');
 
 var A = require('../Archonia.js');
+var Phaser = require('./support/Phaser.js');
+var config = require('../config.js');
 
 var angles = [
   { in: 0, out: 0, p: "   0" }, { in: Math.PI / 2, out: Math.PI / 2, p: "   π/2"},
@@ -16,12 +19,31 @@ var angles = [
 ];
 
 describe("Archonia", function() {
-
-  describe("#computerize/robalize", function() {
-    data_driven(angles, function() {
-      it('#{p}', function(pair) {
-        chai.expect(A.computerizeAngle(A.robalizeAngle(pair.in)).toFixed(8)).equal(pair.out.toFixed(8));
-      })
+  
+  describe("#static functions", function() {
+    describe('#computerize/robalize', function() {
+      data_driven(angles, function() {
+        it('#{p}', function(pair) {
+          chai.expect(A.computerizeAngle(A.robalizeAngle(pair.in)).toFixed(8)).equal(pair.out.toFixed(8));
+        })
+      });
     });
   });
+  
+  describe('#Archonia smoke test', function() {
+    it('#initialize and start game', function() {
+      A.go(config);
+      should.not.equal(A.game, undefined);
+      chai.expect(A.game).to.include({ width: config.gameWidth, height: config.gameHeight });
+    });
+  });
+  
+  describe('#Game state started, run create()', function() {
+    it('#pass create step', function() {
+      A.game.state.create();
+    
+      should.equal(A.game.physics.started, true);
+    });
+  });
+  
 });

@@ -1,11 +1,17 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global game, Phaser */
-
 "use strict";
 
 var A = A || {};
+var Phaser = Phaser || {};
+
+if(typeof window === "undefined") {
+  A = require('./Archonia.js');
+  A.MannaGenerator = require('./Manna.js');
+  
+  Phaser = require('./test/support/Phaser.js');
+}
 
 A.Sun = (function(A) {
   
@@ -55,7 +61,7 @@ A.Sun = (function(A) {
     },
     
     ignite: function() {
-      A.Sun.darkness = game.add.sprite(A.gameCenter.x, A.gameCenter.y, game.cache.getBitmapData('archoniaGoo'));
+      A.Sun.darkness = A.game.add.sprite(A.gameCenter.x, A.gameCenter.y, A.game.cache.getBitmapData('archoniaGoo'));
 
       var scale = A.gameWidth / A.archoniaGooRadius;
       A.Sun.darkness.scale.setTo(scale, scale); // Big enough to cover the world
@@ -64,7 +70,7 @@ A.Sun = (function(A) {
       A.Sun.darkness.alpha = A.darknessAlphaHi; // Note: dark sprite, so high alpha means dark world
       A.Sun.darkness.tint = 0x9900;
 
-      A.Sun.darknessTween = game.add.tween(A.Sun.darkness).to(
+      A.Sun.darknessTween = A.game.add.tween(A.Sun.darkness).to(
         {alpha: A.darknessAlphaLo}, A.dayLength, easingFunction, true, 0, -1, true
       );
   
@@ -77,3 +83,6 @@ A.Sun = (function(A) {
   };
 })(A);
 
+if(typeof window === "undefined") {
+  module.exports = A.Sun;
+}

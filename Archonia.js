@@ -1,15 +1,13 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global Phaser */
-
 "use strict";
 
 var A = A || {};
-var game = game || {};
+var Phaser = Phaser || {};
 
 if(typeof window === "undefined") {
-  game = require('./test/support/phaser.js').game;
+  Phaser = require('./test/support/Phaser.js');
 }
 
 (function() {
@@ -26,9 +24,9 @@ if(typeof window === "undefined") {
     dayLength: 60 * 1000,  // In ms, not ticks
     frameCount: 0,
     gameCenter: null,
-    gameHeight: 600,
+    gameHeight: null,
     gameRadius: null,
-    gameWidth: 600,
+    gameWidth: null,
     archoniaUniqueObjectId: 0,
     mouseUp: true,
     oneToZeroRange: null,
@@ -53,7 +51,7 @@ if(typeof window === "undefined") {
     },
     
     create: function() {
-      game.physics.startSystem(Phaser.Physics.ARCADE);
+      A.game.physics.startSystem(Phaser.Physics.ARCADE);
 
       A.setupBitmaps();
       A.Sun.ignite();
@@ -61,9 +59,9 @@ if(typeof window === "undefined") {
 
       A.worldColorRange = A.Sun.getWorldColorRange();
       
-      A.cursors = game.input.keyboard.createCursorKeys();
-      game.input.onUp.add(A.onMouseUp, A);
-      game.input.onDown.add(A.onMouseDown, A);
+      A.cursors = A.game.input.keyboard.createCursorKeys();
+      A.game.input.onUp.add(A.onMouseUp, A);
+      A.game.input.onDown.add(A.onMouseDown, A);
     },
     
     generateBellCurve: function(stopBelow, height, xOffset, widthOfRange) {
@@ -88,16 +86,28 @@ if(typeof window === "undefined") {
 
       return a * Math.pow(Math.E, f / g);
     },
+    
+    go: function(config) {
+      A.prePhaserSetup(config);
+    
+      A.game = new Phaser.Game(A.gameWidth, A.gameHeight, Phaser.CANVAS);
+
+      A.game.state.add('Archonia', A, false);
+      A.game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
+
+      A.game.state.start('Archonia');
+    },
 
     handleClick: function(/*pointer*/) {
       
     },
     
     integerInRange: function(lo, hi) {
-      return game.rnd.integerInRange(lo, hi);
+      return A.game.rnd.integerInRange(lo, hi);
     },
     
-    prePhaserSetup: function() {
+    prePhaserSetup: function(config) {
+      A = Object.assign(A, config);
 
       A.gameCenter = A.XY(A.gameWidth / 2, A.gameHeight / 2);
       A.gameRadius = A.gameWidth / 2;
@@ -120,11 +130,11 @@ if(typeof window === "undefined") {
     },
 
     preload: function() {
-      game.load.image('particles', 'assets/sprites/pangball.png');
+      A.game.load.image('particles', 'assets/sprites/pangball.png');
     },
     
     realInRange: function(lo, hi) {
-      return game.rnd.realInRange(lo, hi);
+      return A.game.rnd.realInRange(lo, hi);
     },
     
     render: function() {
@@ -160,18 +170,21 @@ if(typeof window === "undefined") {
 
   module.exports = A;
 
-  A.XY = require('./widgets/XY.js');
   A.Range = require('./widgets/Range.js');
+  A.Sun = require('./Sun.js');
+  
+  var xy = require('./widgets/XY.js');
+  A.XY = xy.XY;
+  A.RandomXY = xy.RandomXY;
+
+  var b = require('./Bitmap.js');
+  A.Bitmap = b.Bitmap;
+  A.BitmapFactory = b.BitmapFactory;
   
 } else {
   window.onload = function() {
-    A.prePhaserSetup();
+    var config = require('./config.js');
     
-    game = new Phaser.Game(A.gameWidth, A.gameHeight, Phaser.CANVAS);
-
-    game.state.add('Archonia', A, false);
-    game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
-
-    game.state.start('Archonia');
+    A.go(config);
   };
 }
