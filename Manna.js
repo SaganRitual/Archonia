@@ -1,28 +1,25 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-  "use strict";
+"use strict";
 
-var Archotype = Archotype || {}, Axioms = Axioms || {};
-var Phaser = Phaser || {};
+var Archonia = Archonia || { Axioms: {}, Form: {}, Phaser: {} } || {};
 
 if(typeof window === "undefined") {
-  Axioms = require('./Axioms.js');
-  Archotype = require('./Archonia.js');
-  Archotype.Range = require('./widgets/Range.js');
+  var Phaser = require('./test/support/Phaser.js');
+  Archonia.Phaser.game = new Phaser.Game();
+
+  Archonia.Axioms = require('./Axioms.js');
+  Archonia.Form.Range = require('./widgets/Range.js');
   
   var xy = require('./widgets/XY.js');
-  Archotype.XY = xy.XY;
-  Archotype.RandomXY = xy.RandomXY;
-  
-  Phaser = require('./test/support/Phaser.js');
+  Archonia.Form.XY = xy.XY;
+  Archonia.Form.RandomXY = xy.RandomXY;
 }
 
-(function(Archotype) {
+(function(Archonia) {
   
-  Archotype.MannaGenerator = function(game) {
-    this.game = game;
-    
+  Archonia.Form.MannaGenerator = function() {
     var morselScale = 0.05;
     
     this.howManyMorsels = 500;
@@ -32,25 +29,25 @@ if(typeof window === "undefined") {
     this.bellCurveHeight = 5;
     
     var stopBelow = 0.01, xOffset = 0, width = 2;
-    this.bellCurve = Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
+    this.bellCurve = Archonia.Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
     if(this.bellCurve.length % 2 === 1) { this.bellCurve.push(0); }
     this.bellCurveRadius = this.bellCurve.length / 2;
     
-    this.randomPoint = new Archotype.RandomXY();
+    this.randomPoint = new Archonia.Form.RandomXY();
     this.randomPoint.setMin(0, 0);
     this.randomPoint.setMax(this.gameWidth, this.gameHeight);
     this.optimalTemp = 500;
     
     // We make the A.game scale larger than the radius so the manna will go off
     // the screen when the temps are extreme in either direction
-    this.tempScale = new Archotype.Range(-1000, 1000);
-    this.gameScale = new Archotype.Range(-this.gameRadius, this.gameRadius);
-    this.arrayScale = new Archotype.Range(-this.bellCurveRadius, this.bellCurveRadius);
+    this.tempScale = new Archonia.Form.Range(-1000, 1000);
+    this.gameScale = new Archonia.Form.Range(-Archonia.Axioms.gameRadius, Archonia.Axioms.gameRadius);
+    this.arrayScale = new Archonia.Form.Range(-this.bellCurveRadius, this.bellCurveRadius);
     
-    this.spriteGroup = this.game.add.group();
+    this.spriteGroup = Archonia.Phaser.game.add.group();
     this.spriteGroup.enableBody = true;
     this.spriteGroup.createMultiple(this.howManyMorsels, 'particles', 0, false);
-    this.game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
+    Archonia.Phaser.game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
 
     this.spriteGroup.forEach(function(m) {
       m.previousEmit = 0;
@@ -65,11 +62,11 @@ if(typeof window === "undefined") {
     }, this);
   };
   
-  Archotype.MannaGenerator.prototype = {
+  Archonia.Form.MannaGenerator.prototype = {
     
     giveth: function() {
       var thisParticle = null;
-      var temp = Axioms.sun.getTemperature(this.gameCenter);
+      var temp = Archonia.Axioms.sun.getTemperature(this.gameCenter);
       
       for(var i = 0; i < 10; i++) {
         this.randomPoint.random();
@@ -77,7 +74,7 @@ if(typeof window === "undefined") {
         var scaledY = this.arrayScale.convertPoint(this.randomPoint.point.y, this.gameScale);
         var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
         
-        if(Axioms.realInRange(0, 1) < p) {
+        if(Archonia.Axioms.realInRange(0, 1) < p) {
 
           thisParticle = this.spriteGroup.getFirstDead();
           
@@ -100,10 +97,10 @@ if(typeof window === "undefined") {
       for(var i = 0; i < 10; i++) {
         var thisParticle = this.spriteGroup.getRandom();
         if(thisParticle.alive) {
-          var r = Axioms.integerInRange(0, this.bellCurve.length);
+          var r = Archonia.Axioms.integerInRange(0, this.bellCurve.length);
           var p = this.bellCurve[r] / this.bellCurveHeight;
     
-          if(Axioms.realInRange(0, 1) < p) {
+          if(Archonia.Axioms.realInRange(0, 1) < p) {
             thisParticle.kill();
           }
         }
@@ -128,8 +125,8 @@ if(typeof window === "undefined") {
     
   };
   
-})(Archotype);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.MannaGenerator;
+  module.exports = Archonia.Form.MannaGenerator;
 }
