@@ -86,7 +86,9 @@ if(typeof window === "undefined") {
       );
   
       dayNumber = 1;
-  
+
+      Archonia.Form.worldColorRange = Archonia.Cosmos.Sun.getWorldColorRange();
+      
       /*darknessTween.onLoop.add(function() {
         Archonia.Axioms.archonia.archons.dailyReport(this.dayNumber++);
       }, this);*/

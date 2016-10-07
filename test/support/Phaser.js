@@ -25,7 +25,7 @@ Phaser.Game.prototype = {
     group: function() { return {
       enableBody: null,
       createMultiple: function() {},
-      forEach: function() {}
+      forEach: function(f, c) { var s = _this.add.sprite(); f.call(c, s); }
     }},
     
     image: function() { _this.calledAddImage = true; },
@@ -34,11 +34,12 @@ Phaser.Game.prototype = {
       return {
         alpha: null, tint: null,
         anchor: { setTo: function() {} },
-        scale: { setTo: function() {} }
+        scale: { setTo: function() {} },
+        body: { setSize: function() {}, bounce: { setTo: function() {} } }
       };
     }
   },
-
+  
   input: { keyboard: { createCursorKeys: function() {} }, onUp: { add: function() {} }, onDown: { add: function() {} } },
   rnd: null,
   
@@ -146,7 +147,7 @@ Phaser.BitmapData = function(width, height, game) {
 
 Phaser.BitmapData.prototype = {
   circle: function() { this.calledCircle = true; },
-  getPixelRGB: function() { this.calledGetPixelRGB = true;},
+  getPixelRGB: function(junk1, junk2, rgbObject) { this.calledGetPixelRGB = true; rgbObject.l = 0; }, // ell, not the number 1
   update: function() { this.calledUpdate = true; }
 };
 
