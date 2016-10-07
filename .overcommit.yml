@@ -23,6 +23,11 @@ PreCommit:
       - 'test/*'
       - 'widgets/tinycolor.js'
 
+CommitMsg:      
+  TextWidth:
+    enabled: true
+    on_warn: fail
+
 #  RuboCop:
 #    enabled: true
 #    on_warn: fail # Treat all warnings as failures
