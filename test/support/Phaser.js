@@ -2,45 +2,33 @@ var Phaser = {
   Easing: { Quartic: { InOut: function() {} } }
 };
 
+var _this = null; // Live code doesn't care about context, but tests do
+
 Phaser.Game = function(width, height, canvas) {
-  this.width = width;
-  this.height = height;
   this.canvas = canvas;
   this.state = new Phaser.State();
   this.physics = new Phaser.Physics();
   this.rnd = new Phaser.Random();
+  
+  this.calledAddBitmapData = false;
+  this.calledAddImage = false;
+  
+  this.cache = new Phaser.Cache();
+  
+  _this = this;
 };
 
 Phaser.Game.prototype = {
   add: {
-    bitmapData: function() {
-      return {
-        circle: function() {},
-        context: {
-          fillStyle: null,
-          
-          beginPath: function() {},
-          
-          createLinearGradient: function() {
-            return {
-              addColorStop: function() {}
-            }
-          },
-          
-          fill: function() {},
-          
-          fillRect: function() {}
-        },
-        getPixelRGB: function() {},
-        update: function() {}
-      }
-    },
+    bitmapData: function(width, height) { return new Phaser.BitmapData(width, height, this); },
+    
     group: function() { return {
       enableBody: null,
       createMultiple: function() {},
       forEach: function() {}
     }},
-    image: function() {},
+    
+    image: function() { _this.calledAddImage = true; },
     tween: function() { return { to: function() {} }; },
     sprite: function() {
       return {
@@ -50,14 +38,19 @@ Phaser.Game.prototype = {
       };
     }
   },
-  cache: {
-    addBitmapData: function() {},
-    getBitmapData: function() {}
-  },
+
   input: { keyboard: { createCursorKeys: function() {} }, onUp: { add: function() {} }, onDown: { add: function() {} } },
   rnd: null,
   
   update: function() { this.currentState.update(); }
+};
+
+Phaser.Cache = function() {
+};
+
+Phaser.Cache.prototype = {
+  addBitmapData: function() { _this.calledAddBitmapData = true; },
+  getBitmapData: function() {}
 };
 
 Phaser.Physics = function() {
@@ -104,7 +97,58 @@ Phaser.State.prototype = {
   update: function() {
     this.currentState.update();
   }
-},
+};
+
+Phaser.ColorStop = function(bitmap) {
+  this.bitmap = bitmap;
+};
+
+Phaser.ColorStop.prototype = {
+  addColorStop: function() { this.bitmap.calledAddColorStop = true; }
+};
+
+Phaser.Context = function(bitmap) {
+  this.bitmap = bitmap;
+};
+
+Phaser.Context.prototype = {
+  createLinearGradient: function() {
+    this.bitmap.calledCreateLinearGradient = true; 
+    return new Phaser.ColorStop(this.bitmap);
+  },
+  
+  fillStyle: null,
+  
+  beginPath: function() { this.bitmap.calledBeginPath = true; },
+  
+  fill: function() { this.bitmap.calledFill = true; },
+  
+  fillRect: function(x, y, width, height) { 
+    if(x === undefined || y === undefined ||
+        width === undefined || height === undefined) { throw new Error("bad width/height for bitmap data"); }
+        
+    this.bitmap.calledfillRect = true;
+  }
+};
+
+Phaser.BitmapData = function(width, height, game) {
+  if(width === undefined || height === undefined) { throw new Error("bad width/height for bitmap data"); }
+  this.game = _this;
+  this.calledCreateLinearGradient = false;
+  this.calledBeginPath = false;
+  this.calledfillRect = false;
+  this.calledFill = false;
+  this.calledAddColorStop = false;
+  this.calledCircle = false;
+  
+  this.context = new Phaser.Context(this);
+};
+
+Phaser.BitmapData.prototype = {
+  circle: function() { this.calledCircle = true; },
+  getPixelRGB: function() { this.calledGetPixelRGB = true;},
+  update: function() { this.calledUpdate = true; }
+};
 
 
 module.exports = Phaser;
