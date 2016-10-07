@@ -3,32 +3,32 @@
 
 "use strict";
 
-var A = A || {};
+var Archonia = Archonia || { Form: {} };
 
-(function(A) {
+(function(Archonia) {
 
-A.XY = function(sourceOrMaybeX, maybeY) {
-  if(this instanceof A.XY) {
+Archonia.Form.XY = function(sourceOrMaybeX, maybeY) {
+  if(this instanceof Archonia.Form.XY) {
     this.set(sourceOrMaybeX, maybeY);
   } else {
-    return new A.XY(sourceOrMaybeX, maybeY);
+    return new Archonia.Form.XY(sourceOrMaybeX, maybeY);
   }
 };
 
-A.XY.prototype = {
-  add: function(a1, a2) { var addend = A.XY(a1, a2); this.x += addend.x; this.y += addend.y; },
+Archonia.Form.XY.prototype = {
+  add: function(a1, a2) { var addend = Archonia.Form.XY(a1, a2); this.x += addend.x; this.y += addend.y; },
   
-  dividedByScalar: function(scalar) { var scratch = A.XY(this); scratch.scalarDivide(scalar); return scratch; },
+  dividedByScalar: function(scalar) { var scratch = Archonia.Form.XY(this); scratch.scalarDivide(scalar); return scratch; },
   
-  equals: function(a1, a2) { var rhs = A.XY(a1, a2); return this.x === rhs.x && this.y === rhs.y; },
+  equals: function(a1, a2) { var rhs = Archonia.Form.XY(a1, a2); return this.x === rhs.x && this.y === rhs.y; },
   
   floor: function() { this.x = Math.floor(this.x); this.y = Math.floor(this.y); },
   
-  floored: function() { var scratch = A.XY(this); scratch.floor(); return scratch; },
+  floored: function() { var scratch = Archonia.Form.XY(this); scratch.floor(); return scratch; },
   
-  getAngleFrom: function(a1, a2) { var c = A.XY(a1, a2); return Math.atan2(this.y - c.y, this.x - c.x); },
+  getAngleFrom: function(a1, a2) { var c = Archonia.Form.XY(a1, a2); return Math.atan2(this.y - c.y, this.x - c.x); },
 
-  getAngleTo: function(a1, a2) { var c = A.XY(a1, a2); return c.getAngleFrom(this); },
+  getAngleTo: function(a1, a2) { var c = Archonia.Form.XY(a1, a2); return c.getAngleFrom(this); },
   
   getDistanceTo: function(a1, a2) { return getMagnitude(this.minus(a1, a2)); },
   
@@ -38,13 +38,13 @@ A.XY.prototype = {
 
   getSignedMagnitude: function() { return this.getMagnitude() * this.getSign(); },
   
-  plus: function(a1, a2) { var scratch = A.XY(this); scratch.add(a1, a2); return scratch; },
+  plus: function(a1, a2) { var scratch = Archonia.Form.XY(this); scratch.add(a1, a2); return scratch; },
   
-  minus: function(a1, a2) { var scratch = A.XY(this); scratch.subtract(a1, a2); return scratch; },
+  minus: function(a1, a2) { var scratch = Archonia.Form.XY(this); scratch.subtract(a1, a2); return scratch; },
   
   normalize: function() { var s = this.getMagnitude(); if(s !== 0) { this.x /= s; this.y /= s; } },
   
-  normalized: function() { var scratch = A.XY(this); scratch.normalize(); return scratch; },
+  normalized: function() { var scratch = Archonia.Form.XY(this); scratch.normalize(); return scratch; },
   
   reset: function() { this.set(0, 0); },
   
@@ -53,19 +53,19 @@ A.XY.prototype = {
   scalarMultiply: function(scalar) { this.x *= scalar; this.y *= scalar; },
   
   scaleTo: function(a1, a2) {
-    var scratch = A.XY(a1, a2);
+    var scratch = Archonia.Form.XY(a1, a2);
     var mS = scratch.getMagnitude();
     var mThis = this.getMagnitude();
     this.scalarMultiply(mS / mThis);
   },
   
-  scaledTo: function(a1, a2) { var scratch = A.XY(this); scratch.scaleTo(a1, a2); return scratch; },
+  scaledTo: function(a1, a2) { var scratch = Archonia.Form.XY(this); scratch.scaleTo(a1, a2); return scratch; },
   
   setByMagnitude: function(magnitude) { var a = magnitude / Math.sqrt(2); this.x = a; this.y = a; },
   
-  subtract: function(a1, a2) { var subtrahend = A.XY(a1, a2); this.x -= subtrahend.x; this.y -= subtrahend.y; },
+  subtract: function(a1, a2) { var subtrahend = Archonia.Form.XY(a1, a2); this.x -= subtrahend.x; this.y -= subtrahend.y; },
   
-  timesScalar: function(scalar) { var scratch = A.XY(this); scratch.scalarMultiply(scalar); return scratch; },
+  timesScalar: function(scalar) { var scratch = Archonia.Form.XY(this); scratch.scalarMultiply(scalar); return scratch; },
   
   X: function(places) { if(places === undefined) { places = 0; } return this.x.toFixed(places); },
   
@@ -102,31 +102,31 @@ A.XY.prototype = {
   }
 };
 
-A.XY.fromPolar = function(r, theta) {
-  return A.XY(Math.cos(theta) * r, Math.sin(theta) * r);
+Archonia.Form.XY.fromPolar = function(r, theta) {
+  return Archonia.Form.XY(Math.cos(theta) * r, Math.sin(theta) * r);
 };
 
-A.XY.fromMagnitude = function(magnitude) {
-  return A.XY(magnitude / Math.sqrt(2));
+Archonia.Form.XY.fromMagnitude = function(magnitude) {
+  return Archonia.Form.XY(magnitude / Math.sqrt(2));
 };
 
-A.XY.set = function(target, a1, a2) {
-  var scratch = A.XY(a1, a2);
+Archonia.Form.XY.set = function(target, a1, a2) {
+  var scratch = Archonia.Form.XY(a1, a2);
 
   target.x = scratch.x;
   target.y = scratch.y;
 };
 
-A.RandomXY = function() {
-  this.min = A.XY();
-  this.max = A.XY();
-  this.point = A.XY();
+Archonia.Form.RandomXY = function() {
+  this.min = Archonia.Form.XY();
+  this.max = Archonia.Form.XY();
+  this.point = Archonia.Form.XY();
 };
 
-A.RandomXY.prototype = {
+Archonia.Form.RandomXY.prototype = {
   random: function() {
-    var x = A.integerInRange(this.min.x, this.max.x);
-    var y = A.integerInRange(this.min.y, this.max.y);
+    var x = Archonia.Form.integerInRange(this.min.x, this.max.x);
+    var y = Archonia.Form.integerInRange(this.min.y, this.max.y);
     return this.point.set(x, y);
   },
   
@@ -135,21 +135,21 @@ A.RandomXY.prototype = {
 };
 
 function getMagnitude(a1, a2) {
-  var xy = A.XY(a1, a2);
+  var xy = Archonia.Form.XY(a1, a2);
   
   return Math.sqrt(Math.pow(xy.x, 2) + Math.pow(xy.y, 2));
 }
 
 function getSign(a1, a2) {
-  var xy = A.XY(a1, a2);
+  var xy = Archonia.Form.XY(a1, a2);
 
   if(xy.x === 0) { return Math.sign(xy.y); }
   else if(xy.y === 0) { return Math.sign(xy.x); }
   else { return Math.sign(xy.x) * Math.sign(xy.y); }
 }
 
-})(A);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = A;
+  module.exports = Archonia.Form;
 }

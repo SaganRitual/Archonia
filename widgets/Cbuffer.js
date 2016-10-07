@@ -3,23 +3,23 @@
 
 "use strict";
 
-var Archotype = Archotype || {}, Axioms = Axioms || {};
+var Archonia = Archonia || { Form: {} };
 
 if(typeof window === 'undefined') {
-  Axioms = require('../Axioms.js');
+  Archonia.Axioms = require('../Axioms.js');
 }
 
-(function(Archotype) {
+(function(Archonia) {
   
-  Archotype.Cbuffer = function(howManyElements) {
+  Archonia.Form.Cbuffer = function(howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length Cbuffer"); }
 
-    this.archoniaUniqueObjectId = Archotype.archoniaUniqueObjectId++;
+    this.archoniaUniqueObjectId = Archonia.Form.archoniaUniqueObjectId++;
     this.reset();
     this.howManyElements = howManyElements;
   };
   
-  Archotype.Cbuffer.prototype = {
+  Archonia.Form.Cbuffer.prototype = {
     add: function(index, howMany) {
       if(this.elements.length === 0) { throw new ReferenceError("plus() can't work with an empty Cbuffer"); }
       return (index + howMany + this.elements.length) % this.elements.length;
@@ -75,7 +75,7 @@ if(typeof window === 'undefined') {
       var center = Math.floor(spread / 2);
 
       if(spread % 2 === 0) {
-        center += Axioms.integerInRange(-1, 0);
+        center += Archonia.Axioms.integerInRange(-1, 0);
       }
     
       var result = [];
@@ -132,9 +132,9 @@ if(typeof window === 'undefined') {
 
   };
   
-})(Archotype);
+})(Archonia);
 
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.Cbuffer;
+  module.exports = Archonia.Form.Cbuffer;
 }

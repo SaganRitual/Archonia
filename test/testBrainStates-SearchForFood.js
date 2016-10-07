@@ -1,7 +1,11 @@
 var chai = require('chai');
 var data_driven = require('data-driven');
 
-var Axioms = require('../Axioms.js');
+var Archonia = {
+  Form: {
+    Axioms: require('../Axioms.js')
+  }
+};
 
 var BrainStates = require('../widgets/BrainStates.js');
 
@@ -72,9 +76,9 @@ var checkTurn = function(turnAngle, direction, start) {
   computerizedAngle = theBrain.velocity.getAngleFrom(0);
 
   // First turn is always left, add 7π/6
-  robalizedAngle = Axioms.robalizeAngle(computerizedAngle) + (turnAngle * direction);
+  robalizedAngle = Archonia.Form.Axioms.robalizeAngle(computerizedAngle) + (turnAngle * direction);
 
-  computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
+  computerizedAngle = Archonia.Form.Axioms.computerizeAngle(robalizedAngle);
   xy.set(XY.fromPolar(r, computerizedAngle));
   
   theBrain.tick();

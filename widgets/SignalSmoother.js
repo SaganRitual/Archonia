@@ -3,18 +3,18 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
-var Axioms = Axioms || {};
+var Archonia = Archonia || { Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Axioms = require('../Axioms.js');
-  Archotype.Range = require('./Range.js');
-  Archotype.Cbuffer = require('./Cbuffer.js');
+  Archonia.Axioms = require('../Axioms.js');
+  Archonia.Essence = require('../Essence.js');
+  Archonia.Form.Range = require('./Range.js');
+  Archonia.Form.Cbuffer = require('./Cbuffer.js');
 }
 
-(function(Archotype) {
+(function(Archonia) {
   
-Archotype.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
+Archonia.Form.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   if(rangeLo === undefined) { rangeLo = 0; }
   if(rangeHi === undefined) { rangeHi = 1; }
 
@@ -25,11 +25,11 @@ Archotype.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
 
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   
-  this.cbuffer = new Archotype.Cbuffer(depth);
-  this.valuesRange = new Archotype.Range(rangeLo, rangeHi);
+  this.cbuffer = new Archonia.Form.Cbuffer(depth);
+  this.valuesRange = new Archonia.Form.Range(rangeLo, rangeHi);
 };
 
-Archotype.SignalSmoother.prototype = {
+Archonia.Form.SignalSmoother.prototype = {
   getSignalStrength: function() {
     var signalStrength = 0;
     
@@ -48,23 +48,23 @@ Archotype.SignalSmoother.prototype = {
   },
   
   store: function(value) {
-    var s = Axioms.zeroToOneRange.convertPoint(value, this.valuesRange);
+    var s = Archonia.Essence.zeroToOneRange.convertPoint(value, this.valuesRange);
 
-    s = Axioms.clamp(s, 0, 1);
+    s = Archonia.Axioms.clamp(s, 0, 1);
   
     this.cbuffer.store(s);
 
     this.cbuffer.deepForEach(function(ix, points) {
       points[ix] -= this.decayRate;
-      points[ix] = Axioms.clamp(points[ix], 0, 1);
+      points[ix] = Archonia.Axioms.clamp(points[ix], 0, 1);
     }, this);
     
     this.empty = false;
   }
 };
 
-})(Archotype);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.SignalSmoother;
+  module.exports = Archonia.Form.SignalSmoother;
 }

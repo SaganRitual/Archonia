@@ -3,17 +3,17 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archonia = Archonia || { Form: {} };
 
-(function(Archotype) {
+(function(Archonia) {
 
-Archotype.Range = function(lo, hi) {
+Archonia.Form.Range = function(lo, hi) {
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;
 };
 
-Archotype.Range.prototype = {
+Archonia.Form.Range.prototype = {
   // The reason for this class: scaling a point
   // in my range to a point in a different range
   convertPoint: function(thePointOnHisMap, hisRange) {
@@ -53,7 +53,7 @@ Archotype.Range.prototype = {
   
   radial: function() {
     if(this.radialRange === null) {
-      this.radialRange = new Archotype.Range(0, Math.abs(this.hi - this.lo) / 2);
+      this.radialRange = new Archonia.Form.Range(0, Math.abs(this.hi - this.lo) / 2);
     }
     
     return this.radialRange;
@@ -67,8 +67,8 @@ Archotype.Range.prototype = {
 };
 
   
-})(Archotype);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.Range;
+  module.exports = Archonia.Form.Range;
 }

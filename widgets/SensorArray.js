@@ -3,18 +3,18 @@
 
 "use strict";
 
-var Archotype = Archotype || {}, Axioms = Axioms || {};
+var Archonia = Archonia || { Form: {} };
 
 if(typeof window === "undefined") {
-  Axioms = require('../Axioms.js');
-  Archotype.Cbuffer = require('./Cbuffer.js');
-  Archotype.SignalSmoother = require('./SignalSmoother.js');
+  Archonia.Axioms = require('../Axioms.js');
+  Archonia.Form.Cbuffer = require('./Cbuffer.js');
+  Archonia.Form.SignalSmoother = require('./SignalSmoother.js');
 }
 
-(function(Archotype) {
+(function(Archonia) {
 
-Archotype.SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
-  this.id = Axioms.archoniaUniqueObjectId++;
+Archonia.Form.SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
+  this.id = Archonia.Axioms.archoniaUniqueObjectId++;
 
   this.empty = true;
   this.howManyMeasurementPoints = howManyMeasurementPoints;
@@ -22,14 +22,14 @@ Archotype.SensorArray = function(howManyMeasurementPoints, measurementDepth, dec
   this.signalSmoothers = [];
   
   for(var i = 0; i < howManyMeasurementPoints; i++) {
-    this.signalSmoothers.push(new Archotype.SignalSmoother(measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
+    this.signalSmoothers.push(new Archonia.Form.SignalSmoother(measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
   }
   
-  this.averagesRounder = new Archotype.Cbuffer(howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
+  this.averagesRounder = new Archonia.Form.Cbuffer(howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
   
 };
 
-Archotype.SensorArray.prototype = {
+Archonia.Form.SensorArray.prototype = {
   getAverage: function(index, spread) {
     var e = this.averagesRounder.getSpreadAt(index, spread);
     
@@ -76,8 +76,8 @@ Archotype.SensorArray.prototype = {
   }
 };
 
-})(Archotype);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.SensorArray;
+  module.exports = Archonia.Form.SensorArray;
 }

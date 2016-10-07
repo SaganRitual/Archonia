@@ -1,33 +1,7 @@
 var chai = require('chai');
 
-var Cbuffer = null;
-
+var Cbuffer = require('../widgets/Cbuffer.js');
 describe('Cbuffer', function() {
-  it('#module exists', function() {
-    var c = function() { Cbuffer = require('../widgets/Cbuffer.js'); };
-    chai.expect(c).to.not.throw();
-  });
-});
-  
-describe('Cbuffer', function() {
-  describe('#Public functions exist', function() {
-    var names = [
-      'deepForEach', 'forEach', 'isEmpty', 'getSpreadAt', 'reset', 'slice', 'store'
-    ];
-    
-    for(var n in names) {
-      var name = names[n];
-
-      (function(name) {
-        it('#' + name + '()', function() {
-          var r = new Cbuffer(10);
-          chai.expect(r).to.have.property(name);
-          chai.assert.isFunction(r[name]);
-        });
-      })(name);
-    }
-  });
-
   describe('#isEmpty()', function() {
     it('#empty/not empty', function() {
       var r = new Cbuffer(1);

@@ -1,46 +1,40 @@
-var Archotype = Archotype || {};
-var Axioms = Axioms || {};
+/* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
+	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
+
+"use strict";
+
+var Archonia = Archonia || { Axioms: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Archotype.Range = require('./widgets/Range.js');
-  Archotype.XY = require('./widgets/XY.js').XY;
+  Archonia.Form.Range = require('./widgets/Range.js');
+  Archonia.Form.XY = require('./widgets/XY.js').XY;
 }
 
-(function(Axioms) {
-  Axioms.gameHeight = 600;
-  Axioms.gameWidth = 600;
-  Axioms.gameCenter = Archotype.XY(Axioms.gameWidth / 2, Axioms.gameHeight / 2);
-  Axioms.gameRadius = Axioms.gameWidth / 2;
+(function(Archonia) {
+  Archonia.Axioms.gameHeight = 600;
+  Archonia.Axioms.gameWidth = 600;
+  Archonia.Axioms.gameCenter = Archonia.Form.XY(Archonia.Axioms.gameWidth / 2, Archonia.Axioms.gameHeight / 2);
+  Archonia.Axioms.gameRadius = Archonia.Axioms.gameWidth / 2;
 
-  Axioms.archoniaGooDiameter = 100;
-  Axioms.archoniaGooRadius = 50;
+  Archonia.Axioms.archoniaGooDiameter = 100;
+  Archonia.Axioms.archoniaGooRadius = 50;
 
-  Axioms.dayLength = 60 * 1000;  // In ms, not ticks
+  Archonia.Axioms.dayLength = 60 * 1000;  // In ms, not ticks
 
-  Axioms.frameCount = 0;
+  Archonia.Axioms.frameCount = 0;
 
-  Axioms.archoniaUniqueObjectId = 0;
+  Archonia.Axioms.archoniaUniqueObjectId = 0;
   
-  Axioms.temperatureHi = 1000;
-  Axioms.temperatureLo = -1000;
-  Axioms.darknessAlphaHi = 0.3;
-  Axioms.darknessAlphaLo = 0.0;
-
-  Axioms.ag = null;
-
-	Axioms.buttonHueRange = new Archotype.Range(240, 0);	// Blue (240) is cold, Red (0) is hot
-  Axioms.darknessRange = new Archotype.Range(Axioms.darknessAlphaHi, Axioms.darknessAlphaLo);
-  Axioms.oneToZeroRange = new Archotype.Range(1, 0);
-  Axioms.temperatureRange = new Archotype.Range(Axioms.temperatureLo, Axioms.temperatureHi);
-  Axioms.yAxisRange = new Archotype.Range(Axioms.gameHeight, 0);
-  Axioms.zeroToOneRange = new Archotype.Range(0, 1);
-
+  Archonia.Axioms.temperatureHi = 1000;
+  Archonia.Axioms.temperatureLo = -1000;
+  Archonia.Axioms.darknessAlphaHi = 0.3;
+  Archonia.Axioms.darknessAlphaLo = 0.0;
   
-  Axioms.clamp = function(value, min, max) {
+  Archonia.Axioms.clamp = function(value, min, max) {
     value = Math.max(value, min); value = Math.min(value, max); return value;
   };
 
-  Axioms.computerizeAngle = function(robalizedAngle) {
+  Archonia.Axioms.computerizeAngle = function(robalizedAngle) {
     while(robalizedAngle > 2 * Math.PI) {
       robalizedAngle -= 2 * Math.PI;
     }
@@ -50,11 +44,11 @@ if(typeof window === "undefined") {
     return a;
   };
   
-  Axioms.generateBellCurve = function(stopBelow, height, xOffset, widthOfRange) {
+  Archonia.Axioms.generateBellCurve = function(stopBelow, height, xOffset, widthOfRange) {
     var points = [];
     
     for(var x = xOffset, h = height; h >= stopBelow; x++) {
-      h = Axioms.getCurve(x, height, xOffset, widthOfRange);
+      h = Archonia.Axioms.getCurve(x, height, xOffset, widthOfRange);
       points.push(h);
     }
     
@@ -66,22 +60,22 @@ if(typeof window === "undefined") {
     return leftHand.concat(points);
   };
     
-  Axioms.getCurve = function(x, a, b, c) {
+  Archonia.Axioms.getCurve = function(x, a, b, c) {
     var f = -Math.pow(x - b, 2);
     var g = 2 * Math.pow(c, 2);
 
     return a * Math.pow(Math.E, f / g);
   };
   
-  Axioms.integerInRange = function(lo, hi) {
-    return Math.floor(Axioms.realInRange(lo, hi));
+  Archonia.Axioms.integerInRange = function(lo, hi) {
+    return Math.floor(Archonia.Axioms.realInRange(lo, hi));
   };
   
-  Axioms.realInRange = function(lo, hi) {
+  Archonia.Axioms.realInRange = function(lo, hi) {
     return Math.random() * (hi - lo) + lo;
   };
 
-  Axioms.robalizeAngle = function(computerizedAngle) {
+  Archonia.Axioms.robalizeAngle = function(computerizedAngle) {
     var a = (computerizedAngle < 0) ? -computerizedAngle : 2 * Math.PI - computerizedAngle;
 
     while(a < 2 * Math.PI) {
@@ -90,8 +84,8 @@ if(typeof window === "undefined") {
 
     return a;
   };
-})(Axioms);
+})(Archonia);
 
-if(typeof window == "undefined") {
-  module.exports = Axioms;
+if(typeof window === "undefined") {
+  module.exports = Archonia.Axioms;
 }
