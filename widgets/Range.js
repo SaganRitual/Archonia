@@ -8,6 +8,7 @@ var Archonia = Archonia || { Form: {} };
 (function(Archonia) {
 
 Archonia.Form.Range = function(lo, hi) {
+  if(lo === undefined || hi === undefined) { throw new Error("Bad arguments"); }
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;

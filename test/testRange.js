@@ -101,6 +101,13 @@ var getLoHi = function(value) {
 };
 
 describe('Range', function() {
+  describe("#reject bad arguments", function() {
+    it('#happens all the time in testing, never in the wild', function() {
+      var r = function() { new Range(); };
+      chai.expect(r).to.throw(Error, "Bad arg");
+    });
+  });
+  
   data_driven(tests, function() {
     it('Test single pair of converters', function(singleTest) {
       var description = (
