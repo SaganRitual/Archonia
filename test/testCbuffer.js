@@ -1,8 +1,5 @@
 var chai = require('chai');
 
-var Archotype = require('../Archonia.js');
-var A = new Archotype.Archonia({});
-
 var Cbuffer = null;
 
 describe('Cbuffer', function() {
@@ -23,7 +20,7 @@ describe('Cbuffer', function() {
 
       (function(name) {
         it('#' + name + '()', function() {
-          var r = new Cbuffer(A, 10);
+          var r = new Cbuffer(10);
           chai.expect(r).to.have.property(name);
           chai.assert.isFunction(r[name]);
         });
@@ -33,7 +30,7 @@ describe('Cbuffer', function() {
 
   describe('#isEmpty()', function() {
     it('#empty/not empty', function() {
-      var r = new Cbuffer(A, 1);
+      var r = new Cbuffer(1);
       chai.expect(r.isEmpty()).equal(true);
     
       r.store(1);
@@ -54,7 +51,7 @@ describe('Cbuffer', function() {
 
           var r = null;
         
-          var s = function() { r = new Cbuffer(A, arraySize); };
+          var s = function() { r = new Cbuffer(arraySize); };
         
           chai.expect(s).to.not.throw();
 
@@ -90,7 +87,7 @@ describe('Cbuffer', function() {
     });
     
     it('#quit loop if callback returns false', function() {
-      var r = new Cbuffer(A, 10);
+      var r = new Cbuffer(10);
       var total = 0;
 
       for(var i = 0; i < 5; i++) { r.store(i); }
@@ -102,7 +99,7 @@ describe('Cbuffer', function() {
   
   describe('#deepForEach()', function() {
     it('#change internal values', function() {
-      var r = new Cbuffer(A, 10);
+      var r = new Cbuffer(10);
       
       for(var i = 0; i < 10; i++) { r.store(42); }
       
@@ -120,7 +117,7 @@ describe('Cbuffer', function() {
     });
     
     it('#quit loop if callback returns false', function() {
-      var r = new Cbuffer(A, 10);
+      var r = new Cbuffer(10);
       
       for(var i = 0; i < 10; i++) { r.store(42); }
       
@@ -134,7 +131,7 @@ describe('Cbuffer', function() {
 
   describe('#store()', function() {
     it('#stores values, tracks index', function() {
-      var r = new Cbuffer(A, 2);
+      var r = new Cbuffer(2);
       
       r.store(42);
       chai.expect(r.elements.length).equal(1);
@@ -153,7 +150,7 @@ describe('Cbuffer', function() {
     });
     
     it('#tracks on arrays larger than two elements', function() {
-      var r = new Cbuffer(A, 17);
+      var r = new Cbuffer(17);
       
       for(var i = 0; i < 17; i++) { r.store(i); }
 
@@ -170,7 +167,7 @@ describe('Cbuffer', function() {
   
   describe('#slice()', function() {
     it('#throws appropriately', function() {
-      var r = new Cbuffer(A, 5);
+      var r = new Cbuffer(5);
       
       var arrayEmpty = function() { r.slice(1, 1); }
       chai.expect(arrayEmpty).to.throw(ReferenceError, "Bad arguments");
@@ -178,7 +175,7 @@ describe('Cbuffer', function() {
     
     it('#returns expected sections of its array', function() {
       var howManyEntries = 10;
-      var r = new Cbuffer(A, howManyEntries);
+      var r = new Cbuffer(howManyEntries);
       
       for(var i = 0; i < howManyEntries; i++) { r.store(i); }
       
@@ -205,7 +202,7 @@ describe('Cbuffer', function() {
   describe('#reset()', function() {
     it('#discard internal array, reset index', function() {
       var howManyEntries = 10;
-      var r = new Cbuffer(A, howManyEntries);
+      var r = new Cbuffer(howManyEntries);
       var total = 0;
       
       for(var i = 0; i < howManyEntries; i++) { r.store(i); total += i; }
@@ -229,7 +226,7 @@ describe('Cbuffer', function() {
   describe('#getSpreadAt()', function() {
     it('#cross boundary back to zero when necessary', function() {
       var howManyEntries = 10, result = null;
-      var r = new Cbuffer(A, howManyEntries);
+      var r = new Cbuffer(howManyEntries);
     
       for(var i = 0; i < howManyEntries; i++) { r.store(i); }
       

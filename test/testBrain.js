@@ -1,4 +1,5 @@
 var Archotype = require('../Archonia.js');
+var Axioms = require('../Axioms.js');
 
 var A = new Archotype.Archonia(); A.go({});
 
@@ -322,7 +323,7 @@ describe('Brain', function() {
 
       b.tick();
 
-      var r = b.chooseAction(), theta = A.computerizeAngle(11 * (2 * Math.PI / 12));
+      var r = b.chooseAction(), theta = Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
       
       chai.expect(r).to.include({ action: 'eat', direction: 11 });
       chai.expect(b.body.movementTarget).to.include(Archotype.XY.fromPolar(1, theta));

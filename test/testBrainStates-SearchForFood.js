@@ -1,15 +1,11 @@
 var chai = require('chai');
 var data_driven = require('data-driven');
 
-var Archotype = require('../Archonia.js');
-
-var A = new Archotype.Archonia(); A.go({});
+var Axioms = require('../Axioms.js');
 
 var BrainStates = require('../widgets/BrainStates.js');
 
-var xy = require('../widgets/XY.js');
-var XY = xy.XY;
-var RandomXY = xy.RandomXY;
+var XY = require('../widgets/XY.js').XY;
 
 var archon = {
   genome: { foodSearchTimeBetweenTurns: 15 }, // Any number will do for our test
@@ -17,7 +13,6 @@ var archon = {
 };
 
 var Brain = function(archon) {
-  this.A = A;
   this.archon = archon;
   this.searchForFood = new BrainStates.SearchForFood(this);
   
@@ -57,7 +52,7 @@ Brain.prototype = {
 var theBrain = null;
 
 var checkTurn = function(turnAngle, direction, start) {
-  var computerizedAngle = null, robalizedAngle = null, xy = Archotype.XY(), r = archon.phenotype.getSize(), a = null;
+  var computerizedAngle = null, robalizedAngle = null, xy = XY(), r = archon.phenotype.getSize(), a = null;
   
   a = theBrain.chooseAction();
   chai.expect(a).to.have.property('action', 'continue');
@@ -77,9 +72,9 @@ var checkTurn = function(turnAngle, direction, start) {
   computerizedAngle = theBrain.velocity.getAngleFrom(0);
 
   // First turn is always left, add 7π/6
-  robalizedAngle = A.robalizeAngle(computerizedAngle) + (turnAngle * direction);
+  robalizedAngle = Axioms.robalizeAngle(computerizedAngle) + (turnAngle * direction);
 
-  computerizedAngle = A.computerizeAngle(robalizedAngle);
+  computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
   xy.set(XY.fromPolar(r, computerizedAngle));
   
   theBrain.tick();

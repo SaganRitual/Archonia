@@ -3,10 +3,11 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms|| {};
 var Phaser = Phaser || {};
 
 if(typeof window === "undefined") {
+  Axioms = require('./Axioms.js');
   Archotype = require('./Archonia.js');
   Archotype.MannaGenerator = require('./Manna.js');
   
@@ -17,15 +18,17 @@ if(typeof window === "undefined") {
   
   var easingFunction = Phaser.Easing.Quartic.InOut;
   
-  Archotype.Sun = function(A) {
-    this.A = A;
+  Archotype.Sun = function(archonia) {
+    this.game = archonia.game;
+    
+    this.sunStuff = archonia.bitmapFactory.makeBitmap('archonia');
   };
   
   Archotype.Sun.prototype = {
     getStrength: function() {
       // We have to clamp it because the actual sprite alpha can go slightly
       // negative when it's supposed to stop at zero.
-      return this.A.clamp(this.A.zeroToOneRange.convertPoint(this.darkness.alpha, this.A.darknessRange), 0, 1);
+      return Axioms.clamp(Axioms.zeroToOneRange.convertPoint(this.darkness.alpha, Axioms.darknessRange), 0, 1);
     },
     
     getTemperature: function(where, whereY) {
@@ -33,14 +36,14 @@ if(typeof window === "undefined") {
       where.floor();
 
       var rgb = {};
-      this.A.bg.bm.getPixelRGB(where.x, where.y, rgb, true);
+      this.sunStuff.bm.getPixelRGB(where.x, where.y, rgb, true);
 
-      var lumaComponent = this.A.temperatureRange.convertPoint(rgb.l, this.A.worldColorRange);
+      var lumaComponent = Axioms.temperatureRange.convertPoint(rgb.l, Axioms.worldColorRange);
 
       var darkness = this.darkness.alpha;
-      var darknessComponent = this.A.temperatureRange.convertPoint(darkness, this.A.darknessRange);
+      var darknessComponent = Axioms.temperatureRange.convertPoint(darkness, Axioms.darknessRange);
 
-      var yAxisComponent = this.A.temperatureRange.convertPoint(where.y, this.A.yAxisRange);
+      var yAxisComponent = Axioms.temperatureRange.convertPoint(where.y, Axioms.yAxisRange);
 
       // Give luma and sun most of the weight. The y-axis thing is there
       // just to help them not get stuck in the luma dead zone(s)
@@ -52,11 +55,11 @@ if(typeof window === "undefined") {
     getWorldColorRange: function() {
       var rgb = {};
 
-      this.A.bg.bm.getPixelRGB(this.A.gameRadius, 10, rgb, true);
+      this.sunStuff.bm.getPixelRGB(Axioms.gameRadius, 10, rgb, true);
       var lumaTL = rgb.l;
 
-      this.A.bg.bm.getPixelRGB(
-        Math.floor(this.A.gameRadius), Math.floor(this.A.gameHeight - 10), rgb, true
+      this.sunStuff.bm.getPixelRGB(
+        Math.floor(Axioms.gameRadius), Math.floor(Axioms.gameHeight - 10), rgb, true
       );
       var lumaBR = rgb.l;
 
@@ -65,23 +68,23 @@ if(typeof window === "undefined") {
     },
     
     ignite: function() {
-      this.darkness = this.A.game.add.sprite(this.A.gameCenter.x, this.A.gameCenter.y, this.A.game.cache.getBitmapData('archoniaGoo'));
+      this.darkness = this.game.add.sprite(Axioms.gameCenter.x, Axioms.gameCenter.y, this.game.cache.getBitmapData('archoniaGoo'));
 
-      var scale = this.A.gameWidth / this.A.archoniaGooRadius;
+      var scale = Axioms.gameWidth / Axioms.archoniaGooRadius;
       this.darkness.scale.setTo(scale, scale); // Big enough to cover the world
 
       this.darkness.anchor.setTo(0.5, 0.5);
-      this.darkness.alpha = this.A.darknessAlphaHi; // Note: dark sprite, so high alpha means dark world
+      this.darkness.alpha = Axioms.darknessAlphaHi; // Note: dark sprite, so high alpha means dark world
       this.darkness.tint = 0x9900;
 
-      this.darknessTween = this.A.game.add.tween(this.darkness).to(
-        {alpha: this.A.darknessAlphaLo}, this.A.dayLength, easingFunction, true, 0, -1, true
+      this.darknessTween = this.game.add.tween(this.darkness).to(
+        {alpha: Axioms.darknessAlphaLo}, Axioms.dayLength, easingFunction, true, 0, -1, true
       );
   
       this.dayNumber = 1;
   
       /*this.darknessTween.onLoop.add(function() {
-        this.A.archonia.archons.dailyReport(this.dayNumber++);
+        Axioms.archonia.archons.dailyReport(this.dayNumber++);
       }, this);*/
     }
   };

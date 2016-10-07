@@ -3,10 +3,10 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 
 if(typeof window === "undefined") {
-  Archotype = require('./Archonia.js');
+  Axioms = require('./Axioms.js');
   Archotype.tinycolor = require('./widgets/tinycolor.js');
   Archotype.Range = require('./widgets/Range.js');
 }
@@ -17,13 +17,14 @@ if(typeof window === "undefined") {
   var larvaFatDensity = 1000;
   var embryoFatDensity = 1000;
 
-Archotype.Phenotype = function(A, archon) {
+Archotype.Phenotype = function(archon, theSun) {
   
   if(archon === undefined) {
     throw new TypeError("Phenotype needs an archon");
   }
   
-  this.A = A;
+  this.sun = theSun;
+  
   this.archon = archon;
   this.genome = archon.genome;
   this.embryoCalorieBudget = 0;
@@ -127,7 +128,7 @@ Archotype.Phenotype.prototype = {
   },
 
   getTempCost: function() {
-    var t = this.A.sun.getTemperature(this.archon);
+    var t = this.sun.getTemperature(this.archon);
     var d = Math.abs(t - this.genome.optimalTemp);
     var s = this.getMass();
     var p = Math.log((d || 1) + 1) * Math.log(s + 1);
@@ -146,9 +147,9 @@ Archotype.Phenotype.prototype = {
   },
 
   setButtonColor: function(temp) {
-  	temp = this.A.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
+  	temp = Axioms.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
 
-  	var hue = this.A.buttonHueRange.convertPoint(temp, this.optimalTempRange);
+  	var hue = Axioms.buttonHueRange.convertPoint(temp, this.optimalTempRange);
   	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
   	var rgb = Archotype.tinycolor(hsl).toHex();
   	var tint = parseInt(rgb, 16);
@@ -157,14 +158,14 @@ Archotype.Phenotype.prototype = {
   },
   
   setColors: function() {
-    var t = this.A.sun.getTemperature(this.archon);
+    var t = this.sun.getTemperature(this.archon);
 
     this.setButtonColor(t);
   },
   
   setSize: function() {
     var m = this.getMass();
-    var s = m / this.A.archoniaGooDiameter;
+    var s = m / Axioms.archoniaGooDiameter;
     
     this.archon.phaseron.scale.setTo(s, s);
     

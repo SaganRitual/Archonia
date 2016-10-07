@@ -3,12 +3,14 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 
 if(typeof window === "undefined") {
+  Axioms = require('./Axioms.js');
   Archotype = require('./Archonia.js');
   Archotype.SensorArray = require('./widgets/SensorArray.js');
   Archotype.Body = require('./Body.js');
+  Archotype.XY = require('./widgets/XY.js').XY;
 }
 
 (function(Archotype) {
@@ -48,7 +50,7 @@ Archotype.Brain = function(A, archon) {
     for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
     this.senseControls[senseNameInGenome].sensorArray = new Archotype.SensorArray(
-      this.A, extra.howManyPoints, this.archon.genome.senseMeasurementDepth,
+      extra.howManyPoints, this.archon.genome.senseMeasurementDepth,
       gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
   }
@@ -128,12 +130,12 @@ Archotype.Brain.prototype = {
     case "flee":
     case "eat":
       robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
-      computerizedAngle = this.A.computerizeAngle(robalizedAngle);
+      computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
       break;
       
     case "findSafeTemp":
       robalizedAngle = (this.currentAction.direction * Math.PI) + (Math.PI / 2);
-      computerizedAngle = this.A.computerizeAngle(robalizedAngle);
+      computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
       break;
       
     default:

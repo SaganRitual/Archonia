@@ -3,10 +3,10 @@
 
 "use strict";
 
-var A = A || {};
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 
 if(typeof window === "undefined") {
+  Axioms = require('./Axioms.js');
   Archotype = require('./Archonia.js');
 }
 
@@ -36,17 +36,17 @@ if(typeof window === "undefined") {
     }
   };
   
-  Archotype.BitmapFactory = function(A) {
-    this.A = A;
+  Archotype.BitmapFactory = function(game) {
+    this.game = game;
   };
   
   Archotype.BitmapFactory.prototype = {
     
     archonia: function() {
-      var bm = this.A.game.add.bitmapData(this.A.game.width, this.A.game.height);
+      var bm = this.game.add.bitmapData(Axioms.gameWidth, Axioms.gameHeight);
       var cx = bm.context;
 
-      var g = cx.createLinearGradient(this.A.game.width / 2, 0, this.A.game.width / 2, this.A.game.height);
+      var g = cx.createLinearGradient(Axioms.gameRadius, 0, Axioms.gameRadius, Axioms.gameWidth);
 
       g.addColorStop(0.00, 'hsl(202, 100%, 100%)');
       g.addColorStop(0.40, 'hsl(202, 100%, 50%)');
@@ -55,23 +55,23 @@ if(typeof window === "undefined") {
       g.addColorStop(1.00, 'hsl(218, 100%, 00%)');
 
       cx.fillStyle = g;
-      cx.fillRect(0, 0, this.A.game.width, this.A.game.height);
+      cx.fillRect(0, 0, Axioms.gameWidth, Axioms.gameHeight);
 
       bm.update();
-      this.A.game.add.image(0, 0, bm);
+      this.game.add.image(0, 0, bm);
     
       return new Archotype.Bitmap(bm);
     },
   
     archoniaGoo: function() {
-      var bm = this.A.game.add.bitmapData(this.A.archoniaGooDiameter, this.A.archoniaGooDiameter);
+      var bm = this.game.add.bitmapData(Axioms.archoniaGooDiameter, Axioms.archoniaGooDiameter);
       var cx = bm.context;
 
       cx.beginPath();
-      bm.circle(this.A.archoniaGooRadius, this.A.archoniaGooRadius, this.A.archoniaGooRadius, 'rgba(255, 255, 255, 1)');
+      bm.circle(Axioms.archoniaGooRadius, Axioms.archoniaGooRadius, Axioms.archoniaGooRadius, 'rgba(255, 255, 255, 1)');
       cx.fill();
 
-      this.A.game.cache.addBitmapData('archoniaGoo', bm);
+      this.game.cache.addBitmapData('archoniaGoo', bm);
     
       return new Archotype.Bitmap(bm);
     },

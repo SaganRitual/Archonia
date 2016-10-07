@@ -4,20 +4,20 @@
 "use strict";
 
 var Archotype = Archotype || {};
+var Axioms = Axioms || {};
 
 if(typeof window === "undefined") {
-  Archotype = require('../Archonia.js');
+  Axioms = require('../Axioms.js');
   Archotype.Range = require('./Range.js');
   Archotype.Cbuffer = require('./Cbuffer.js');
 }
 
 (function(Archotype) {
   
-Archotype.SignalSmoother = function(A, depth, decayRate, rangeLo, rangeHi) {
+Archotype.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   if(rangeLo === undefined) { rangeLo = 0; }
   if(rangeHi === undefined) { rangeHi = 1; }
 
-  this.A = A;
   this.empty = true;
   this.depth = depth;
   this.rangeLo = rangeLo;
@@ -25,7 +25,7 @@ Archotype.SignalSmoother = function(A, depth, decayRate, rangeLo, rangeHi) {
 
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   
-  this.cbuffer = new Archotype.Cbuffer(this.A, depth);
+  this.cbuffer = new Archotype.Cbuffer(depth);
   this.valuesRange = new Archotype.Range(rangeLo, rangeHi);
 };
 
@@ -48,15 +48,15 @@ Archotype.SignalSmoother.prototype = {
   },
   
   store: function(value) {
-    var s = this.A.zeroToOneRange.convertPoint(value, this.valuesRange);
+    var s = Axioms.zeroToOneRange.convertPoint(value, this.valuesRange);
 
-    s = this.A.clamp(s, 0, 1);
+    s = Axioms.clamp(s, 0, 1);
   
     this.cbuffer.store(s);
 
     this.cbuffer.deepForEach(function(ix, points) {
       points[ix] -= this.decayRate;
-      points[ix] = this.A.clamp(points[ix], 0, 1);
+      points[ix] = Axioms.clamp(points[ix], 0, 1);
     }, this);
     
     this.empty = false;

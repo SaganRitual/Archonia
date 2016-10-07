@@ -3,11 +3,13 @@
 
   "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 var Phaser = Phaser || {};
 
 if(typeof window === "undefined") {
+  Axioms = require('./Axioms.js');
   Archotype = require('./Archonia.js');
+  Archotype.Range = require('./widgets/Range.js');
   
   var xy = require('./widgets/XY.js');
   Archotype.XY = xy.XY;
@@ -18,8 +20,8 @@ if(typeof window === "undefined") {
 
 (function(Archotype) {
   
-  Archotype.MannaGenerator = function(A) {
-    this.A = A;
+  Archotype.MannaGenerator = function(game) {
+    this.game = game;
     
     var morselScale = 0.05;
     
@@ -30,25 +32,25 @@ if(typeof window === "undefined") {
     this.bellCurveHeight = 5;
     
     var stopBelow = 0.01, xOffset = 0, width = 2;
-    this.bellCurve = this.A.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
+    this.bellCurve = Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
     if(this.bellCurve.length % 2 === 1) { this.bellCurve.push(0); }
     this.bellCurveRadius = this.bellCurve.length / 2;
     
     this.randomPoint = new Archotype.RandomXY();
     this.randomPoint.setMin(0, 0);
-    this.randomPoint.setMax(this.A.gameWidth, this.A.gameHeight);
+    this.randomPoint.setMax(this.gameWidth, this.gameHeight);
     this.optimalTemp = 500;
     
     // We make the A.game scale larger than the radius so the manna will go off
     // the screen when the temps are extreme in either direction
     this.tempScale = new Archotype.Range(-1000, 1000);
-    this.gameScale = new Archotype.Range(-this.A.gameRadius, this.A.gameRadius);
+    this.gameScale = new Archotype.Range(-this.gameRadius, this.gameRadius);
     this.arrayScale = new Archotype.Range(-this.bellCurveRadius, this.bellCurveRadius);
     
-    this.spriteGroup = this.A.game.add.group();
+    this.spriteGroup = this.game.add.group();
     this.spriteGroup.enableBody = true;
     this.spriteGroup.createMultiple(this.howManyMorsels, 'particles', 0, false);
-    this.A.game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
+    this.game.physics.enable(this.spriteGroup, Phaser.Physics.ARCADE);
 
     this.spriteGroup.forEach(function(m) {
       m.previousEmit = 0;
@@ -67,7 +69,7 @@ if(typeof window === "undefined") {
     
     giveth: function() {
       var thisParticle = null;
-      var temp = this.A.sun.getTemperature(this.A.gameCenter);
+      var temp = Axioms.sun.getTemperature(this.gameCenter);
       
       for(var i = 0; i < 10; i++) {
         this.randomPoint.random();
@@ -75,7 +77,7 @@ if(typeof window === "undefined") {
         var scaledY = this.arrayScale.convertPoint(this.randomPoint.point.y, this.gameScale);
         var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
         
-        if(this.A.realInRange(0, 1) < p) {
+        if(Axioms.realInRange(0, 1) < p) {
 
           thisParticle = this.spriteGroup.getFirstDead();
           
@@ -84,7 +86,7 @@ if(typeof window === "undefined") {
           } else {
             this.randomPoint.point.y += this.gameScale.convertPoint(temp, this.tempScale);
           
-            if(this.randomPoint.point.y > 0 && this.randomPoint.point.y < this.A.gameHeight) {
+            if(this.randomPoint.point.y > 0 && this.randomPoint.point.y < this.gameHeight) {
               thisParticle.position.setTo(this.randomPoint.point.x, this.randomPoint.point.y);
               thisParticle.revive();
             }
@@ -98,10 +100,10 @@ if(typeof window === "undefined") {
       for(var i = 0; i < 10; i++) {
         var thisParticle = this.spriteGroup.getRandom();
         if(thisParticle.alive) {
-          var r = this.A.integerInRange(0, this.bellCurve.length);
+          var r = Axioms.integerInRange(0, this.bellCurve.length);
           var p = this.bellCurve[r] / this.bellCurveHeight;
     
-          if(this.A.realInRange(0, 1) < p) {
+          if(Axioms.realInRange(0, 1) < p) {
             thisParticle.kill();
           }
         }
@@ -113,8 +115,8 @@ if(typeof window === "undefined") {
 
     	if(showDebugOutlines) {
     		this.spritePool.forEachAlive(function(a) {
-    	    this.A.game.debug.body(a, 'yellow', false);
-    			this.A.game.debug.spriteBounds(a, 'blue', false);
+    	    this.game.debug.body(a, 'yellow', false);
+    			this.game.debug.spriteBounds(a, 'blue', false);
     		}, this);
     	}
     },

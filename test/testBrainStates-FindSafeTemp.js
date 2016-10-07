@@ -1,23 +1,18 @@
 var chai = require('chai');
 var data_driven = require('data-driven');
 
-var Archotype = require('../Archonia.js');
-Archotype.BrainStates = require('../widgets/BrainStates.js');
+var BrainStates = require('../widgets/BrainStates.js');
+var XY = require('../widgets/XY.js').XY;
 
-var xy = require('../widgets/XY.js');
-Archotype.XY = xy.XY;
-Archotype.RandomXY = xy.RandomXY;
+var Axioms = require('../Axioms.js');
 
-var A = new Archotype.Archonia(); A.go({});
-
-A.sun = { getTemperature: function(where) { return where.y; } };
+var A = { sun: { getTemperature: function(where) { return where.y; } } };
 
 var archon = { genome: { optimalTemp: -200, optimalTempRange: 400, howLongBadTempToEncystment: 60 } };
 
 var Brain = function(archon) {
-  this.A = A;
   this.archon = archon;
-  this.position = Archotype.XY();
+  this.position = XY();
   
   this.getTemperature = A.sun.getTemperature;
 };
@@ -25,7 +20,7 @@ var Brain = function(archon) {
 var theBrain = new Brain(archon);
 
 var trackFromHereToThere = function(from, to) {
-  var t = new Archotype.BrainStates.FindSafeTemp(theBrain);
+  var t = new BrainStates.FindSafeTemp(theBrain);
   var r = null;
   
   t.start();

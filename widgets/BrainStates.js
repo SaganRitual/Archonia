@@ -3,15 +3,12 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 
 if(typeof window === "undefined") {
-  Archotype = require('../Archonia.js');
+  Axioms = require('../Axioms.js');
   Archotype.Cbuffer = require('./Cbuffer.js');
-
-  var xy = require('./XY.js');
-  Archotype.XY = xy.XY;
-  Archotype.RandomXY = xy.RandomXY;
+  Archotype.XY = require('./XY.js').XY;
 }
 
 (function(Archotype) {
@@ -39,7 +36,7 @@ Archotype.BrainStates.FindSafeTemp = function(brain) {
   Archotype.BrainStates.BrainState.call(this, brain);
   
   this.brain = brain;
-  this.tempCheck = new Archotype.Cbuffer(this.brain.A, this.brain.archon.genome.howLongBadTempToEncystment);
+  this.tempCheck = new Archotype.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
 };
 
 Archotype.BrainStates.FindSafeTemp.prototype = Object.create(Archotype.BrainStates.BrainState.prototype);
@@ -117,7 +114,7 @@ Archotype.BrainStates.SearchForFood.prototype.chooseAction = function() {
       return {
         action: 'setMoveTarget',
         moveTo: Archotype.XY(
-          this.brain.A.integerInRange(0, this.brain.A.gameWidth), this.brain.A.integerInRange(0, this.brain.A.gameHeight)
+          Axioms.integerInRange(0, Axioms.gameWidth), Axioms.integerInRange(0, Axioms.gameHeight)
         )
       };
     } else {
@@ -131,8 +128,8 @@ Archotype.BrainStates.SearchForFood.prototype.chooseAction = function() {
     var newTarget = Archotype.XY(this.brain.velocity), computerizedAngle = null, robalizedAngle = null;
 
     computerizedAngle = newTarget.getAngleFrom(0);
-    robalizedAngle = this.brain.A.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
-    computerizedAngle = this.brain.A.computerizeAngle(robalizedAngle);
+    robalizedAngle = Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
+    computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
     
     return({ action: 'turn', moveTo: Archotype.XY.fromPolar(this.brain.archon.phenotype.getSize(), computerizedAngle) });
     

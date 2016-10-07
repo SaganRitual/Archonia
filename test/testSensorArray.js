@@ -1,42 +1,13 @@
-var Archotype = require('../Archonia.js');
-
-var A = new Archotype.Archonia(); A.go({});
+var Archotype = {};
+Archotype.SensorArray = require('../widgets/SensorArray.js');
 
 var chai = require('chai');
 
 describe('SensorArray', function() {
-  describe('Smoke test', function() {
-    it('#Module exists', function() {
-      var c = function() { Archotype.SensorArray = require('../widgets/SensorArray.js'); };
-      chai.expect(c).to.not.throw();
-      chai.expect(Archotype).to.have.property('SensorArray');
-    });
-
-    it('#Object exists', function() {
-      chai.assert.typeOf(Archotype.SensorArray, "Function");
-    });
-  });
-  
-  describe('#public functions exist', function() {
-    var names = [ 'getBestSignal', 'isEmpty', 'reset', 'store' ];
-      
-    for(var n in names) {
-      var name = names[n];
-      
-      (function(name) {
-        it('#' + name + '()', function() {
-          var cc = new Archotype.SensorArray(A, 1, function() {});
-          chai.expect(cc).to.have.property(name);
-          chai.assert.isFunction(cc[name]);
-        });
-      })(name);
-    }
-  });
-  
   describe('#reset(), isEmpty()', function() {
     it('#before store, after store, after reset', function() {
       var measurementDepth = 10, howManyMeasurementPoints = 1, valueRangeLo = 0, valueRangeHi = 100, decayRate = 0.01;
-      var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+      var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
       chai.expect(c.isEmpty()).equal(true);
       for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.signalSmoothers[i].isEmpty()).equal(true); }
@@ -55,7 +26,7 @@ describe('SensorArray', function() {
     describe('#getBestSignal(), single input point, single tick', function() {
       it('#boring values range 0 - 100', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 1, valueRangeLo = 0, valueRangeHi = 100, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 100);
         var s = c.getBestSignal();
@@ -65,7 +36,7 @@ describe('SensorArray', function() {
 
       it('#exciting values range 100 - 0', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 1, valueRangeLo = -100, valueRangeHi = 0, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 0);
         var s = c.getBestSignal();
@@ -77,7 +48,7 @@ describe('SensorArray', function() {
     describe('#getBestSignal(), multiple inputs, single tick', function() {
       it('#boring values range 0 - 100', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 5, valueRangeLo = 0, valueRangeHi = 100, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 100); c.store(1, 50); c.store(2, 75); c.store(3, 90); c.store(4, 17);
         var s = c.getBestSignal();
@@ -88,7 +59,7 @@ describe('SensorArray', function() {
 
       it('#exciting values range -0.5 - +0.5', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 5, valueRangeLo = -0.5, valueRangeHi = +0.5, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 0.3); c.store(1, 0); c.store(2, 0.25); c.store(3, -0.20); c.store(4, -0.043);
         var s = c.getBestSignal();
@@ -101,7 +72,7 @@ describe('SensorArray', function() {
     describe('#getBestSignal(), multiple inputs, multiple ticks', function() {
       it('#boring values range 0 - 100', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 5, valueRangeLo = 0, valueRangeHi = 100, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 100); c.store(1,  0); c.store(2, 75); c.store(3, 90); c.store(4,  0);
         c.store(0, 0);   c.store(1, 50); c.store(2,  0); c.store(3, 90); c.store(4,  0);
@@ -117,7 +88,7 @@ describe('SensorArray', function() {
 
       it('#exciting values range -11 - +17', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 5, valueRangeLo = -11, valueRangeHi = 17, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 17);  c.store(1,  0); c.store(2, 10); c.store(3, 14.2); c.store(4,  0);
         c.store(0, 0);   c.store(1,  3); c.store(2,  0); c.store(3, 14.2); c.store(4,  0);
@@ -135,7 +106,7 @@ describe('SensorArray', function() {
     describe('#getBestSignal with spread', function() {
       it('#boring values range 0 - 100', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 5, valueRangeLo = 0, valueRangeHi = 100, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 100); c.store(1,  0); c.store(2,  5); c.store(3, 90); c.store(4,  0);
         c.store(0, 0);   c.store(1, 50); c.store(2,  0); c.store(3, 90); c.store(4, 50);
@@ -152,7 +123,7 @@ describe('SensorArray', function() {
 
       it('#by now somewhat boring range -11 - 17', function() {
         var measurementDepth = 10, howManyMeasurementPoints = 5, valueRangeLo = -11, valueRangeHi = 17, decayRate = 0.01;
-        var c = new Archotype.SensorArray(A, howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
+        var c = new Archotype.SensorArray(howManyMeasurementPoints, measurementDepth, decayRate, valueRangeLo, valueRangeHi);
       
         c.store(0, 17);  c.store(1,  0); c.store(2, -9.6); c.store(3, 14.2); c.store(4,   0);
         c.store(0, 0);   c.store(1,  3); c.store(2,    0); c.store(3, 14.2); c.store(4,   3.0);

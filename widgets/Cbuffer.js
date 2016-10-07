@@ -3,19 +3,18 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 
-if(typeof window === "undefined") {
-  Archotype = require('../Archonia.js');
+if(typeof window === 'undefined') {
+  Axioms = require('../Axioms.js');
 }
 
 (function(Archotype) {
   
-  Archotype.Cbuffer = function(A, howManyElements) {
+  Archotype.Cbuffer = function(howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length Cbuffer"); }
 
-    this.A = A;
-    this.archoniaUniqueObjectId = this.A.archoniaUniqueObjectId++;
+    this.archoniaUniqueObjectId = Archotype.archoniaUniqueObjectId++;
     this.reset();
     this.howManyElements = howManyElements;
   };
@@ -76,7 +75,7 @@ if(typeof window === "undefined") {
       var center = Math.floor(spread / 2);
 
       if(spread % 2 === 0) {
-        center += this.A.integerInRange(-1, 0);
+        center += Axioms.integerInRange(-1, 0);
       }
     
       var result = [];

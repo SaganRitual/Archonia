@@ -3,19 +3,18 @@
 
 "use strict";
 
-var Archotype = Archotype || {};
+var Archotype = Archotype || {}, Axioms = Axioms || {};
 
 if(typeof window === "undefined") {
-  Archotype = require('../Archonia.js');
+  Axioms = require('../Axioms.js');
+  Archotype.Cbuffer = require('./Cbuffer.js');
   Archotype.SignalSmoother = require('./SignalSmoother.js');
 }
 
 (function(Archotype) {
 
-Archotype.SensorArray = function(A, howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
-  this.A = A;
-  
-  this.id = A.archoniaUniqueObjectId++;
+Archotype.SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
+  this.id = Axioms.archoniaUniqueObjectId++;
 
   this.empty = true;
   this.howManyMeasurementPoints = howManyMeasurementPoints;
@@ -23,10 +22,10 @@ Archotype.SensorArray = function(A, howManyMeasurementPoints, measurementDepth, 
   this.signalSmoothers = [];
   
   for(var i = 0; i < howManyMeasurementPoints; i++) {
-    this.signalSmoothers.push(new Archotype.SignalSmoother(this.A, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
+    this.signalSmoothers.push(new Archotype.SignalSmoother(measurementDepth, decayRate, valuesRangeLo, valuesRangeHi));
   }
   
-  this.averagesRounder = new Archotype.Cbuffer(this.A, howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
+  this.averagesRounder = new Archotype.Cbuffer(howManyMeasurementPoints, 0, 0, howManyMeasurementPoints);
   
 };
 
