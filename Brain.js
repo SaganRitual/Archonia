@@ -8,6 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Form.Body = require('./Body');
+  Archonia.Form.BrainStates = require('./widgets/BrainStates.js');
   Archonia.Form.SensorArray = require('./widgets/SensorArray');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
 }
@@ -23,10 +24,19 @@ Archonia.Form.Brain = function(archon) {
   
   var gSenses = archon.genome.senses;
 
+  this.searchForFood = new Archonia.Form.BrainStates.SearchForFood(this);
+
   this.defaultAction = { action: 'searchForFood', direction: 0, signalWeight: 0 };
   this.movementTarget = Archonia.Form.XY();
   
   this.currentAction = Object.assign({}, this.defaultAction);
+
+  this.frameCount = 0;
+  this.state = null;
+  this.ackValue = null;
+
+  this.velocity = Archonia.Form.XY();
+  this.action = null;
   
   var senseAddons = {
     fatigue:     { howManyPoints:  1, signalSpread: 1, action: 'moveToSecure' },
@@ -55,6 +65,14 @@ Archonia.Form.Brain = function(archon) {
 };
 
 Archonia.Form.Brain.prototype = {
+  ack: function(ackValue) {
+    switch(this.state) {
+      case 'searchForFood': this.searchForFood.ack(ackValue); break;
+    }
+  
+    this.ackValue = null;
+  },
+
   chooseAction: function() {
     
     this.currentAction = Object.assign({}, this.defaultAction);
@@ -88,6 +106,8 @@ Archonia.Form.Brain.prototype = {
   launch: function() {
     
   },
+
+  startSearchForFood: function() { this.searchForFood.start(); this.state = 'searchForFood'; },
   
   senseFatigue: function(where, fatigue) {
     this.senseControls.fatigue.sensorArray.store(where, fatigue);
