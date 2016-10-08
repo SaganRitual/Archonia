@@ -1,6 +1,6 @@
 var chai = require('chai');
 
-var MannaGenerator = require('../Manna.js');
+var MannaGenerator = require('../MannaGenerator.js');
 
 describe("MannaGenerator", function() {
   it('#smoke', function() {

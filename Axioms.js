@@ -3,17 +3,11 @@
 
 "use strict";
 
-var Archonia = Archonia || { Axioms: {}, Form: {} };
-
-if(typeof window === "undefined") {
-  Archonia.Form.Range = require('./widgets/Range.js');
-  Archonia.Form.XY = require('./widgets/XY.js').XY;
-}
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
   Archonia.Axioms.gameHeight = 600;
   Archonia.Axioms.gameWidth = 600;
-  Archonia.Axioms.gameCenter = Archonia.Form.XY(Archonia.Axioms.gameWidth / 2, Archonia.Axioms.gameHeight / 2);
   Archonia.Axioms.gameRadius = Archonia.Axioms.gameWidth / 2;
 
   Archonia.Axioms.archoniaGooDiameter = 100;

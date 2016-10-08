@@ -7,8 +7,9 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Cosmos.MannaGenerator = require('./Manna.js');
+  Archonia.Cosmos.MannaGenerator = require('./MannaGenerator.js');
   Archonia.Cosmos.Sun = require('./Sun.js');
+  Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
   
   var Phaser = require('./test/support/Phaser.js');
   Archonia.Engine.game = new Phaser.Game();
@@ -21,6 +22,9 @@ if(typeof window === "undefined") {
     
     create: function() {
       Archonia.Engine.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+      Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
+      Archonia.Essence.Goo = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
 
       Archonia.Cosmos.Sun.ignite();
       Archonia.Cosmos.MannaGenerator.start();
@@ -47,11 +51,7 @@ if(typeof window === "undefined") {
     },
     
     render: function() {
-      Archonia.Engine.mannaGenerator.render();
-    },
-
-    setupBitmaps: function() {
-      Archonia.Engine.ag = Archonia.Engine.bitmapFactory.makeBitmap('archoniaGoo');
+      Archonia.Cosmos.MannaGenerator.render();
     },
     
     start: function() {
@@ -66,7 +66,7 @@ if(typeof window === "undefined") {
     update: function() {
       Archonia.Engine.frameCount++;
       
-      Archonia.Engine.mannaGenerator.tick(Archonia.Engine.frameCount);
+      Archonia.Cosmos.MannaGenerator.tick(Archonia.Engine.frameCount);
     }
     
   };

@@ -1,16 +1,16 @@
 var chai = require('chai');
 
-var BitmapFactory = require('../Bitmap.js');
+var BitmapFactory = require('../BitmapFactory.js');
 
 describe("BitmapFactory", function() {
   describe("#archonia", function() {
     it('#smoke', function() {
-      var create = function() { return BitmapFactory.makeBitmap('archonia'); }
+      var create = function() { return BitmapFactory.makeBitmap('archoniaSea'); }
       chai.expect(create).to.not.throw();
     });
     
     it('#bitmap', function() {
-      var archoniaBitmap = BitmapFactory.makeBitmap('archonia');
+      var archoniaBitmap = BitmapFactory.makeBitmap('archoniaSea');
       var phaserBitmap = archoniaBitmap.bm;
       
       chai.expect(phaserBitmap).not.equal(undefined);

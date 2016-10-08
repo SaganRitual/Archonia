@@ -123,7 +123,6 @@ describe('Phenotype', function() {
 
         var r = Math.abs(theSun.currentTemp - archon.genome.optimalTemp);
         var s = Math.log((r || 1) + 1) * Math.log(p.getMass() + 1);
-        console.log(s);
 
         var c = p.getTempCost().toFixed(4);
         chai.expect(c).equal(s.toFixed(4));
@@ -132,7 +131,6 @@ describe('Phenotype', function() {
         
         r = Math.abs(theSun.currentTemp - archon.genome.optimalTemp);
         s = Math.log((r || 1) + 1) * Math.log(p.getMass() + 1);
-        console.log(s);
 
         c = p.getTempCost().toFixed(4);
         chai.expect(c).equal(s.toFixed(4));

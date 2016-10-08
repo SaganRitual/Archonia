@@ -3,7 +3,7 @@
 
 "use strict";
 
-var Archonia = Archonia || { Form: {} };
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
 

@@ -3,7 +3,11 @@
 
 "use strict";
 
-var Archonia = Archonia || { Form: {} };
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
+
+if(typeof window === "undefined") {
+  Archonia.Axioms = require("../Axioms.js");
+}
 
 (function(Archonia) {
 
@@ -125,13 +129,19 @@ Archonia.Form.RandomXY = function() {
 
 Archonia.Form.RandomXY.prototype = {
   random: function() {
-    var x = Archonia.Form.integerInRange(this.min.x, this.max.x);
-    var y = Archonia.Form.integerInRange(this.min.y, this.max.y);
+    var x = Archonia.Axioms.integerInRange(this.min.x, this.max.x);
+    var y = Archonia.Axioms.integerInRange(this.min.y, this.max.y);
     return this.point.set(x, y);
   },
   
-  setMin: function(minX, minY) { this.min.set(minX, minY); },
-  setMax: function(maxX, maxY) { this.max.set(maxX, maxY); }
+  setMin: function(minX, minY) {
+    if(minX === undefined || minY === undefined) { throw new Error("Bad arguments"); }
+    else { this.min.set(minX, minY); }
+  },
+  setMax: function(maxX, maxY) {
+    if(maxX === undefined || maxY === undefined) { throw new Error("Bad arguments"); }
+    else { this.max.set(maxX, maxY); }
+  }
 };
 
 function getMagnitude(a1, a2) {

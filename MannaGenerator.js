@@ -19,7 +19,7 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
-  var MG = Archonia.Form.MannaGenerator = {
+  var MG = Archonia.Cosmos.MannaGenerator = {
     start: function() {
       var morselScale = 0.05;
     
@@ -36,7 +36,7 @@ if(typeof window === "undefined") {
     
       MG.randomPoint = new Archonia.Form.RandomXY();
       MG.randomPoint.setMin(0, 0);
-      MG.randomPoint.setMax(MG.gameWidth, MG.gameHeight);
+      MG.randomPoint.setMax(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
       MG.optimalTemp = 500;
     
       // We make the A.game scale larger than the radius so the manna will go off
@@ -65,7 +65,7 @@ if(typeof window === "undefined") {
   
     giveth: function() {
       var thisParticle = null;
-      var temp = Archonia.Cosmos.Sun.getTemperature(MG.gameCenter);
+      var temp = Archonia.Cosmos.Sun.getTemperature(Archonia.Essence.gameCenter);
       
       for(var i = 0; i < 10; i++) {
         MG.randomPoint.random();
@@ -82,7 +82,7 @@ if(typeof window === "undefined") {
           } else {
             MG.randomPoint.point.y += MG.gameScale.convertPoint(temp, MG.tempScale);
           
-            if(MG.randomPoint.point.y > 0 && MG.randomPoint.point.y < MG.gameHeight) {
+            if(MG.randomPoint.point.y > 0 && MG.randomPoint.point.y < Archonia.Axioms.gameHeight) {
               thisParticle.position.setTo(MG.randomPoint.point.x, MG.randomPoint.point.y);
               thisParticle.revive();
             }
@@ -127,5 +127,5 @@ if(typeof window === "undefined") {
 })(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archonia.Form.MannaGenerator;
+  module.exports = Archonia.Cosmos.MannaGenerator;
 }

@@ -3,30 +3,28 @@
 
 "use strict";
 
-var Archotype = Archotype || {}, Axioms = Axioms || {};
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Axioms = require('./Axioms.js');
-  Archotype = require('./Archonia.js');
-  Archotype.SensorArray = require('./widgets/SensorArray.js');
-  Archotype.Body = require('./Body.js');
-  Archotype.XY = require('./widgets/XY.js').XY;
+  Archonia.Axioms = require('./Axioms.js');
+  Archonia.Form.Body = require('./Body');
+  Archonia.Form.SensorArray = require('./widgets/SensorArray');
+  Archonia.Form.XY = require('./widgets/XY.js').XY;
 }
 
-(function(Archotype) {
+(function(Archonia) {
   
-  var howManyPointsForSpatialInputs = 12;
+var howManyPointsForSpatialInputs = 12;
 
-Archotype.Brain = function(A, archon) {
-  this.A = A;
-  this.id = A.archoniaUniqueObjectId++;
+Archonia.Form.Brain = function(archon) {
   this.archon = archon;
   
-  this.body = new Archotype.Body();
+  this.body = new Archonia.Form.Body();
   
   var gSenses = archon.genome.senses;
 
   this.defaultAction = { action: 'searchForFood', direction: 0, signalWeight: 0 };
+  this.movementTarget = Archonia.Form.XY();
   
   this.currentAction = Object.assign({}, this.defaultAction);
   
@@ -49,14 +47,14 @@ Archotype.Brain = function(A, archon) {
     
     for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
 
-    this.senseControls[senseNameInGenome].sensorArray = new Archotype.SensorArray(
+    this.senseControls[senseNameInGenome].sensorArray = new Archonia.Form.SensorArray(
       extra.howManyPoints, this.archon.genome.senseMeasurementDepth,
       gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
     );
   }
 };
 
-Archotype.Brain.prototype = {
+Archonia.Form.Brain.prototype = {
   chooseAction: function() {
     
     this.currentAction = Object.assign({}, this.defaultAction);
@@ -130,12 +128,12 @@ Archotype.Brain.prototype = {
     case "flee":
     case "eat":
       robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
-      computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
+      computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
       break;
       
     case "findSafeTemp":
       robalizedAngle = (this.currentAction.direction * Math.PI) + (Math.PI / 2);
-      computerizedAngle = Axioms.computerizeAngle(robalizedAngle);
+      computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
       break;
       
     default:
@@ -144,13 +142,13 @@ Archotype.Brain.prototype = {
       break;
     }
     
-    var xy = Archotype.XY.fromPolar(1, computerizedAngle);
-    this.body.setMovementTarget(xy);
+    var xy = Archonia.Form.XY.fromPolar(1, computerizedAngle);
+    this.movementTarget.set(xy);
   }
 };
   
-})(Archotype);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.Brain;
+  module.exports = Archonia.Form.Brain;
 }

@@ -3,21 +3,22 @@
 
 "use strict";
 
-var Archotype = Archotype || {}, Axioms = Axioms || {};
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Axioms = require('./Axioms.js');
-  Archotype.tinycolor = require('./widgets/tinycolor.js');
-  Archotype.Range = require('./widgets/Range.js');
+  Archonia.Axioms = require('./Axioms.js');
+  Archonia.Essence = require('./Essence.js');
+  Archonia.Form.tinycolor = require('./widgets/tinycolor.js');
+  Archonia.Form.Range = require('./widgets/Range.js');
 }
 
-(function(Archotype) {
+(function(Archonia) {
   
   var adultFatDensity = 100;  // 100 calories per gram
   var larvaFatDensity = 1000;
   var embryoFatDensity = 1000;
 
-Archotype.Phenotype = function(archon, theSun) {
+Archonia.Form.Phenotype = function(archon, theSun) {
   
   if(archon === undefined) {
     throw new TypeError("Phenotype needs an archon");
@@ -31,11 +32,11 @@ Archotype.Phenotype = function(archon, theSun) {
   this.larvalCalorieBudget = 0;
   this.adultCalorieBudget = 0;
   
-  this.optimalTempRange = new Archotype.Range();
+  this.optimalTempRange = new Archonia.Form.Range(0, 0);
   
 };
 
-Archotype.Phenotype.prototype = {
+Archonia.Form.Phenotype.prototype = {
   
   reproductionCostFactor: 1.25,
 
@@ -147,11 +148,11 @@ Archotype.Phenotype.prototype = {
   },
 
   setButtonColor: function(temp) {
-  	temp = Axioms.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
+  	temp = Archonia.Axioms.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
 
-  	var hue = Axioms.buttonHueRange.convertPoint(temp, this.optimalTempRange);
+  	var hue = Archonia.Essence.buttonHueRange.convertPoint(temp, this.optimalTempRange);
   	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
-  	var rgb = Archotype.tinycolor(hsl).toHex();
+  	var rgb = Archonia.Form.tinycolor(hsl).toHex();
   	var tint = parseInt(rgb, 16);
 
   	this.archon.button.tint = tint;
@@ -165,7 +166,7 @@ Archotype.Phenotype.prototype = {
   
   setSize: function() {
     var m = this.getMass();
-    var s = m / Axioms.archoniaGooDiameter;
+    var s = m / Archonia.Axioms.archoniaGooDiameter;
     
     this.archon.phaseron.scale.setTo(s, s);
     
@@ -174,8 +175,8 @@ Archotype.Phenotype.prototype = {
   }
 };
   
-})(Archotype);
+})(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archotype.Phenotype;
+  module.exports = Archonia.Form.Phenotype;
 }

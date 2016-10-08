@@ -6,7 +6,7 @@
 var A = A || {};
 
 if(typeof window === "undefined") {
-  A = require('./Archonia.js');
+  A = require('./Engine.js');
 }
 
 (function(A) {

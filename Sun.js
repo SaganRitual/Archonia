@@ -3,32 +3,34 @@
 
 "use strict";
 
-var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Form: {}, Phaser: {} } || {};
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
   var Phaser = require('./test/support/Phaser.js');
-  Archonia.Phaser.game = new Phaser.Game();
+  Archonia.Engine.game = new Phaser.Game();
   
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
-  Archonia.Essence.bitmapFactory = require('./Bitmap.js');
+  Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
   Archonia.Form.Range = require('./widgets/Range.js');
+
+  Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
 }
 
 (function(Archonia) {
   
-  var darkness = null;
-  var darknessTween = null;
-  var dayNumber = null;
-  var easingFunction = Phaser.Easing.Quartic.InOut;
-  var sunGoo = null;
-  
   Archonia.Cosmos.Sun = {
+    darkness: null,
+    darknessTween: null,
+    dayNumber: null,
+    easingFunction: Phaser.Easing.Quartic.InOut,
+    sunGoo: null,
+  
     getStrength: function() {
       // We have to clamp it because the actual sprite alpha can go slightly
       // negative when it's supposed to stop at zero.
       return Archonia.Axioms.clamp(
-        Archonia.Essence.zeroToOneRange.convertPoint(darkness.alpha, Archonia.Essence.darknessRange), 0, 1
+        Archonia.Essence.zeroToOneRange.convertPoint(Archonia.Cosmos.Sun.darkness.alpha, Archonia.Essence.darknessRange), 0, 1
       );
     },
     
@@ -37,13 +39,13 @@ if(typeof window === "undefined") {
       where.floor();
 
       var rgb = {};
-      sunGoo.bm.getPixelRGB(where.x, where.y, rgb, true);
+      Archonia.Cosmos.Sea.bm.getPixelRGB(where.x, where.y, rgb, true);
 
-      var lumaComponent = Archonia.Axioms.temperatureRange.convertPoint(rgb.l, Archonia.Axioms.worldColorRange);
+      var lumaComponent = Archonia.Essence.temperatureRange.convertPoint(rgb.l, Archonia.Essence.worldColorRange);
 
-      var darknessComponent = Archonia.Axioms.temperatureRange.convertPoint(darkness.alpha, Archonia.Axioms.darknessRange);
+      var darknessComponent = Archonia.Essence.temperatureRange.convertPoint(Archonia.Cosmos.Sun.darkness.alpha, Archonia.Essence.darknessRange);
 
-      var yAxisComponent = Archonia.Axioms.temperatureRange.convertPoint(where.y, Archonia.Axioms.yAxisRange);
+      var yAxisComponent = Archonia.Essence.temperatureRange.convertPoint(where.y, Archonia.Essence.yAxisRange);
 
       // Give luma and sun most of the weight. The y-axis thing is there
       // just to help them not get stuck in the luma dead zone(s)
@@ -55,10 +57,10 @@ if(typeof window === "undefined") {
     getWorldColorRange: function() {
       var rgb = {};
 
-      sunGoo.bm.getPixelRGB(Archonia.Axioms.gameRadius, 10, rgb, true);
+      Archonia.Cosmos.Sea.bm.getPixelRGB(Archonia.Axioms.gameRadius, 10, rgb, true);
       var lumaTL = rgb.l;
 
-      sunGoo.bm.getPixelRGB(
+      Archonia.Cosmos.Sea.bm.getPixelRGB(
         Math.floor(Archonia.Axioms.gameRadius), Math.floor(Archonia.Axioms.gameHeight - 10), rgb, true
       );
       var lumaBR = rgb.l;
@@ -68,29 +70,27 @@ if(typeof window === "undefined") {
     },
     
     ignite: function() {
-      sunGoo = Archonia.Essence.bitmapFactory.makeBitmap('archonia');
-      
-      darkness = Archonia.Phaser.game.add.sprite(
-        Archonia.Axioms.gameCenter.x, Archonia.Axioms.gameCenter.y, Archonia.Phaser.game.cache.getBitmapData('archoniaGoo')
+      Archonia.Cosmos.Sun.darkness = Archonia.Engine.game.add.sprite(
+        Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y, Archonia.Engine.game.cache.getBitmapData('archoniaGoo')
       );
 
       var scale = Archonia.Axioms.gameWidth / Archonia.Axioms.archoniaGooRadius;
-      darkness.scale.setTo(scale, scale); // Big enough to cover the world
+      Archonia.Cosmos.Sun.darkness.scale.setTo(scale, scale); // Big enough to cover the world
 
-      darkness.anchor.setTo(0.5, 0.5);
-      darkness.alpha = Archonia.Axioms.darknessAlphaHi; // Note: dark sprite, so high alpha means dark world
-      darkness.tint = 0x9900;
+      Archonia.Cosmos.Sun.darkness.anchor.setTo(0.5, 0.5);
+      Archonia.Cosmos.Sun.darkness.alpha = Archonia.Axioms.darknessAlphaHi; // Note: dark sprite, so high alpha means dark world
+      Archonia.Cosmos.Sun.darkness.tint = 0x9900;
 
-      darknessTween = Archonia.Phaser.game.add.tween(darkness).to(
-        {alpha: Archonia.Axioms.darknessAlphaLo}, Archonia.Axioms.dayLength, easingFunction, true, 0, -1, true
+      Archonia.Cosmos.Sun.darknessTween = Archonia.Engine.game.add.tween(Archonia.Cosmos.Sun.darkness).to(
+        {alpha: Archonia.Axioms.darknessAlphaLo}, Archonia.Axioms.dayLength, Archonia.Cosmos.Sun.easingFunction, true, 0, -1, true
       );
   
-      dayNumber = 1;
+      Archonia.Cosmos.Sun.dayNumber = 1;
 
-      Archonia.Form.worldColorRange = Archonia.Cosmos.Sun.getWorldColorRange();
+      Archonia.Essence.worldColorRange = Archonia.Cosmos.Sun.getWorldColorRange();
       
-      /*darknessTween.onLoop.add(function() {
-        Archonia.Axioms.archonia.archons.dailyReport(this.dayNumber++);
+      /*Archonia.Cosmos.Sun.darknessTween.onLoop.add(function() {
+        Archonia.Axioms.archonia.archons.dailyReport(this.Archonia.Cosmos.Sun.dayNumber++);
       }, this);*/
     }
   };

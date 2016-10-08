@@ -3,14 +3,16 @@
 
 "use strict";
 
-var Archonia = Archonia || { Axioms: {}, Essence: {}, Form: {} };
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Form.Range = require('./widgets/Range.js');
+  Archonia.Form.XY = require('./widgets/XY.js').XY;
 }
 
 (function(Archonia) {
+  Archonia.Essence.gameCenter = Archonia.Form.XY(Archonia.Axioms.gameWidth / 2, Archonia.Axioms.gameHeight / 2);
   Archonia.Essence.buttonHueRange = new Archonia.Form.Range(240, 0);	// Blue (240) is cold, Red (0) is hot
   Archonia.Essence.darknessRange = new Archonia.Form.Range(Archonia.Axioms.darknessAlphaHi, Archonia.Axioms.darknessAlphaLo);
   Archonia.Essence.oneToZeroRange = new Archonia.Form.Range(1, 0);

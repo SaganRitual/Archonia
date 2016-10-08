@@ -3,7 +3,7 @@
 
 "use strict";
 
-var Archonia = Archonia || { Essence: {}, Form: {} };
+var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('../Axioms.js');
