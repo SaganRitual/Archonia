@@ -104,7 +104,22 @@ describe('Range', function() {
   describe("#reject bad arguments", function() {
     it('#happens all the time in testing, never in the wild', function() {
       var r = function() { new Range(); };
+      var s = function() { new Range(1, 1); };
+      var t = function() { new Range("hello", "there")};
       chai.expect(r).to.throw(Error, "Bad arg");
+      chai.expect(s).to.throw(Error, "Bad arg");
+      chai.expect(t).to.throw(Error, "Bad arg");
+    });
+    
+    it('#convertPoint should complain about bad args', function() {
+      var r = new Range(0, 1);
+      var c = function() { r.convertPoint(); };
+      var d = function() { r.convertPoint("hello", r); }
+      var e = function() { r.convertPoint(0, "there"); }
+      
+      chai.expect(c).to.throw(Error, "Bad arg");
+      chai.expect(d).to.throw(Error, "Bad arg");
+      chai.expect(e).to.throw(Error, "Bad arg");
     });
   });
   

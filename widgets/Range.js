@@ -8,7 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
 
 Archonia.Form.Range = function(lo, hi) {
-  if(lo === undefined || hi === undefined) { throw new Error("Bad arguments"); }
+  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi) || lo === hi) { throw new Error("Bad arguments"); }
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;
@@ -18,6 +18,10 @@ Archonia.Form.Range.prototype = {
   // The reason for this class: scaling a point
   // in my range to a point in a different range
   convertPoint: function(thePointOnHisMap, hisRange) {
+    if(
+      thePointOnHisMap === undefined || isNaN(thePointOnHisMap) ||
+      hisRange === undefined || !(hisRange instanceof Archonia.Form.Range)
+    ) { throw new Error("Bad arguments"); }
 
     // This is a signed value, indicating both his distance
     // and direction from his center; if it's a negative
