@@ -10,6 +10,7 @@ if(typeof window === "undefined") {
   Archonia.Cosmos.MannaGenerator = require('./MannaGenerator.js');
   Archonia.Cosmos.Sun = require('./Sun.js');
   Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
+  Archonia.Cosmos.Dronery = require('./Dronery.js');
   
   var Phaser = require('./test/support/Phaser.js');
   Archonia.Engine.game = new Phaser.Game();
@@ -23,15 +24,17 @@ if(typeof window === "undefined") {
     create: function() {
       Archonia.Engine.game.physics.startSystem(Phaser.Physics.ARCADE);
 
+      Archonia.Engine.cursors = Archonia.Engine.game.input.keyboard.createCursorKeys();
+      Archonia.Engine.game.input.onUp.add(Archonia.Engine.onMouseUp, Archonia.Engine);
+      Archonia.Engine.game.input.onDown.add(Archonia.Engine.onMouseDown, Archonia.Engine);
+
       Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
       Archonia.Essence.Goo = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
 
       Archonia.Cosmos.Sun.ignite();
       Archonia.Cosmos.MannaGenerator.start();
-
-      Archonia.Engine.cursors = Archonia.Engine.game.input.keyboard.createCursorKeys();
-      Archonia.Engine.game.input.onUp.add(Archonia.Engine.onMouseUp, Archonia.Engine);
-      Archonia.Engine.game.input.onDown.add(Archonia.Engine.onMouseDown, Archonia.Engine);
+      
+      Archonia.Cosmos.Dronery.start();
     },
 
     handleClick: function(/*pointer*/) {

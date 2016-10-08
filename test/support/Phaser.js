@@ -18,26 +18,36 @@ Phaser.Game = function(width, height, canvas) {
   _this = this;
 };
 
+
+Phaser.Group = function() {
+  
+};
+
+Phaser.Group.prototype = {
+  enableBody: null,
+  createMultiple: function() {},
+  forEach: function(f, c) { var s = _this.add.sprite(); f.call(c, s); },
+  getIndex: function() { return 0; },
+  getChildAt: function() { return new Phaser.Sprite(); }
+};
+
+Phaser.Sprite = function() {};
+Phaser.Sprite.prototype = {
+  alpha: null, tint: null,
+  addChild: function() {},
+  anchor: { setTo: function() {} },
+  scale: { setTo: function() {} },
+  body: { setSize: function() {}, bounce: { setTo: function() {} } }
+};
+
 Phaser.Game.prototype = {
   add: {
     bitmapData: function(width, height) { return new Phaser.BitmapData(width, height, this); },
     
-    group: function() { return {
-      enableBody: null,
-      createMultiple: function() {},
-      forEach: function(f, c) { var s = _this.add.sprite(); f.call(c, s); }
-    }},
-    
+    group: function() { return new Phaser.Group(); },
     image: function() { _this.calledAddImage = true; },
     tween: function() { return { to: function() {} }; },
-    sprite: function() {
-      return {
-        alpha: null, tint: null,
-        anchor: { setTo: function() {} },
-        scale: { setTo: function() {} },
-        body: { setSize: function() {}, bounce: { setTo: function() {} } }
-      };
-    }
+    sprite: function() { return new Phaser.Sprite(); },
   },
   
   input: { keyboard: { createCursorKeys: function() {} }, onUp: { add: function() {} }, onDown: { add: function() {} } },
