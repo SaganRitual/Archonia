@@ -95,20 +95,10 @@ Archonia.Form.Archon.prototype.getVelocity = function() {
 };
 
 Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
-  Archonia.Axioms.archonia.genomer.inherit(this, myParentArchon);
-  
-  this.isParasite = this.god.decreesYouAParasite(myParentArchon);
-  
-  //var texture = this.isParasite ? 'parasiteGoo' : 'realityGoo';
-  //this.sprite.loadTexture(Archonia.Engine.game.cache.getBitmapData(texture));
-  
-  var xScale = this.isParasite ? 1.25 : 0.25;
-  var yScale = this.isParasite ? 0.25 : 0.25;
-  
-  this.button.scale.setTo(xScale, yScale);
+  Archonia.Cosmos.Genomer.inherit(this, myParentArchon);
   
   this.myParentArchon = myParentArchon;
-  this.frameCount = Archonia.Form.integerInRange(0, 60);
+  this.frameCount = Archonia.Axioms.integerInRange(0, 60);
   this.whichFlash = 'birth';
   this.flashDuration = 0.5 * 60;
   this.flashInterval = 5;
@@ -124,25 +114,22 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     defending: { on: 0xFF0000, off: 0x0000FF }
   };
 
-	this.uniqueID = this.god.getUniqueID();
+	/*this.uniqueID = this.god.getUniqueID();
   if(this.uniqueID === 0) {
     this.sprite.tint = 0x00FFFF;  // For debugging, so I can see archon 0
-  }
+  }*/
   
   this.sensor.scale.setTo(this.sensorScale, this.sensorScale);  
 
-  this.accel.launch(this);
-  this.lizer.launch(this);
-  this.locator.launch(this);
-  this.temper.launch(this);
-  this.mover.launch(this);
-  
   if(myParentArchon === undefined) {
-    this.position.set(Archonia.Form.integerInRange(20, Archonia.Engine.game.width - 20), Archonia.Form.integerInRange(20, Archonia.Engine.game.height - 20));
-    Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
+    this.position.set(
+      Archonia.Axioms.integerInRange(20, Archonia.Engine.game.width - 20),
+      Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20)
+    );
+    //Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
   } else {
     this.position.set(myParentArchon.position);
-    Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
+   // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
   }
 
   this.firstLaunch = false;
@@ -172,7 +159,9 @@ Archonia.Form.Archon.prototype.setSize = function(lizerIsLaunched) {
   }
   
   mass = (
-    (babyFat / Archonia.Axioms.babyFatDensity) + (adultFat / Archonia.Axioms.fatDensity) + (embryoFat / Archonia.Axioms.embryoFatDensity)
+    (babyFat / Archonia.Axioms.babyFatDensity) +
+    (adultFat / Archonia.Axioms.adultFatDensity) +
+    (embryoFat / Archonia.Axioms.embryoFatDensity)
   );
   
 	var p = Archonia.Essence.archonSizeRange.convertPoint(mass, Archonia.Essence.archonMassRange);
@@ -232,10 +221,10 @@ Archonia.Form.Archon.prototype.tick = function() {
   this.sensor.x = this.sprite.x; // So the sensor will stay attached
   this.sensor.y = this.sprite.y; // So the sensor will stay attached
   
-  this.accel.tick(this.frameCount);
+  /*this.accel.tick(this.frameCount);
   this.lizer.tick(this.frameCount);
   this.locator.tick(this.frameCount);
-  this.mover.tick(this.frameCount);
+  this.mover.tick(this.frameCount);*/
 };
 
 })(Archonia);

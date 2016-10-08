@@ -6,10 +6,14 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
+  Archonia.Axioms.adultFatAtBirth = 100;
+  Archonia.Axioms.adultFatDensity = 100;
   Archonia.Axioms.archonCount = 1;
   Archonia.Axioms.archoniaGooDiameter = 100;
   Archonia.Axioms.archoniaGooRadius = 50;
   Archonia.Axioms.archoniaUniqueObjectId = 0;
+  Archonia.Axioms.babyFatAtBirth = 100;
+  Archonia.Axioms.babyFatDensity = 1000;
   Archonia.Axioms.costFactorForGivingBirth = 2;
   Archonia.Axioms.costFactorForBeingBorn = 1;
   Archonia.Axioms.dailyBirthCounter = 0;
@@ -17,6 +21,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.darknessAlphaHi = 0.3;
   Archonia.Axioms.darknessAlphaLo = 0.0;
   Archonia.Axioms.dayLength = 60 * 1000;  // In ms, not ticks
+  Archonia.Axioms.embryoFatDensity = 1000;
   Archonia.Axioms.frameCount = 0;
   Archonia.Axioms.gameHeight = 600;
   Archonia.Axioms.gameWidth = 600;
