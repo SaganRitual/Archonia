@@ -6,23 +6,29 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
+  Archonia.Axioms.archonCount = 1;
+  Archonia.Axioms.archoniaGooDiameter = 100;
+  Archonia.Axioms.archoniaGooRadius = 50;
+  Archonia.Axioms.archoniaUniqueObjectId = 0;
+  Archonia.Axioms.costFactorForGivingBirth = 2;
+  Archonia.Axioms.costFactorForBeingBorn = 1;
+  Archonia.Axioms.dailyBirthCounter = 0;
+  Archonia.Axioms.dailyDeathCounter = 0;
+  Archonia.Axioms.darknessAlphaHi = 0.3;
+  Archonia.Axioms.darknessAlphaLo = 0.0;
+  Archonia.Axioms.dayLength = 60 * 1000;  // In ms, not ticks
+  Archonia.Axioms.frameCount = 0;
   Archonia.Axioms.gameHeight = 600;
   Archonia.Axioms.gameWidth = 600;
   Archonia.Axioms.gameRadius = Archonia.Axioms.gameWidth / 2;
-
-  Archonia.Axioms.archoniaGooDiameter = 100;
-  Archonia.Axioms.archoniaGooRadius = 50;
-
-  Archonia.Axioms.dayLength = 60 * 1000;  // In ms, not ticks
-
-  Archonia.Axioms.frameCount = 0;
-
-  Archonia.Axioms.archoniaUniqueObjectId = 0;
-  
+  Archonia.Axioms.maxAcceleration = 15;
+  Archonia.Axioms.maxMagnitudeA = 15;
+  Archonia.Axioms.maxMagnitudeV = 75;
+  Archonia.Axioms.maxSpeed = 75;                   // pix/sec
+  Archonia.Axioms.minimumAdultMass = 1;            // Below this, an adult will die
   Archonia.Axioms.temperatureHi = 1000;
   Archonia.Axioms.temperatureLo = -1000;
-  Archonia.Axioms.darknessAlphaHi = 0.3;
-  Archonia.Axioms.darknessAlphaLo = 0.0;
+  Archonia.Axioms.worldBoundsBorder = 15;
   
   Archonia.Axioms.clamp = function(value, min, max) {
     value = Math.max(value, min); value = Math.min(value, max); return value;

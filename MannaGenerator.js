@@ -15,6 +15,11 @@ if(typeof window === "undefined") {
   var xy = require('./widgets/XY.js');
   Archonia.Form.XY = xy.XY;
   Archonia.Form.RandomXY = xy.RandomXY;
+  
+  Archonia.Essence = require('./Essence.js');
+  Archonia.Cosmos.Sun = require('./Sun.js');
+  
+  Archonia.Cosmos.Sun.ignite();
 }
 
 (function(Archonia) {

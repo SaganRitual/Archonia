@@ -10,11 +10,12 @@ describe("Engine", function() {
     });
   })
   
-  describe('game state started, run create()', function() {
+  describe('game state started, see if it actually runs', function() {
     it('#pass create step', function() {
       Engine.game.state.create();
-    
       chai.expect(Engine.game.physics.started).true;
+
+      chai.expect(Engine.update).to.not.throw();
     });
   });
   

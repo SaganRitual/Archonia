@@ -27,17 +27,23 @@ Phaser.Group.prototype = {
   enableBody: null,
   createMultiple: function() {},
   forEach: function(f, c) { var s = _this.add.sprite(); f.call(c, s); },
+  forEachAlive: function(f, c) { var s = _this.add.sprite(); f.call(c, s); },
+  getFirstDead: function() { return new Phaser.Sprite(); },
   getIndex: function() { return 0; },
-  getChildAt: function() { return new Phaser.Sprite(); }
+  getChildAt: function() { return new Phaser.Sprite(); },
+  getRandom: function() { return new Phaser.Sprite(); }
 };
 
 Phaser.Sprite = function() {};
 Phaser.Sprite.prototype = {
-  alpha: null, tint: null,
+  alpha: 1, tint: 0,
   addChild: function() {},
   anchor: { setTo: function() {} },
   scale: { setTo: function() {} },
-  body: { setSize: function() {}, bounce: { setTo: function() {} } }
+  body: { setSize: function() {}, bounce: { setTo: function() {} } },
+  position: { setTo: function() {} },
+  revive: function() {},
+  archon: { tick: function() {} }
 };
 
 Phaser.Game.prototype = {
@@ -157,7 +163,12 @@ Phaser.BitmapData = function(width, height, game) {
 
 Phaser.BitmapData.prototype = {
   circle: function() { this.calledCircle = true; },
-  getPixelRGB: function(junk1, junk2, rgbObject) { this.calledGetPixelRGB = true; rgbObject.l = 0; }, // ell, not the number 1
+  getPixelRGB: function(x, y, rgbObject) {
+    this.calledGetPixelRGB = true;
+    
+    // ell, not the number one
+    rgbObject.l = y > 300 ? 1 : 0;
+  },
   update: function() { this.calledUpdate = true; }
 };
 

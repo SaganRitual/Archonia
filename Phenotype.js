@@ -32,7 +32,7 @@ Archonia.Form.Phenotype = function(archon, theSun) {
   this.larvalCalorieBudget = 0;
   this.adultCalorieBudget = 0;
   
-  this.optimalTempRange = new Archonia.Form.Range(0, 0);
+  this.optimalTempRange = null;
   
 };
 
@@ -142,7 +142,7 @@ Archonia.Form.Phenotype.prototype = {
     this.adultCalorieBudget = this.genome.birthMass.adultCalories;
     
     var tempRangeRadius = this.genome.optimalTempRangeWidth / 2;
-    this.optimalTempRange.set(this.genome.optimalTemp - tempRangeRadius, this.genome.optimalTemp + tempRangeRadius);
+    this.optimalTempRange = new Archonia.Form.Range(this.genome.optimalTemp - tempRangeRadius, this.genome.optimalTemp + tempRangeRadius);
     
     this.setSize();
   },

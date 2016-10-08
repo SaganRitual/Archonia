@@ -13,6 +13,7 @@ if(typeof window === "undefined") {
   Archonia.Essence = require('./Essence.js');
   Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
   Archonia.Form.Range = require('./widgets/Range.js');
+  Archonia.Form.XY = require('./widgets/XY.js').XY;
 
   Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
 }
@@ -35,6 +36,8 @@ if(typeof window === "undefined") {
     },
     
     getTemperature: function(where, whereY) {
+      if(where === undefined || !(where instanceof Archonia.Form.XY)) { throw new Error("Bad arguments"); }
+
       where.set(where, whereY);
       where.floor();
 

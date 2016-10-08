@@ -11,4 +11,9 @@ describe("MannaGenerator", function() {
     chai.expect(MannaGenerator.randomPoint.max.x).not.equal(undefined);
     chai.expect(MannaGenerator.randomPoint.max.y).not.equal(undefined);
   });
+  
+  it('#of course, it should also run', function() {
+    var t = function() { MannaGenerator.tick(); };
+    chai.expect(t).to.not.throw();
+  });
 });

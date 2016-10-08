@@ -11,7 +11,7 @@ describe('SensorArray', function() {
       chai.expect(c.isEmpty()).equal(true);
       for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.signalSmoothers[i].isEmpty()).equal(true); }
       
-      c.store(0);
+      c.store(0, 0);
       chai.expect(c.isEmpty()).equal(false);
       for(i = 0; i < howManyMeasurementPoints; i++) { chai.expect(c.signalSmoothers[i].isEmpty()).equal(false); }
       

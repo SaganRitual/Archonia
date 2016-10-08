@@ -8,6 +8,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 if(typeof window === "undefined") {
   var Phaser = require('./test/support/Phaser.js');
   Archonia.Engine.game = new Phaser.Game();
+  
+  Archonia.Form.Archon = require('./Archon.js');
 }
 
 (function(Archonia) {

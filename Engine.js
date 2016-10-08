@@ -70,6 +70,7 @@ if(typeof window === "undefined") {
       Archonia.Engine.frameCount++;
       
       Archonia.Cosmos.MannaGenerator.tick(Archonia.Engine.frameCount);
+      Archonia.Cosmos.Dronery.tick(Archonia.Engine.frameCount);
     }
     
   };

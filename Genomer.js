@@ -8,6 +8,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 if(typeof window === "undefined") {
   Archonia.Form.tinycolor = require('./widgets/tinycolor.js');
   Archonia.Axioms = require('./Axioms.js');
+} else{
+  Archonia.Form.tinycolor = window.tinycolor;
 }
 
 (function(Archonia) {
