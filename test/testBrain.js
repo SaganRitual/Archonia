@@ -32,6 +32,8 @@ var rampSensorsDirectional = function(brain, sense, values) {
 var frameCount = 0;
 var tick = function(theBrain) { theBrain.tick(frameCount++); };
 
+var A = { sun: { getTemperature: function(where) { return where.y; } } };
+
 var foodSearchToFirstTurn = function(brain, archon) {
   var temp = archon.genome.optimalTemp;
   var food = 50;
@@ -81,9 +83,79 @@ var foodSearchToFirstTurn = function(brain, archon) {
   robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6);
 
   computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
-  var xy = Archonia.Form.XY(Archonia.Form.XY.fromPolar(archon.getSize(), computerizedAngle));
+  var xy = Archonia.Form.XY.fromPolar(archon.genome.maxMVelocity, computerizedAngle);
 
   tick(brain);
+  chai.expect(archon.velocity).to.include({ x: xy.x, y: xy.y });
+};
+
+var safeTempSearch = function(brain, archon) {
+  var temp = archon.genome.optimalTemp;
+  var food = 50;
+
+  var fullness = archon.genome.reproductionThreshold + archon.genome.embryoThreshold;
+  var computerizedAngle = null, xy = null;
+  
+  rampSensorsDirectional(brain, 'hunger', [ fullness ]);
+
+  rampSensorsDirectional( brain, 'temperature', [ temp, temp ] );
+  rampSensorsDirectional( brain, 'food', [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+  rampSensorsDirectional( brain, 'fatigue',  [ 0 ] );
+  rampSensorsDirectional( brain, 'predator', [ 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0 ] );
+  rampSensorsDirectional( brain, 'prey',     [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+  rampSensorsDirectional( brain, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+
+  // Make sure we're not getting tempSearch when we're
+  // supposed to be fleeing a predator
+  tick(brain);
+  
+  // Should choose position #2, the center of the spread
+  computerizedAngle = Archonia.Axioms.computerizeAngle(5 * (2 * Math.PI / 12));
+  xy = Archonia.Form.XY.fromPolar(archon.genome.maxMVelocity, computerizedAngle);
+  chai.expect(archon.velocity).to.include({ x: xy.x, y: xy.y });
+
+  // End predator threat, make temp too hi
+  for(var i = 0; i < archon.genome.senseMeasurementDepth; i++) {
+    rampSensorsDirectional( brain, 'predator', [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+    rampSensorsDirectional( brain, 'temperature', [ temp, temp  + archon.genome.optimalTempRange ] );
+  }
+  
+  // Temp too high below, go up
+  tick(brain);
+  chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
+  chai.expect(archon.velocity.y).equal(archon.genome.maxMVelocity);
+
+  // Temp too high above, go down
+  for(var i = 0; i < archon.genome.senseMeasurementDepth - 1; i++) {
+    rampSensorsDirectional( brain, 'temperature', [ temp  + archon.genome.optimalTempRange, temp ] );
+  }
+
+  tick(brain);
+  chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
+  chai.expect(archon.velocity.y).equal(-archon.genome.maxMVelocity);
+  
+  // Should continue move until we reach the time limit; here we
+  // go until just before that limit; velocity should not change
+  //
+  // Ok, sloppy here about the exact number of ticks and the order,
+  // but it doesn't matter if we're off by a couple; the main thing
+  // is to change direction when necessary
+  for(var j = 0; j < archon.genome.howLongBadTempToEncystment - 2; j++) {
+    tick(brain);
+    chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
+    chai.expect(archon.velocity.y).equal(-archon.genome.maxMVelocity);
+  }
+
+  // Now bring temp back to normal and raise another threat; temp state should tell
+  // the brain that temp is ok, brain should turn it off and take care of the new threat
+  for(var i = 0; i < archon.genome.senseMeasurementDepth; i++) {
+    rampSensorsDirectional( brain, 'toxin',    [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 ] );
+    rampSensorsDirectional( brain, 'temperature', [ temp, temp ] );
+  }
+
+  tick(brain);
+  computerizedAngle = Archonia.Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
+  xy = Archonia.Form.XY.fromPolar(archon.genome.maxMVelocity, computerizedAngle);
   chai.expect(archon.velocity).to.include({ x: xy.x, y: xy.y });
 };
 
@@ -97,7 +169,7 @@ describe('Brain', function() {
       for(var s in archon.genome.senses) { archon.genome.senses[s].multiplier = 1; }
       
       // Ramp everyone up; fatigue should win this round
-      for(var i = 0; i < 5; i++) {
+      for(var i = 0; i < archon.genome.senseMeasurementDepth; i++) {
         rampSensors(b, 'fatigue', 0.89, 1);
         rampSensors(b, 'hunger', archon.genome.embryoThreshold + archon.genome.reproductionThreshold, 1);
         rampSensors(b, 'temperature', archon.genome.optimalTemp, 2);
@@ -108,8 +180,8 @@ describe('Brain', function() {
 
         tick(b);
         
-        // Brain wants to go to point 0 on the sensor array; that's (1, 0) on the x/y plane
-        chai.expect(b.movementTarget).to.include({ x: 1, y: 0 });
+        // Brain wants to go to point 0 on the sensor array; that's (maxMVelocity, 0) on the x/y plane
+        chai.expect(archon.velocity).to.include({ x: archon.genome.maxMVelocity, y: 0 });
 
         r = b.determineMostPressingNeed();
         chai.expect(r).to.include({ action: 'moveToSecure', direction: 0});
@@ -127,7 +199,7 @@ describe('Brain', function() {
       rampSensors(b, 'food', 50, 12);
 
       tick(b);
-      chai.expect(b.movementTarget).to.include({ x: 1, y: 0 });
+      chai.expect(archon.velocity).to.include({ x: archon.genome.maxMVelocity, y: 0 });
 
       r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'moveToSecure', direction: 0});
@@ -142,7 +214,7 @@ describe('Brain', function() {
       rampSensors(b, 'food', 50, 12);
 
       tick(b);
-      chai.expect(b.movementTarget).to.include({ x: 1, y: 0 });
+      chai.expect(archon.velocity).to.include({ x: archon.genome.maxMVelocity, y: 0 });
 
       r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'toxinDefense', direction: 0});
@@ -202,10 +274,10 @@ describe('Brain', function() {
 
       tick(b);
 
-      var r = b.determineMostPressingNeed(), theta = Archonia.Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
+      var theta = Archonia.Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
+      var xy = Archonia.Form.XY.fromPolar(archon.genome.maxMVelocity, theta)
       
-      chai.expect(r).to.include({ action: 'eat', direction: 11 });
-      chai.expect(b.movementTarget).to.include(Archonia.Form.XY.fromPolar(1, theta));
+      chai.expect(archon.velocity).to.include({ x: xy.x, y: xy.y });
     });
   });
   
@@ -229,7 +301,7 @@ describe('Brain', function() {
       robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) - (7 * Math.PI / 6);
 
       computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
-      var xy = Archonia.Form.XY(Archonia.Form.XY.fromPolar(archon.getSize(), computerizedAngle));
+      var xy = Archonia.Form.XY(Archonia.Form.XY.fromPolar(archon.genome.maxMVelocity, computerizedAngle));
 
       for(var i = 0; i < archon.genome.foodSearchTimeBetweenTurns; i++) {
         tick(brain);
@@ -240,4 +312,33 @@ describe('Brain', function() {
     });
   });
 
+  describe('#FindSafeTemp state', function() {
+    it("#track until not needed", function() {
+      var archon = new testData.Archon();
+      var brain = new Archonia.Form.Brain(archon);
+      safeTempSearch(brain, archon);
+    });
+  
+    it('#temp not getting any better: encyst', function() {
+      var archon = new testData.Archon();
+      var brain = new Archonia.Form.Brain(archon);
+      safeTempSearch(brain, archon);
+
+      for(var i = 0; i < archon.genome.senseMeasurementDepth; i++) {
+        rampSensorsDirectional( brain, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+        rampSensorsDirectional(
+          brain, 'temperature', [ archon.genome.optimalTemp, archon.genome.optimalTemp + archon.genome.optimalTempRange ]
+        );
+      }
+
+      for(var i = 0; i < archon.genome.howLongBadTempToEncystment; i++) {
+        tick(brain);
+        chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
+        chai.expect(archon.velocity.y).equal(archon.genome.maxMVelocity);
+      }
+
+      tick(brain);
+      chai.expect(archon.velocity).to.include({ x: 0, y: 0 });
+    });
+  })
 });

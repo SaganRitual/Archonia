@@ -17,48 +17,48 @@ Archonia.Form.BrainStates = {
   BrainState: function(brain) { this.brain = brain; }
 };
 
-Archonia.Form.BrainStates.BrainState.prototype.tick = function(frameCount) {
-  this.frameCount = frameCount;
-};
-
-Archonia.Form.BrainStates.Encyst = function(brain) {
-  Archonia.Form.BrainStates.BrainState.call(this, brain);
-};
-
-Archonia.Form.BrainStates.Encyst.prototype = Object.create(Archonia.Form.BrainStates.BrainState.prototype);
-Archonia.Form.BrainStates.Encyst.prototype.constructor = Archonia.Form.BrainStates.Encyst;
-
-Archonia.Form.BrainStates.Encyst.prototype.tick = function(frameCount) {
-  Archonia.Form.BrainStates.BrainState.prototype.tick.call(this, frameCount);
-};
-
 Archonia.Form.BrainStates.FindSafeTemp = function(brain) {
   Archonia.Form.BrainStates.BrainState.call(this, brain);
   this.tempCheck = new Archonia.Form.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
+  this.active = false; this.startPending = false;
 };
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype = Object.create(Archonia.Form.BrainStates.BrainState.prototype);
 Archonia.Form.BrainStates.FindSafeTemp.prototype.constructor = Archonia.Form.BrainStates.FindSafeTemp;
 
-Archonia.Form.BrainStates.FindSafeTemp.prototype.chooseAction = function() {
+Archonia.Form.BrainStates.FindSafeTemp.prototype.getInstruction = function() {
   var foundTolerableTemp = false, radius = this.brain.archon.genome.optimalTempRange / 2;
       
   this.tempCheck.forEach(function(ix, delta) {
     if(delta < radius) { foundTolerableTemp = true; return false; }
   });
   
-  return foundTolerableTemp ? 'move' : 'encyst';
+  var action = (foundTolerableTemp || this.startPending) ? 'move' : 'encyst';
+  
+  return { action: action, dVelocity: null }; // Brain will decide the direction depending on sense input
 };
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype.start = function() {
+  this.active = true; this.startPending = true;
   for(var i = 0; i < this.brain.archon.genome.howLongBadTempToEncystment; i++) {
     this.tempCheck.store(this.brain.archon.genome.optimalTemp);
   }
 };
 
-Archonia.Form.BrainStates.FindSafeTemp.prototype.update = function(frameCount) {//jshint ignore: line
-  var delta = Math.abs(this.brain.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
-  this.tempCheck.store(delta);
+Archonia.Form.BrainStates.FindSafeTemp.prototype.update = function(frameCount, onOff) {
+  var startup = onOff && !this.active;
+  var shutdown = !onOff && this.active;
+  var continueRunning = onOff && this.active;
+
+  if(startup) {
+    this.start();
+  } else if(shutdown) {
+    this.active = false; 
+  } else if(continueRunning) {
+    this.startPending = false;
+    var delta = Math.abs(this.brain.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
+    this.tempCheck.store(delta);
+  }
 };
 
 Archonia.Form.BrainStates.SearchForFood = function(brain) {
@@ -76,24 +76,24 @@ Archonia.Form.BrainStates.SearchForFood.prototype = Object.create(Archonia.Form.
 Archonia.Form.BrainStates.SearchForFood.prototype.constructor = Archonia.Form.BrainStates.SearchForFood;
 
 Archonia.Form.BrainStates.SearchForFood.prototype.getInstruction = function() {
+  
+  var robalizedAngle = null, computerizedAngle = null;
 
   if(this.startPending) {
-    return {
-      action: 'setMoveTarget',
-      moveTo: Archonia.Form.XY(
-        Archonia.Axioms.integerInRange(0, Archonia.Axioms.gameWidth), Archonia.Axioms.integerInRange(0, Archonia.Axioms.gameHeight)
-      )
-    };
+    robalizedAngle = Archonia.Axioms.realInRange(0, 2 * Math.PI);
+    computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
+    
+    return { action: 'setVelocity', dVelocity: computerizedAngle };
     
   } else if(this.turnPending) {
 
-    var newTarget = Archonia.Form.XY(this.brain.archon.velocity), computerizedAngle = null, robalizedAngle = null;
+    var v = Archonia.Form.XY(this.brain.archon.velocity);
 
-    computerizedAngle = newTarget.getAngleFrom(0);
+    computerizedAngle = v.getAngleFrom(0);
     robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
     computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
     
-    return({ action: 'turn', moveTo: Archonia.Form.XY.fromPolar(this.brain.archon.getSize(), computerizedAngle) });
+    return({ action: 'turn', dVelocity: computerizedAngle });
     
   } else {
     return { action: 'continue' };

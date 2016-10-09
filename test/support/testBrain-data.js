@@ -20,14 +20,17 @@ var XY = require('../../widgets/XY.js').XY;
   
   A.Archon.prototype = {
     getSize: function() { return 2; },
-    moveTo: function(where) { this.velocity.set(where); },
+    moveTo: function(where) { this.velocity.set(this.position.plus(where)); },
+    setMVelocity: function(vector) { this.velocity.set(vector); },
     position: XY(42, 137),
     velocity: XY(),
     
     genome: {
+      maxMVelocity: 5,
       foodSearchTimeBetweenTurns: 15,
       
       optimalTemp: optimalTemp, optimalTempRange: optimalTempRange,
+      howLongBadTempToEncystment: 15,
     
       offspringMass: { adultCalories: adultCalories, larvalCalories: larvalCalories },
     

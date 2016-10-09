@@ -27,10 +27,6 @@ Archonia.Form.Brain = function(archon) {
 
   this.state_searchForFood = new Archonia.Form.BrainStates.SearchForFood(this);
   this.state_findSafeTemp = new Archonia.Form.BrainStates.FindSafeTemp(this);
-  
-  this.currentState = 'searchForFood';
-
-  this.movementTarget = Archonia.Form.XY();
 
   this.currentAction = { senseName: 'hunger', action: 'searchForFood', direction: 0, signalWeight: 0 };
 
@@ -76,7 +72,14 @@ Archonia.Form.Brain.prototype = {
     for(var s in this.senseControls) {
       b = this.getEffectiveSignalStrengthFromSense(s);
 
-      if(b.effectiveSignalStrength > signalToBeat) {
+      if(
+        // If the sense we're checking is not the sense that we're currently responding
+        // to, then the sense we're checking has to beat the damping threshold. If it
+        // is the sense we're currently responding to, then we just update the current
+        // action stuff. This is because we need to update the direction even if the
+        // signal strength hasn't changed, or if it has decreased
+        (b.effectiveSignalStrength > signalToBeat) || (s === this.currentAction.senseName)
+      ) {
 
         signalToBeat = b.effectiveSignalStrength;
         
@@ -157,17 +160,27 @@ Archonia.Form.Brain.prototype = {
     case "pursue":
     case "flee":
     case "eat":
+    case 'toxinDefense':
       setMovementTarget = true;
       robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
       computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
       break;
       
     case "findSafeTemp":
+      stateInstruction = this.state_findSafeTemp.getInstruction();
+      if(stateInstruction.action === 'move') {
+        setMovementTarget = true;
+        robalizedAngle = (this.currentAction.direction * Math.PI) + (Math.PI / 2);
+        computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
+      } else {
+        this.archon.setMVelocity(0);
+      }
       break;
       
     case'searchForFood':
       stateInstruction = this.state_searchForFood.getInstruction();
-      if(stateInstruction.action !== 'continue') { this.archon.moveTo(stateInstruction.moveTo); }
+      computerizedAngle = stateInstruction.dVelocity;
+      setMovementTarget = stateInstruction.action !== 'continue';
       break;
       
     default:  // For all the non-spatial inputs
@@ -176,8 +189,8 @@ Archonia.Form.Brain.prototype = {
     }
 
     if(setMovementTarget) {
-      var xy = Archonia.Form.XY.fromPolar(1, computerizedAngle);
-      this.movementTarget.set(xy);
+      var xy = Archonia.Form.XY.fromPolar(this.archon.genome.maxMVelocity, computerizedAngle);
+      this.archon.setMVelocity(xy);
     }
   }
 };
