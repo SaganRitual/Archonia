@@ -249,5 +249,13 @@ Archonia.Cosmos.Genomer = {
 })(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = { Cosmos: Archonia.Cosmos, Form: Archonia.Form };
+  module.exports = {
+    Genomer: Archonia.Cosmos.Genomer,
+    Gene: Archonia.Form.Gene,
+    ScalarGene: Archonia.Form.ScalarGene,
+    ColorGene: Archonia.Form.ColorGene,
+    SenseGene: Archonia.Form.SenseGene,
+    SenseGeneFixed: Archonia.Form.SenseGeneFixed,
+    SenseGeneVariable: Archonia.Form.SenseGeneVariable
+  };
 }

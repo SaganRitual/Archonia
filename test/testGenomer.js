@@ -3,9 +3,16 @@ var assert = require('assert');
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
-var v = require('../Genomer.js');
-Archonia.Cosmos = v.Cosmos;
-Archonia.Form = v.Form;
+var g = require('../Genomer.js');
+
+Archonia.Cosmos.Genomer = g.Genomer 
+Archonia.Form.Gene = g.Gene
+Archonia.Form.ScalarGene = g.ScalarGene
+Archonia.Form.ColorGene = g.ColorGene
+Archonia.Form.SenseGene = g.SenseGene
+Archonia.Form.SenseGeneFixed = g.SenseGeneFixed
+Archonia.Form.SenseGeneVariable = g.SenseGeneVariable
+Archonia.Form.tinycolor = require('../widgets/tinycolor.js');
 
 Archonia.Axioms = require('../Axioms.js');
 
