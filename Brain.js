@@ -8,7 +8,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Cosmos.Sun = require('./Sun.js');
-  Archonia.Form.Body = require('./Body.js');
   Archonia.Form.BrainStates = require('./widgets/BrainStates.js');
   Archonia.Form.SensorArray = require('./widgets/SensorArray');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
@@ -20,8 +19,6 @@ var howManyPointsForSpatialInputs = 12;
 
 Archonia.Form.Brain = function(archon) {
   this.archon = archon;
-  
-  this.body = new Archonia.Form.Body();
   
   var gSenses = archon.genome.senses;
 
