@@ -136,6 +136,8 @@ Archonia.Form.SenseGene.prototype.inherit = function(parentGene) {
 
   this.multiplier = this.mutateScalar(parentGene.multiplier);
   this.decayRate = this.mutateScalar(parentGene.decayRate);
+  this.valuesRangeLo = this.mutateScalar(parentGene.valuesRangeLo);
+  this.valuesRangeHi = this.mutateScalar(parentGene.valuesRangeHi);
 };
 
 Archonia.Form.SenseGeneFixed = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
@@ -148,8 +150,6 @@ Archonia.Form.SenseGeneFixed.prototype.newGene = function() { return new Archoni
 
 Archonia.Form.SenseGeneFixed.prototype.inherit = function(parentGene) {
   Archonia.Form.SenseGene.prototype.inherit.call(this, parentGene);
-  this.valuesRangeLo = parentGene.valuesRangeLo;
-  this.valuesRangeHi = parentGene.valuesRangeHi;
 };
 
 Archonia.Form.SenseGeneVariable = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
