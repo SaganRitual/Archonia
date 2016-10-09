@@ -119,6 +119,53 @@ Archonia.Form.ColorGene.prototype.getOptimalTemp = function() {
   return t;
 };
 
+Archonia.Form.SenseGene = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
+  this.multiplier = multiplier;
+  this.decayRate = decayRate;
+  this.valuesRangeLo = valuesRangeLo;
+  this.valuesRangeHi = valuesRangeHi;
+  
+  Archonia.Form.Gene.call(this);
+};
+
+Archonia.Form.SenseGene.prototype = Object.create(Archonia.Form.Gene.prototype);
+Archonia.Form.SenseGene.prototype.constructor = Archonia.Form.SenseGene;
+Archonia.Form.SenseGene.prototype.newGene = function() { throw new Error("SenseGene.newGene() is pure virtual"); };
+Archonia.Form.SenseGene.prototype.inherit = function(parentGene) {
+  this.mutateMutatability(parentGene);
+
+  this.multiplier = this.mutateScalar(parentGene.multiplier);
+  this.decayRate = this.mutateScalar(parentGene.decayRate);
+};
+
+Archonia.Form.SenseGeneFixed = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
+  Archonia.Form.SenseGene.call(this, multiplier, decayRate, valuesRangeLo, valuesRangeHi);
+};
+
+Archonia.Form.SenseGeneFixed.prototype = Object.create(Archonia.Form.SenseGene.prototype);
+Archonia.Form.SenseGeneFixed.prototype.constructor = Archonia.Form.SenseGeneFixed;
+Archonia.Form.SenseGeneFixed.prototype.newGene = function() { return new Archonia.Form.SenseGeneFixed(); };
+
+Archonia.Form.SenseGeneFixed.prototype.inherit = function(parentGene) {
+  Archonia.Form.SenseGene.prototype.inherit.call(this, parentGene);
+  this.valuesRangeLo = parentGene.valuesRangeLo;
+  this.valuesRangeHi = parentGene.valuesRangeHi;
+};
+
+Archonia.Form.SenseGeneVariable = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
+  Archonia.Form.SenseGene.call(this, multiplier, decayRate, valuesRangeLo, valuesRangeHi);
+};
+
+Archonia.Form.SenseGeneVariable.prototype = Object.create(Archonia.Form.SenseGene.prototype);
+Archonia.Form.SenseGeneVariable.prototype.constructor = Archonia.Form.SenseGeneVariable;
+Archonia.Form.SenseGeneVariable.prototype.newGene = function() { return new Archonia.Form.SenseGeneVariable(); };
+
+Archonia.Form.SenseGeneVariable.prototype.inherit = function(parentGene) {
+  Archonia.Form.SenseGene.prototype.inherit.call(this, parentGene);
+  this.valuesRangeLo = this.mutateScalar(parentGene.valuesRangeLo);
+  this.valuesRangeHi = this.mutateScalar(parentGene.valuesRangeHi);
+};
+
 Archonia.Form.Genome = function(archon, parentGenome) {
   this.archon = archon;
   
