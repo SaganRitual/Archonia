@@ -20,7 +20,7 @@ PreCommit:
     enabled: true
     on_warn: fail
     exclude:
-      - 'test/*'
+      - 'test/**/*'
       - 'widgets/tinycolor.js'
 
 CommitMsg:      
