@@ -124,7 +124,7 @@ describe('Genomer', function() {
     it('SenseGeneFixed', function() {
       var makeGene = function() {
         var multiplier = 1, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-        return new Archonia.Form.SenseGeneVariable(multiplier, decayRate, valuesRangeLo, valuesRangeHi);
+        return new Archonia.Form.SenseGeneFixed(multiplier, decayRate, valuesRangeLo, valuesRangeHi);
       };
       
       var doResultStuff = function(sg) {
@@ -139,7 +139,7 @@ describe('Genomer', function() {
     it('SenseGeneVariable', function() {
       var makeGene = function() {
         var multiplier = 1, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-        return new Archonia.Form.SenseGeneFixed(multiplier, decayRate, valuesRangeLo, valuesRangeHi);
+        return new Archonia.Form.SenseGeneVariable(multiplier, decayRate, valuesRangeLo, valuesRangeHi);
       };
       
       var doResultStuff = function(sg) {

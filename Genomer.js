@@ -190,30 +190,40 @@ Archonia.Form.Genome.prototype = {
 };
 
 var primordialGenome = {
-  avoidDangerousPreyFactor: new Archonia.Form.ScalarGene(10),
-  birthThresholdMultiplier: new Archonia.Form.ScalarGene(1),
-  color: new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)')),
+  avoidDangerousPreyFactor:  new Archonia.Form.ScalarGene(10),
+  birthThresholdMultiplier:  new Archonia.Form.ScalarGene(1),
+  color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)')),
   feedingAccelerationDamper: new Archonia.Form.ScalarGene(1),
-  feedingSpeedDamper: new Archonia.Form.ScalarGene(1),
-  hungerMultiplier: new Archonia.Form.ScalarGene(0.0005),
-  injuryFactorThreshold: new Archonia.Form.ScalarGene(0.5),
-  maxMAcceleration: new Archonia.Form.ScalarGene(15),
-  maxMVelocity: new Archonia.Form.ScalarGene(75),
-  optimalMass: new Archonia.Form.ScalarGene(5),
-  offspringEnergy: new Archonia.Form.ScalarGene(200),
-  parasiteChaseFactor: new Archonia.Form.ScalarGene(1),
-  parasiteFlightFactor: new Archonia.Form.ScalarGene(10),
-  sensorScale: new Archonia.Form.ScalarGene(1),
-  targetChangeDelay: new Archonia.Form.ScalarGene(5),
-  tasteFactor: new Archonia.Form.ScalarGene(100),
-  tempFactor: new Archonia.Form.ScalarGene(1),
-  tempRange: new Archonia.Form.ScalarGene(400),
-  tempRangeDamping: new Archonia.Form.ScalarGene(0.5),
+  feedingSpeedDamper:        new Archonia.Form.ScalarGene(1),
+  hungerMultiplier:          new Archonia.Form.ScalarGene(0.0005),
+  injuryFactorThreshold:     new Archonia.Form.ScalarGene(0.5),
+  maxMAcceleration:          new Archonia.Form.ScalarGene(15),
+  maxMVelocity:              new Archonia.Form.ScalarGene(75),
+  optimalMass:               new Archonia.Form.ScalarGene(5),
+  offspringEnergy:           new Archonia.Form.ScalarGene(200),
+  parasiteChaseFactor:       new Archonia.Form.ScalarGene(1),
+  parasiteFlightFactor:      new Archonia.Form.ScalarGene(10),
+  sensorScale:               new Archonia.Form.ScalarGene(1),
+  targetChangeDelay:         new Archonia.Form.ScalarGene(5),
+  tasteFactor:               new Archonia.Form.ScalarGene(100),
+  tempFactor:                new Archonia.Form.ScalarGene(1),
+  tempRange:                 new Archonia.Form.ScalarGene(400),
+  tempRangeDamping:          new Archonia.Form.ScalarGene(0.5),
 
   // dummy entries so the getters will work
   optimalTemp: null,
   optimalHiTemp: null,
-  optimalLoTemp: null
+  optimalLoTemp: null,
+  
+  // Archonia 0.2
+  
+  fatigue:     new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),   
+  food:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, Archonia.Axioms.caloriesPerManna),
+  predator:    new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),
+  prey:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),
+  hunger:      new Archonia.Form.SenseGeneVariable(1, 0.1, 1000, 0),  // Just hacking in hi/lo for now
+  temperature: new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),         // Color gene should fill in hi/lo?
+  toxin:       new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1)
 };
 
 Archonia.Cosmos.Genomer = {
