@@ -32,8 +32,6 @@ var rampSensorsDirectional = function(brain, sense, values) {
 var frameCount = 0;
 var tick = function(theBrain) { theBrain.tick(frameCount++); };
 
-var A = { sun: { getTemperature: function(where) { return where.y; } } };
-
 var foodSearchToFirstTurn = function(brain, archon) {
   var temp = archon.genome.optimalTemp;
   var food = 50;
@@ -107,6 +105,7 @@ var safeTempSearch = function(brain, archon) {
 
   // Make sure we're not getting tempSearch when we're
   // supposed to be fleeing a predator
+  process.env['Sun.getTemperature'] = temp; // So the state will see that the temp is ok
   tick(brain);
   
   // Should choose position #2, the center of the spread
@@ -121,6 +120,8 @@ var safeTempSearch = function(brain, archon) {
   }
   
   // Temp too high below, go up
+  process.env['Sun.getTemperature'] = temp  + archon.genome.optimalTempRange;
+
   tick(brain);
   chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
   chai.expect(archon.velocity.y).equal(archon.genome.maxMVelocity);
@@ -129,6 +130,8 @@ var safeTempSearch = function(brain, archon) {
   for(var i = 0; i < archon.genome.senseMeasurementDepth - 1; i++) {
     rampSensorsDirectional( brain, 'temperature', [ temp  + archon.genome.optimalTempRange, temp ] );
   }
+  
+  process.env['Sun.getTemperature'] = temp  + archon.genome.optimalTempRange;
 
   tick(brain);
   chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
@@ -140,6 +143,8 @@ var safeTempSearch = function(brain, archon) {
   // Ok, sloppy here about the exact number of ticks and the order,
   // but it doesn't matter if we're off by a couple; the main thing
   // is to change direction when necessary
+  process.env['Sun.getTemperature'] = temp  + archon.genome.optimalTempRange;
+
   for(var j = 0; j < archon.genome.howLongBadTempToEncystment - 2; j++) {
     tick(brain);
     chai.expect(archon.velocity.x).within(-1e-5, 1e-5);
@@ -152,6 +157,8 @@ var safeTempSearch = function(brain, archon) {
     rampSensorsDirectional( brain, 'toxin',    [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 ] );
     rampSensorsDirectional( brain, 'temperature', [ temp, temp ] );
   }
+
+  process.env['Sun.getTemperature'] = temp;
 
   tick(brain);
   computerizedAngle = Archonia.Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
@@ -330,6 +337,8 @@ describe('Brain', function() {
           brain, 'temperature', [ archon.genome.optimalTemp, archon.genome.optimalTemp + archon.genome.optimalTempRange ]
         );
       }
+
+      process.env['Sun.getTemperature'] = archon.genome.optimalTemp + archon.genome.optimalTempRange;
 
       for(var i = 0; i < archon.genome.howLongBadTempToEncystment; i++) {
         tick(brain);

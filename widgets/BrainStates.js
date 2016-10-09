@@ -9,6 +9,9 @@ if(typeof window === "undefined") {
   Archonia.Axioms = require('../Axioms.js');
   Archonia.Form.Cbuffer = require('./Cbuffer.js');
   Archonia.Form.XY = require('./XY.js').XY;
+
+  if(process.env.whichSun === undefined) { process.env.whichSun = '../test/support/mockSun.js'; }
+  Archonia.Cosmos.Sun = require(process.env.whichSun);
 }
 
 (function(Archonia) {
@@ -56,7 +59,7 @@ Archonia.Form.BrainStates.FindSafeTemp.prototype.update = function(frameCount, o
     this.active = false; 
   } else if(continueRunning) {
     this.startPending = false;
-    var delta = Math.abs(this.brain.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
+    var delta = Math.abs(Archonia.Cosmos.Sun.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
     this.tempCheck.store(delta);
   }
 };

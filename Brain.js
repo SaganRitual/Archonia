@@ -7,7 +7,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Cosmos.Sun = require('./Sun.js');
   Archonia.Form.BrainStates = require('./widgets/BrainStates.js');
   Archonia.Form.SensorArray = require('./widgets/SensorArray');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
@@ -43,6 +42,7 @@ Archonia.Form.Brain = function(archon) {
   
   this.senseControls = {};
   
+  // Come back to this; I think we're copying every gene in the genome, not just the sense genes
   for(var senseNameInGenome in gSenses) {
     this.senseControls[senseNameInGenome] = {};
     
@@ -103,10 +103,6 @@ Archonia.Form.Brain.prototype = {
       effectiveSignalStrength: inputSignal.weight * genomeSenseControls.multiplier,
       action: brainSenseControls.action
     });
-  },
-  
-  getTemperature: function() {
-    return Archonia.Cosmos.Sun.getTemperature(this.archon.position);
   },
   
   launch: function() {
