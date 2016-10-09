@@ -7,7 +7,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Form.Body = require('./Body');
+  Archonia.Cosmos.Sun = require('./Sun.js');
+  Archonia.Form.Body = require('./Body.js');
   Archonia.Form.BrainStates = require('./widgets/BrainStates.js');
   Archonia.Form.SensorArray = require('./widgets/SensorArray');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
@@ -24,19 +25,18 @@ Archonia.Form.Brain = function(archon) {
   
   var gSenses = archon.genome.senses;
 
-  this.searchForFood = new Archonia.Form.BrainStates.SearchForFood(this);
-
-  this.defaultAction = { action: 'searchForFood', direction: 0, signalWeight: 0 };
-  this.movementTarget = Archonia.Form.XY();
+  this.state_searchForFood = new Archonia.Form.BrainStates.SearchForFood(this);
+  this.state_findSafeTemp = new Archonia.Form.BrainStates.FindSafeTemp(this);
   
-  this.currentAction = Object.assign({}, this.defaultAction);
+  this.currentState = 'searchForFood';
+
+  this.movementTarget = Archonia.Form.XY();
+
+  this.currentAction = { senseName: 'hunger', action: 'searchForFood', direction: 0, signalWeight: 0 };
 
   this.frameCount = 0;
-  this.state = null;
-  this.ackValue = null;
 
   this.velocity = Archonia.Form.XY();
-  this.action = null;
   
   var senseAddons = {
     fatigue:     { howManyPoints:  1, signalSpread: 1, action: 'moveToSecure' },
@@ -65,49 +65,55 @@ Archonia.Form.Brain = function(archon) {
 };
 
 Archonia.Form.Brain.prototype = {
-  ack: function(ackValue) {
-    switch(this.state) {
-      case 'searchForFood': this.searchForFood.ack(ackValue); break;
-    }
-  
-    this.ackValue = null;
-  },
-
-  chooseAction: function() {
+  determineMostPressingNeed: function() {
     
-    this.currentAction = Object.assign({}, this.defaultAction);
-
+    var b = this.getEffectiveSignalStrengthFromSense(this.currentAction.senseName);
+    
+    this.currentAction.signalWeight = b.effectiveSignalStrength;
+    
+    var signalToBeat = this.currentAction.signalWeight + this.archon.genome.inertialDamper;
+    
     for(var s in this.senseControls) {
-      var genomeSenseControls = this.archon.genome.senses[s];
-      var brainSenseControls = this.senseControls[s];
-      var inputSignal = null;
-      
-      if(brainSenseControls.sensorArray.isEmpty()) {
-        throw new Error("Sensors should never be empty");
-      } else {
+      b = this.getEffectiveSignalStrengthFromSense(s);
+
+      if(b.effectiveSignalStrength > signalToBeat) {
+
+        signalToBeat = b.effectiveSignalStrength;
         
-        inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
-        
-        var effectiveSignalStrength = inputSignal.weight * genomeSenseControls.multiplier;
+        this.currentAction.senseName = s;
+        this.currentAction.signalWeight = b.effectiveSignalStrength;
+        this.currentAction.action = b.action;
+        this.currentAction.direction = b.direction;
 
-        if(effectiveSignalStrength > this.currentAction.signalWeight + this.archon.genome.inertialDamper) {
-
-          this.currentAction.signalWeight = effectiveSignalStrength;
-          this.currentAction.action = brainSenseControls.action;
-          this.currentAction.direction = inputSignal.direction;
-
-        }
       }
     }
 
     return this.currentAction;
+  },
+
+  getEffectiveSignalStrengthFromSense: function(senseName) {
+    var brainSenseControls = this.senseControls[senseName];
+
+    if(brainSenseControls.sensorArray.isEmpty()) { throw new Error("Sensors should never be empty"); }
+  
+    var genomeSenseControls = this.archon.genome.senses[senseName];
+    var inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
+ 
+    return Object.assign(inputSignal, {
+      effectiveSignalStrength: inputSignal.weight * genomeSenseControls.multiplier,
+      action: brainSenseControls.action
+    });
+  },
+  
+  getTemperature: function() {
+    return Archonia.Cosmos.Sun.getTemperature(this.archon.position);
   },
   
   launch: function() {
     
   },
 
-  startSearchForFood: function() { this.searchForFood.start(); this.state = 'searchForFood'; },
+  startSearchForFood: function() { this.stateAwaitingAck = true; this.searchForFood.start(); this.state = 'searchForFood'; },
   
   senseFatigue: function(where, fatigue) {
     this.senseControls.fatigue.sensorArray.store(where, fatigue);
@@ -137,33 +143,42 @@ Archonia.Form.Brain.prototype = {
     this.senseControls.toxin.sensorArray.store(where, toxin);
   },
   
-  tick: function() {
-    var computerizedAngle = null, robalizedAngle = null;
+  tick: function(frameCount) {
+    var computerizedAngle = null, robalizedAngle = null, stateInstruction = null, setMovementTarget = false;
     
-    this.chooseAction();
-    
+    this.determineMostPressingNeed();
+
+    this.frameCount = frameCount;
+    this.state_searchForFood.update(frameCount, this.currentAction.action === 'searchForFood');
+    this.state_findSafeTemp.update(frameCount, this.currentAction.action === 'findSafeTemp');
+
     switch(this.currentAction.action) {
     case "moveToSecure":
     case "pursue":
     case "flee":
     case "eat":
+      setMovementTarget = true;
       robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
       computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
       break;
       
     case "findSafeTemp":
-      robalizedAngle = (this.currentAction.direction * Math.PI) + (Math.PI / 2);
-      computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
       break;
       
-    default:
-      robalizedAngle = 0;
-      computerizedAngle = 0;
+    case'searchForFood':
+      stateInstruction = this.state_searchForFood.getInstruction();
+      if(stateInstruction.action !== 'continue') { this.archon.moveTo(stateInstruction.moveTo); }
+      break;
+      
+    default:  // For all the non-spatial inputs
+      robalizedAngle = 0; computerizedAngle = 0; setMovementTarget = true;
       break;
     }
-    
-    var xy = Archonia.Form.XY.fromPolar(1, computerizedAngle);
-    this.movementTarget.set(xy);
+
+    if(setMovementTarget) {
+      var xy = Archonia.Form.XY.fromPolar(1, computerizedAngle);
+      this.movementTarget.set(xy);
+    }
   }
 };
   

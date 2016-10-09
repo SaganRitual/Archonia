@@ -1,17 +1,32 @@
-var adultCalories = 100, larvalCalories = 100, embryoThreshold = 200, reproductionThreshold = 500;
-var hungerLo = embryoThreshold + reproductionThreshold, hungerHi = 0;
+var A = {};
 
-var optimalTemp = -200, optimalTempRange = 400;
-var tempRadius = optimalTempRange / 2, tempLo = optimalTemp, tempHi = optimalTemp + tempRadius;
+var XY = require('../../widgets/XY.js').XY;
 
-var senseMeasurementDepth = 10, caloriesPerManna = 100;
+(function(Archon) {
 
-var reproductionCostFactor = 1.25;
+  var adultCalories = 100, larvalCalories = 100, embryoThreshold = 200, reproductionThreshold = 500;
+  var hungerLo = embryoThreshold + reproductionThreshold, hungerHi = 0;
 
-module.exports = {
+  var optimalTemp = -200, optimalTempRange = 400;
+  var tempRadius = optimalTempRange / 2, tempLo = optimalTemp, tempHi = optimalTemp + tempRadius;
 
-  archon: {
+  var senseMeasurementDepth = 10, caloriesPerManna = 100;
+
+  var reproductionCostFactor = 1.25;
+  
+  A.Archon = function() {
+    
+  };
+  
+  A.Archon.prototype = {
+    getSize: function() { return 2; },
+    moveTo: function(where) { this.velocity.set(where); },
+    position: XY(42, 137),
+    velocity: XY(),
+    
     genome: {
+      foodSearchTimeBetweenTurns: 15,
+      
       optimalTemp: optimalTemp, optimalTempRange: optimalTempRange,
     
       offspringMass: { adultCalories: adultCalories, larvalCalories: larvalCalories },
@@ -33,4 +48,6 @@ module.exports = {
       }
     }
   }
-};
+})(A);
+
+module.exports = A;

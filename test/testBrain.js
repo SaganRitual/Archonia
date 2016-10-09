@@ -5,9 +5,8 @@ Archonia.Form.Brain = require('../Brain.js');
 Archonia.Form.XY = require('../widgets/XY.js').XY;
 
 var testData = require('./support/testBrain-data.js');
-var archon = testData.archon;
+var archon = new testData.Archon();
 
-var data_driven = require('data-driven');
 var chai = require('chai');
 
 var rampSensors = function(brain, sense, value, howManyMeasurementPoints) {
@@ -30,6 +29,64 @@ var rampSensorsDirectional = function(brain, sense, values) {
   }
 };
 
+var frameCount = 0;
+var tick = function(theBrain) { theBrain.tick(frameCount++); };
+
+var foodSearchToFirstTurn = function(brain, archon) {
+  var temp = archon.genome.optimalTemp;
+  var food = 50;
+
+  var fullness = 0; // Low fullness; extremely hungry
+  rampSensorsDirectional(brain, 'hunger', [ fullness ]);
+
+  rampSensorsDirectional( brain, 'temperature', [ temp, temp ] );
+  rampSensorsDirectional( brain, 'food', [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+  rampSensorsDirectional( brain, 'fatigue',  [ 0 ] );
+  rampSensorsDirectional( brain, 'predator', [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+  rampSensorsDirectional( brain, 'prey',     [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+  rampSensorsDirectional( brain, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
+
+  // hack some ugliness into our velocity, so we can tell that
+  // the brain is setting the velocity to something reasonable. We
+  // can't check for fixed values because starting from stationary
+  // sets us in a random direction
+  archon.velocity.set('garbage', 'garbage');
+  tick(brain);
+
+  chai.expect(archon.velocity).to.have.property('x').that.is.a('number');
+  chai.expect(archon.velocity).to.have.property('y').that.is.a('number');
+
+  // Now we have some fixed values in the velocity, check that they remain
+  // the same until the genome says it's time to turn
+  var x = archon.velocity.x, y = archon.velocity.y;
+
+  // but first, hack some garbage in again, because the brain should not
+  // be setting the velocity again until the genome says it's time to
+  // turn. Make sure he's not setting it
+  archon.velocity.set('garbage', 'garbage');
+  tick(brain);
+
+  chai.expect(archon.velocity).to.include({ x: 'garbage', y: 'garbage' });
+
+  archon.velocity.set(x, y);
+
+  for(var i = 0; i < archon.genome.foodSearchTimeBetweenTurns - 1; i++) {
+    tick(brain);
+    chai.expect(archon.velocity).to.include({ x: x, y: y });
+  }
+
+  computerizedAngle = archon.velocity.getAngleFrom(0);
+
+  // First turn is always left, add 7π/6
+  robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6);
+
+  computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
+  var xy = Archonia.Form.XY(Archonia.Form.XY.fromPolar(archon.getSize(), computerizedAngle));
+
+  tick(brain);
+  chai.expect(archon.velocity).to.include({ x: xy.x, y: xy.y });
+};
+
 describe('Brain', function() {
   describe('Inertia threshold / change damping', function() {
     it('#no state change until threshold met', function() {
@@ -49,15 +106,15 @@ describe('Brain', function() {
         rampSensors(b, 'toxin', 0.8, 12);
         rampSensors(b, 'food', 75, 12);
 
-        b.tick();
+        tick(b);
         
         // Brain wants to go to point 0 on the sensor array; that's (1, 0) on the x/y plane
         chai.expect(b.movementTarget).to.include({ x: 1, y: 0 });
 
-        r = b.chooseAction();
+        r = b.determineMostPressingNeed();
         chai.expect(r).to.include({ action: 'moveToSecure', direction: 0});
       }
-      
+
       // Let fatigue decay while the others continue up; nothing should
       // change until someone gets past fatigue plus the inertial damper.
       // Shouldn't happen on this round
@@ -69,10 +126,10 @@ describe('Brain', function() {
       rampSensors(b, 'toxin', 0.5, 12);
       rampSensors(b, 'food', 50, 12);
 
-      b.tick();
+      tick(b);
       chai.expect(b.movementTarget).to.include({ x: 1, y: 0 });
 
-      r = b.chooseAction();
+      r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'moveToSecure', direction: 0});
       
       // Should happen on this round
@@ -84,10 +141,10 @@ describe('Brain', function() {
       rampSensors(b, 'toxin', 0.5, 12);
       rampSensors(b, 'food', 50, 12);
 
-      b.tick();
+      tick(b);
       chai.expect(b.movementTarget).to.include({ x: 1, y: 0 });
 
-      r = b.chooseAction();
+      r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'toxinDefense', direction: 0});
     });
   });
@@ -109,17 +166,18 @@ describe('Brain', function() {
       rampSensorsDirectional( b, 'prey',     [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
       rampSensorsDirectional( b, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
       
-      var r = b.chooseAction();
+      var r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'eat', direction: 11 });
 
       rampSensorsDirectional( b, 'temperature', [ temp, temp + archon.genome.optimalTempRange ] );
       
-      var r = b.chooseAction();
+      var r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'findSafeTemp', direction: 1 });
 
       rampSensorsDirectional( b, 'fatigue',  [ 1 ] );
-      
-      var r = b.chooseAction();
+      rampSensorsDirectional( b, 'fatigue',  [ 1 ] );
+
+      var r = b.determineMostPressingNeed();
       chai.expect(r).to.include({ action: 'moveToSecure', direction: 0 });
     });
   });
@@ -127,12 +185,13 @@ describe('Brain', function() {
   describe('Movement instructions to body', function() {
     it('#calculate movement target from sensor input', function() {
       var b = new Archonia.Form.Brain(archon), r = null;
-      
-      var hunger = archon.genome.embryoThreshold + archon.genome.reproductionThreshold;
+
+      // high fullness -- not hungry at all
+      var fullness = archon.genome.embryoThreshold + archon.genome.reproductionThreshold;
       var temp = archon.genome.optimalTemp;
       var food = 50;
       
-      rampSensorsDirectional(b, 'hunger', [ hunger ]);
+      rampSensorsDirectional(b, 'hunger', [ fullness ]);
 
       rampSensorsDirectional( b, 'temperature', [ temp, temp ] );
       rampSensorsDirectional( b, 'food', [ food, 0, 0, 0, food, 0, food, 0, food, 0, food, food ] );
@@ -141,12 +200,43 @@ describe('Brain', function() {
       rampSensorsDirectional( b, 'prey',     [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
       rampSensorsDirectional( b, 'toxin',    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] );
 
-      b.tick();
+      tick(b);
 
-      var r = b.chooseAction(), theta = Archonia.Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
+      var r = b.determineMostPressingNeed(), theta = Archonia.Axioms.computerizeAngle(11 * (2 * Math.PI / 12));
       
       chai.expect(r).to.include({ action: 'eat', direction: 11 });
       chai.expect(b.movementTarget).to.include(Archonia.Form.XY.fromPolar(1, theta));
+    });
+  });
+  
+  describe('#SearchForFood state', function() {
+    it('#start of search to first turn -- left', function() {
+      var archon = new testData.Archon();
+      var brain = new Archonia.Form.Brain(archon);
+      
+      foodSearchToFirstTurn(brain, archon);
+    });
+  
+    it('#first turn to second -- right', function() {
+      var archon = new testData.Archon();
+      var brain = new Archonia.Form.Brain(archon);
+      
+      foodSearchToFirstTurn(brain, archon);
+
+      computerizedAngle = archon.velocity.getAngleFrom(0);
+
+      // Right turn, subtract 7π/6
+      robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) - (7 * Math.PI / 6);
+
+      computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
+      var xy = Archonia.Form.XY(Archonia.Form.XY.fromPolar(archon.getSize(), computerizedAngle));
+
+      for(var i = 0; i < archon.genome.foodSearchTimeBetweenTurns; i++) {
+        tick(brain);
+      }
+
+      tick(brain);
+      chai.expect(archon.velocity).to.include({ x: xy.x, y: xy.y });
     });
   });
 

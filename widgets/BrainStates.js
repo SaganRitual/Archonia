@@ -34,8 +34,6 @@ Archonia.Form.BrainStates.Encyst.prototype.tick = function(frameCount) {
 
 Archonia.Form.BrainStates.FindSafeTemp = function(brain) {
   Archonia.Form.BrainStates.BrainState.call(this, brain);
-  
-  this.brain = brain;
   this.tempCheck = new Archonia.Form.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
 };
 
@@ -58,9 +56,7 @@ Archonia.Form.BrainStates.FindSafeTemp.prototype.start = function() {
   }
 };
 
-Archonia.Form.BrainStates.FindSafeTemp.prototype.tick = function(frameCount) {
-  Archonia.Form.BrainStates.BrainState.prototype.tick.call(this, frameCount);
-
+Archonia.Form.BrainStates.FindSafeTemp.prototype.update = function(frameCount) {//jshint ignore: line
   var delta = Math.abs(this.brain.getTemperature(this.brain.position) - this.brain.archon.genome.optimalTemp);
   this.tempCheck.store(delta);
 };
@@ -68,97 +64,68 @@ Archonia.Form.BrainStates.FindSafeTemp.prototype.tick = function(frameCount) {
 Archonia.Form.BrainStates.SearchForFood = function(brain) {
   Archonia.Form.BrainStates.BrainState.call(this, brain);
   
-  this.searching = false;
-  this.startOfSearchPending = false;
+  this.startPending = false;
   this.turnPending = false;
+  this.active = false;
   
   this.timeToTurn = -1;
-  this.turnDirection = 1;
+  this.turnDirection = -1;
 };
 
 Archonia.Form.BrainStates.SearchForFood.prototype = Object.create(Archonia.Form.BrainStates.BrainState.prototype);
 Archonia.Form.BrainStates.SearchForFood.prototype.constructor = Archonia.Form.BrainStates.SearchForFood;
 
-Archonia.Form.BrainStates.SearchForFood.prototype.ack = function(action) {
-  if(this.ackValue === null || action !== this.ackValue) { throw(new Error("Ack '" + action + "' received out of order")); }
-  
-  switch(this.ackValue) {
-    case 'start':
-      this.searching = true;
-      this.startOfSearchPending = false;
-      break;
-      
-    case 'turn':
-      this.turnPending = false;
-      this.turnDirection *= -1; // Next turn goes the other way
-      break;
-  }
-  
-  
-  this.ackValue = null;
-};
+Archonia.Form.BrainStates.SearchForFood.prototype.getInstruction = function() {
 
-Archonia.Form.BrainStates.SearchForFood.prototype.chooseAction = function() {
-
-  if(this.startOfSearchPending) {
-    
-    this.ackValue = 'start';
-
-    // The brain has told us to start; until he tells us he has
-    // received our instructions concerning the start of the
-    // search, we keep giving him those instructions
-
-    this.timeToTurn = this.frameCount + this.brain.archon.genome.foodSearchTimeBetweenTurns;
-
-    if(this.brain.velocity.equals(0)) {
-      return {
-        action: 'setMoveTarget',
-        moveTo: Archonia.Form.XY(
-          Archonia.Axioms.integerInRange(0, Archonia.Axioms.gameWidth), Archonia.Axioms.integerInRange(0, Archonia.Axioms.gameHeight)
-        )
-      };
-    } else {
-      return { action: 'continue' };
-    }
+  if(this.startPending) {
+    return {
+      action: 'setMoveTarget',
+      moveTo: Archonia.Form.XY(
+        Archonia.Axioms.integerInRange(0, Archonia.Axioms.gameWidth), Archonia.Axioms.integerInRange(0, Archonia.Axioms.gameHeight)
+      )
+    };
     
   } else if(this.turnPending) {
 
-    this.ackValue = 'turn';
-    
-    var newTarget = Archonia.Form.XY(this.brain.velocity), computerizedAngle = null, robalizedAngle = null;
+    var newTarget = Archonia.Form.XY(this.brain.archon.velocity), computerizedAngle = null, robalizedAngle = null;
 
     computerizedAngle = newTarget.getAngleFrom(0);
     robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
     computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
     
-    return({ action: 'turn', moveTo: Archonia.Form.XY.fromPolar(this.brain.archon.phenotype.getSize(), computerizedAngle) });
+    return({ action: 'turn', moveTo: Archonia.Form.XY.fromPolar(this.brain.archon.getSize(), computerizedAngle) });
     
   } else {
     return { action: 'continue' };
   }
 };
 
-Archonia.Form.BrainStates.SearchForFood.prototype.start = function() {
-  this.startOfSearchPending = true;
-  this.ackValue = 'start';
+Archonia.Form.BrainStates.SearchForFood.prototype.stop = function() {
+  this.active = false; this.startPending = false; this.turnPending = false;
 };
 
-Archonia.Form.BrainStates.SearchForFood.prototype.tick = function(frameCount) {
-  Archonia.Form.BrainStates.BrainState.prototype.tick.call(this, frameCount);
+Archonia.Form.BrainStates.SearchForFood.prototype.setTurnTimer = function(frameCount) {
+  this.timeToTurn = frameCount + this.brain.archon.genome.foodSearchTimeBetweenTurns;
+};
+
+Archonia.Form.BrainStates.SearchForFood.prototype.start = function(frameCount) {
+  this.active = true; this.startPending = true; this.setTurnTimer(frameCount);
+};
+
+Archonia.Form.BrainStates.SearchForFood.prototype.update = function(frameCount, onOff) {
+  var startup = onOff && !this.active;
+  var shutdown = !onOff && this.active;
+  var continueRunning = onOff && this.active;
+  //var continueSleeping = !onOff && !this.active;  // If we're sleeping, then we can just ignore update calls
   
-  if(this.startOfSearchPending) {
+  if(startup) { this.start(frameCount); }
+  else if(shutdown) { this.stop(); }
+  else if(continueRunning) { this.startPending = false; this.updateTurnStatus(frameCount); }
+};
 
-    this.timeToTurn = this.frameCount + this.brain.archon.genome.foodSearchTimeBetweenTurns;
-
-  } else if(this.searching) {
-
-    if(this.turnPending) {
-      this.timeToTurn = this.frameCount + this.brain.archon.genome.foodSearchTimeBetweenTurns;
-    } else if(this.frameCount > this.timeToTurn) {
-      this.turnPending = true;
-    }
-
-  } 
+Archonia.Form.BrainStates.SearchForFood.prototype.updateTurnStatus = function(frameCount) {
+  if(frameCount > this.timeToTurn) { this.turnPending = true; this.turnDirection *= -1; this.setTurnTimer(frameCount); }
+  else { this.turnPending = false; }
 };
   
 })(Archonia);
