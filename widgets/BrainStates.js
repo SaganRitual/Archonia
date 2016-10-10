@@ -6,8 +6,11 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  if(process.env['BrainStates.mockCbuffer'] === undefined) { process.env['BrainStates.mockCbuffer'] = '../test/support/mockCbuffer.js'; }
-  Archonia.Form.Cbuffer = require(process.env['BrainStates.mockCbuffer']);
+  if(process.env['BrainStates.Cbuffer'] === undefined) { process.env['BrainStates.Cbuffer'] = '../test/support/mockCbuffer.js'; }
+  if(process.env['BrainStates.Sun'] === undefined) { process.env['BrainStates.Sun'] = '../test/support/mockSun.js'; }
+
+  Archonia.Form.Cbuffer = require(process.env['BrainStates.Cbuffer']);
+  Archonia.Cosmos.Sun = require(process.env['BrainStates.Sun']);
 }
 
 (function(Archonia) {
