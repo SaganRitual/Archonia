@@ -11,6 +11,8 @@ if(typeof window === "undefined") {
 
   Archonia.Form.Cbuffer = require(process.env['BrainStates.Cbuffer']);
   Archonia.Cosmos.Sun = require(process.env['BrainStates.Sun']);
+  Archonia.Axioms = require('../Axioms.js');  // No point in mocking up the axioms
+  Archonia.Form.XY = require('../widgets/XY.js').XY;  // No point in mocking up the XY
 }
 
 (function(Archonia) {
@@ -28,15 +30,19 @@ Archonia.Form.BrainStates.FindSafeTemp.prototype = Object.create(Archonia.Form.B
 Archonia.Form.BrainStates.FindSafeTemp.prototype.constructor = Archonia.Form.BrainStates.FindSafeTemp;
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype.getInstruction = function() {
-  var foundTolerableTemp = false, radius = this.brain.archon.genome.tempRange / 2;
+  if(this.active) {
+    var foundTolerableTemp = false, radius = this.brain.archon.genome.tempRange / 2;
       
-  this.tempCheck.forEach(function(ix, delta) {
-    if(delta < radius) { foundTolerableTemp = true; return false; }
-  });
+    this.tempCheck.forEach(function(ix, delta) {
+      if(delta < radius) { foundTolerableTemp = true; return false; }
+    });
   
-  var action = (foundTolerableTemp || this.startPending) ? 'move' : 'encyst';
+    var action = (foundTolerableTemp || this.startPending) ? 'move' : 'encyst';
   
-  return { action: action, dVelocity: null }; // Brain will decide the direction depending on sense input
+    return { action: action, dVelocity: null }; // Brain will decide the direction depending on sense input
+  } else {
+    return { action: 'n/a' };
+  }
 };
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype.start = function() {
