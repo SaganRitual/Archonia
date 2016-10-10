@@ -1,5 +1,9 @@
 var chai = require("chai");
+var decache = require('decache');
 
+decache('./support/mockArchon.js');
+
+process.env['Brain'] = './mockBrain.js';
 process.env['BrainStates.Cbuffer'] = '../widgets/Cbuffer.js'; // Real Cbuffer; mocking up a Cbuffer is pointless
 
 var Archon = require('./support/mockArchon.js');
@@ -170,7 +174,7 @@ describe("BrainStates", function() {
         chai.expect(archon.brain.foodSearchStateInstructions.action).equal('continue');
       }
       
-      computerizedAngle = archon.velocity.getAngleFrom(0);
+      computerizedAngle = archon.mVelocity.getAngleFrom(0);
 
       // First turn is always left, add 7π/6
       robalizedAngle = Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6);
@@ -194,7 +198,7 @@ describe("BrainStates", function() {
         chai.expect(archon.brain.foodSearchStateInstructions.action).equal('continue');
       }
       
-      computerizedAngle = archon.velocity.getAngleFrom(0);
+      computerizedAngle = archon.mVelocity.getAngleFrom(0);
 
       // First turn is always left, add 7π/6
       robalizedAngle = Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6);
@@ -210,7 +214,7 @@ describe("BrainStates", function() {
         chai.expect(archon.brain.foodSearchStateInstructions.action).equal('continue');
       }
       
-      computerizedAngle = archon.velocity.getAngleFrom(0);
+      computerizedAngle = archon.mVelocity.getAngleFrom(0);
 
       // First turn is always left, add 7π/6
       robalizedAngle = Axioms.robalizeAngle(computerizedAngle) - (7 * Math.PI / 6);
