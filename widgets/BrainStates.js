@@ -6,12 +6,8 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Archonia.Axioms = require('../Axioms.js');
-  Archonia.Form.Cbuffer = require('./Cbuffer.js');
-  Archonia.Form.XY = require('./XY.js').XY;
-
-  if(process.env.whichSun === undefined) { process.env.whichSun = '../test/support/mockSun.js'; }
-  Archonia.Cosmos.Sun = require(process.env.whichSun);
+  if(process.env['BrainStates.mockCbuffer'] === undefined) { process.env['BrainStates.mockCbuffer'] = '../test/support/mockCbuffer.js'; }
+  Archonia.Form.Cbuffer = require(process.env['BrainStates.mockCbuffer']);
 }
 
 (function(Archonia) {
