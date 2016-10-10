@@ -16,6 +16,35 @@ describe('Cbuffer', function() {
   });
 
   describe('#forEach()', function() {
+    it('#simple check: iterate over the correct number of elements', function() {
+      var arraySize = 10, elementCount = null, i = null, r = null;
+      var s = function() { r = new Cbuffer(arraySize); };
+      chai.expect(s).to.not.throw();
+      
+      for(i = 0; i < arraySize; i++) { r.store(0); }
+      
+      elementCount = 0;
+      r.forEach(function() {
+        elementCount++;
+      });
+      
+      chai.expect(elementCount).equal(arraySize);
+      
+      // so it worked when we filled it; make sure it
+      // works when we push it around to the start again
+      // 3 is arbitrary; just want to make sure we're not
+      // pushing it right up to the edge, in case that
+      // would make us get a false pass
+      for(i = 0; i < arraySize - 3; i++) { r.store(0); }
+      
+      elementCount = 0;
+      r.forEach(function() {
+        elementCount++;
+      });
+      
+      chai.expect(elementCount).equal(arraySize);
+    });
+    
     it('#iterating callback, proper roundering, various array sizes', function() {
       for(var fillCount = 1; fillCount < 10; fillCount++) {
 
