@@ -260,7 +260,7 @@ Archonia.Cosmos.Genomer = {
     childArchon.genome.inherit(parentArchon.genome);
   },
   
-  start: function() {
+  setupGenomePrototype: function() {
     genomePrototypeSetup = true;
     
     for(var i in primordialGenome.core) {

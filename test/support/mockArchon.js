@@ -14,8 +14,6 @@ Archonia.Form.XY = require('../../widgets/XY.js').XY;
 
 (function(Archonia) {
   
-  Archonia.Cosmos.Genomer.start();
-  
 Archonia.Form.Archon = function() {
   Archonia.Cosmos.Genomer.genomifyMe(this); // No inheritance here; just getting a skeleton genome
 
