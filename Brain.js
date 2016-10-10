@@ -6,15 +6,18 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
+  // No point in mocking up the lowest-level stuff
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Form.BrainStates = require('./widgets/BrainStates.js');
-  Archonia.Form.SensorArray = require('./widgets/SensorArray');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
+
+  if(process.env.BrainStates === undefined) { process.env.BrainStates = './test/support/mockBrainStates.js'; }
+  if(process.env.SensorArray === undefined) { process.env.SensorArray = './test/support/mockSensorArray.js'; }
+  
+  Archonia.Form.BrainStates = require(process.env.BrainStates);
+  Archonia.Form.SensorArray = require(process.env.SensorArray);
 }
 
 (function(Archonia) {
-  
-var howManyPointsForSpatialInputs = 12;
 
 Archonia.Form.Brain = function(archon) {
   this.archon = archon;
@@ -29,12 +32,12 @@ Archonia.Form.Brain = function(archon) {
   this.velocity = Archonia.Form.XY();
   
   this.sensesPhenotype = {
-    food:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'eat' },
-    predator:    { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'flee' },
-    prey:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'pursue' },
-    hunger:      { howManyPoints:  1, signalSpread: 1, action: 'searchForFood' },
-    temperature: { howManyPoints:  2, signalSpread: 1, action: 'findSafeTemp' },
-    toxin:       { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'toxinDefense' }
+    food:        { howManyPoints: Archonia.Axioms.howManyPointsForSpatialInputs, signalSpread: 3, action: 'eat' },
+    predator:    { howManyPoints: Archonia.Axioms.howManyPointsForSpatialInputs, signalSpread: 3, action: 'flee' },
+    prey:        { howManyPoints: Archonia.Axioms.howManyPointsForSpatialInputs, signalSpread: 3, action: 'pursue' },
+    hunger:      { howManyPoints: Archonia.Axioms.howManyPointsForNonSpatialInputs, signalSpread: 1, action: 'searchForFood' },
+    temperature: { howManyPoints: Archonia.Axioms.howManyPointsForTemperatureInputs, signalSpread: 1, action: 'findSafeTemp' },
+    toxin:       { howManyPoints: Archonia.Axioms.howManyPointsForSpatialInputs, signalSpread: 3, action: 'toxinDefense' }
   };
 };
 
@@ -80,17 +83,19 @@ Archonia.Form.Brain.prototype = {
     var genomeSenseControls = this.archon.genome[senseName];
     var inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
  
-    return Object.assign(inputSignal, {
+    var ret = Object.assign(inputSignal, {
       effectiveSignalStrength: inputSignal.weight * genomeSenseControls.multiplier,
       action: brainSenseControls.action
     });
+    
+    return ret;
   },
   
   launch: function() {
     for(var senseName in this.sensesPhenotype) {
       var senseInPhenotype = this.sensesPhenotype[senseName],
           senseInGenotype = this.archon.genome[senseName];
-          
+
       senseInPhenotype.sensorArray = new Archonia.Form.SensorArray(
         senseInPhenotype.howManyPoints, this.archon.genome.senseMeasurementDepth,
         senseInGenotype.decayRate, senseInGenotype.valuesRangeLo, senseInGenotype.valuesRangeHi
@@ -122,6 +127,30 @@ Archonia.Form.Brain.prototype = {
     this.sensesPhenotype.toxin.sensorArray.store(where, toxin);
   },
   
+  processFoodSearchInstruction: function() {
+    var stateInstruction = this.state_searchForFood.getInstruction();
+    
+    if(stateInstruction.action === 'continue') {
+      if(this.archon.mVelocity.getMagnitude() === 0) {
+        stateInstruction.dVelocity =
+          Archonia.Axioms.computerizeAngle(Archonia.Axioms.realInRange(0, 2 * Math.PI));
+        
+        stateInstruction.setMovementTarget = true;
+      } else {
+        // Got continue, and we're already moving;
+        // do nothing so we'll keep going in a
+        // straight line until the state tells us to turn
+        stateInstruction.setMovementTarget = false;
+      }
+    } else {
+      // State is telling us to turn, and has given
+      // us an angle. Just use it as is
+      stateInstruction.setMovementTarget = true;
+    }
+    
+    return stateInstruction;
+  },
+  
   tick: function(frameCount) {
     var computerizedAngle = null, robalizedAngle = null, stateInstruction = null, setMovementTarget = false;
     
@@ -138,7 +167,7 @@ Archonia.Form.Brain.prototype = {
     case "eat":
     case 'toxinDefense':
       setMovementTarget = true;
-      robalizedAngle = this.currentAction.direction * (2 * Math.PI / howManyPointsForSpatialInputs);
+      robalizedAngle = this.currentAction.direction * (2 * Math.PI / Archonia.Axioms.howManyPointsForSpatialInputs);
       computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
       break;
       
@@ -154,9 +183,9 @@ Archonia.Form.Brain.prototype = {
       break;
       
     case'searchForFood':
-      stateInstruction = this.state_searchForFood.getInstruction();
+      stateInstruction = this.processFoodSearchInstruction();
       computerizedAngle = stateInstruction.dVelocity;
-      setMovementTarget = stateInstruction.action !== 'continue';
+      setMovementTarget = stateInstruction.setMovementTarget;
       break;
       
     default:  // For all the non-spatial inputs

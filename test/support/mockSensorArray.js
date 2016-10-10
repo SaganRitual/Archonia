@@ -1,6 +1,6 @@
 var SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
   this.empty = true;
-  this.mockup = true;
+  this.bestSignal = {};
 };
 
 SensorArray.prototype = {
@@ -17,14 +17,12 @@ SensorArray.prototype = {
   reset: function() {
     this.empty = true;
   },
+  
+  setDirection: function(direction) { this.bestSignal.direction = direction; },
+  setReturnValue: function(bestSignal) { this.bestSignal = bestSignal; },
 
   store: function(where, value) {
-    if(where === -1) {
-      value(this);  // Callback into the test harness for identifying the sense array
-    } else if(where === -2) {
-      this.bestSignal = value;
-    }
-    
+    this.bestSignal = { weight: value, direction: 0};
     this.empty = false;
   }
 };
