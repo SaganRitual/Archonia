@@ -8,6 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 if(typeof window === "undefined") {
   Archonia.Form.tinycolor = require('./widgets/tinycolor.js');
   Archonia.Axioms = require('./Axioms.js');
+  Archonia.Essence = require('./Essence.js');
 } else{
   Archonia.Form.tinycolor = window.tinycolor;
 }
@@ -125,6 +126,8 @@ Archonia.Form.SenseGene = function(multiplier, decayRate, valuesRangeLo, valuesR
   this.valuesRangeLo = valuesRangeLo;
   this.valuesRangeHi = valuesRangeHi;
   
+  this.isSenseGene = true;
+  
   Archonia.Form.Gene.call(this);
 };
 
@@ -168,28 +171,28 @@ Archonia.Form.SenseGeneVariable.prototype.inherit = function(parentGene) {
 
 Archonia.Form.Genome = function(archon, parentGenome) {
   this.archon = archon;
+  this.core = {};
   
-  for(var i in parentGenome) {
-    if(parentGenome[i] === null) {
-      this[i] = null; // For dummy properties so our getters will work -- I hope!
+  for(var i in parentGenome.core) {
+    if(parentGenome.core[i] === null) {
+      this.core[i] = null; // For dummy properties so our getters will work -- I hope!
     } else {
-      this[i] = parentGenome[i].newGene();
-      this[i].archon = archon;
+      this.core[i] = parentGenome.core[i].newGene();
     }
   }
 };
 
 Archonia.Form.Genome.prototype = {
   inherit: function(parentGenome) {
-    for(var i in parentGenome) {
-      if(parentGenome[i] !== null && i !== 'archon' && typeof parentGenome[i] !== 'function') {
-        this[i].inherit(parentGenome[i]);
+    for(var i in parentGenome.core) { 
+      if(this.core[i] !== null) {
+        this.core[i].inherit(parentGenome.core[i]);
       }
     }
   }
 };
 
-var primordialGenome = {
+var primordialGenome = { core: {
   avoidDangerousPreyFactor:  new Archonia.Form.ScalarGene(10),
   birthThresholdMultiplier:  new Archonia.Form.ScalarGene(1),
   color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)')),
@@ -217,6 +220,15 @@ var primordialGenome = {
   
   // Archonia 0.2
   
+  foodSearchTimeBetweenTurns:  new Archonia.Form.ScalarGene(15),
+  howLongBadTempToEncystment:  new Archonia.Form.ScalarGene(15),
+  offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
+  offspringMassLarvalCalories: new Archonia.Form.ScalarGene(100),
+  reproductionThreshold:       new Archonia.Form.ScalarGene(500),
+  embryoThreshold:             new Archonia.Form.ScalarGene(200),
+  senseMeasurementDepth:       new Archonia.Form.ScalarGene(10),
+  inertialDamper:              new Archonia.Form.ScalarGene(0.02),
+  
   fatigue:     new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),   
   food:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, Archonia.Axioms.caloriesPerManna),
   predator:    new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),
@@ -224,11 +236,15 @@ var primordialGenome = {
   hunger:      new Archonia.Form.SenseGeneVariable(1, 0.1, 1000, 0),  // Just hacking in hi/lo for now
   temperature: new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),         // Color gene should fill in hi/lo?
   toxin:       new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1)
-};
+} };
+
+var genomePrototypeSetup = false;
 
 Archonia.Cosmos.Genomer = {
   
   genomifyMe: function(archon) {
+    if(!genomePrototypeSetup) { Archonia.Cosmos.Genomer.setupGenomePrototype(); }
+    
     archon.genome = new Archonia.Form.Genome(archon, primordialGenome);
   },
   
@@ -242,9 +258,72 @@ Archonia.Cosmos.Genomer = {
     // primordial as our starting point
     if(parentArchon === undefined) { parentArchon = { genome: primordialGenome }; }
     childArchon.genome.inherit(parentArchon.genome);
+  },
+  
+  start: function() {
+    genomePrototypeSetup = true;
+    
+    for(var i in primordialGenome.core) {
+      switch(i) {
+      case 'color':
+        Object.defineProperty(Archonia.Form.Genome.prototype, i,
+          { get: function()  { return this.core.color.getColorAsDecimal(); } }
+        );
+        break;
+      
+      case 'optimalHiTemp':
+        Object.defineProperty(Archonia.Form.Genome.prototype, i,
+          { get: function () { return this.core.color.getOptimalHiTemp();  } }
+        );
+        break;
+      
+      case 'optimalLoTemp':
+        Object.defineProperty(Archonia.Form.Genome.prototype, i,
+          { get: function () { return this.core.color.getOptimalLoTemp(); } }
+        );
+        break;
+      
+      case 'optimalTemp':
+        Object.defineProperty(Archonia.Form.Genome.prototype, i,
+          { get: function () { return this.core.color.getOptimalTemp(); } }
+        );
+        break;
+      
+      default:
+        Object.defineProperty(Archonia.Form.Genome.prototype, i, (
+          function(propertyName) {
+            return {
+              get: function() { 
+                if(this.core.hasOwnProperty(propertyName)) {
+                  if(this.core[propertyName].isSenseGene) {
+                    return this.core[propertyName];
+                  } else {
+                    return this.core[propertyName].value;
+                  }
+                } else {
+                  throw new Error("No such property '" + propertyName + "' in genome");
+                }
+              },
+            
+              set: function(value) {
+                if(this.core.hasOwnProperty(propertyName)) {
+                  if(this.core[propertyName].isSenseGene) {
+                    throw new Error("SenseGene is not scalar; can't be set");
+                  } else {
+                    this.core[propertyName].value = value; return true;
+                  }
+                } else {
+                  throw new Error("No such property '" + propertyName + "' in genome");
+                }
+              }
+            };
+          })(i));
+        break;
+      }
+    }
   }
-
 };
+
 
 })(Archonia);
 
