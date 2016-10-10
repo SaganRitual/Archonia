@@ -19,8 +19,6 @@ var howManyPointsForSpatialInputs = 12;
 Archonia.Form.Brain = function(archon) {
   this.archon = archon;
   
-  var gSenses = archon.genome.senses;
-
   this.state_searchForFood = new Archonia.Form.BrainStates.SearchForFood(this);
   this.state_findSafeTemp = new Archonia.Form.BrainStates.FindSafeTemp(this);
 
@@ -30,7 +28,7 @@ Archonia.Form.Brain = function(archon) {
 
   this.velocity = Archonia.Form.XY();
   
-  var senseAddons = {
+  this.sensesPhenotype = {
     fatigue:     { howManyPoints:  1, signalSpread: 1, action: 'moveToSecure' },
     food:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'eat' },
     predator:    { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'flee' },
@@ -39,22 +37,6 @@ Archonia.Form.Brain = function(archon) {
     temperature: { howManyPoints:  2, signalSpread: 1, action: 'findSafeTemp' },
     toxin:       { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'toxinDefense' }
   };
-  
-  this.senseControls = {};
-  
-  // Come back to this; I think we're copying every gene in the genome, not just the sense genes
-  for(var senseNameInGenome in gSenses) {
-    this.senseControls[senseNameInGenome] = {};
-    
-    var gSense = gSenses[senseNameInGenome], pSense = this.senseControls[senseNameInGenome], extra = senseAddons[senseNameInGenome];
-    
-    for(var ee in extra) { pSense[ee] = extra[ee]; }  // Copy the extra gene-related info to the sense info
-
-    this.senseControls[senseNameInGenome].sensorArray = new Archonia.Form.SensorArray(
-      extra.howManyPoints, this.archon.genome.senseMeasurementDepth,
-      gSense.decayRate, gSense.valuesRangeLo, gSense.valuesRangeHi
-    );
-  }
 };
 
 Archonia.Form.Brain.prototype = {
@@ -66,7 +48,7 @@ Archonia.Form.Brain.prototype = {
     
     var signalToBeat = this.currentAction.signalWeight + this.archon.genome.inertialDamper;
     
-    for(var s in this.senseControls) {
+    for(var s in this.sensesPhenotype) {
       b = this.getEffectiveSignalStrengthFromSense(s);
 
       if(
@@ -92,11 +74,11 @@ Archonia.Form.Brain.prototype = {
   },
 
   getEffectiveSignalStrengthFromSense: function(senseName) {
-    var brainSenseControls = this.senseControls[senseName];
+    var brainSenseControls = this.sensesPhenotype[senseName];
 
     if(brainSenseControls.sensorArray.isEmpty()) { throw new Error("Sensors should never be empty"); }
   
-    var genomeSenseControls = this.archon.genome.senses[senseName];
+    var genomeSenseControls = this.archon.genome[senseName];
     var inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
  
     return Object.assign(inputSignal, {
@@ -106,37 +88,45 @@ Archonia.Form.Brain.prototype = {
   },
   
   launch: function() {
-    
+    for(var senseName in this.sensesPhenotype) {
+      var senseInPhenotype = this.sensesPhenotype[senseName],
+          senseInGenotype = this.archon.genome[senseName];
+          
+      senseInPhenotype.sensorArray = new Archonia.Form.SensorArray(
+        senseInPhenotype.howManyPoints, this.archon.genome.senseMeasurementDepth,
+        senseInGenotype.decayRate, senseInGenotype.valuesRangeLo, senseInGenotype.valuesRangeHi
+      );
+    }
   },
 
-  startSearchForFood: function() { this.stateAwaitingAck = true; this.searchForFood.start(); this.state = 'searchForFood'; },
+  startSearchForFood: function() { this.searchForFood.start(); this.state = 'searchForFood'; },
   
   senseFatigue: function(where, fatigue) {
-    this.senseControls.fatigue.sensorArray.store(where, fatigue);
+    this.sensesPhenotype.fatigue.sensorArray.store(where, fatigue);
   },
   
   senseHunger: function(where, hunger) {
-    this.senseControls.hunger.sensorArray.store(where, hunger);
+    this.sensesPhenotype.hunger.sensorArray.store(where, hunger);
   },
   
   senseFood: function(where, food) {
-    this.senseControls.food.sensorArray.store(where, food);
+    this.sensesPhenotype.food.sensorArray.store(where, food);
   },
 
   sensePredator: function(where, predator) {
-    this.senseControls.predator.sensorArray.store(where, predator);
+    this.sensesPhenotype.predator.sensorArray.store(where, predator);
   },
 
   sensePrey: function(where, prey) {
-    this.senseControls.prey.sensorArray.store(where, prey);
+    this.sensesPhenotype.prey.sensorArray.store(where, prey);
   },
   
   senseTemperature: function(where, temp) {
-    this.senseControls.temperature.sensorArray.store(where, temp);
+    this.sensesPhenotype.temperature.sensorArray.store(where, temp);
   },
   
   senseToxin: function(where, toxin) {
-    this.senseControls.toxin.sensorArray.store(where, toxin);
+    this.sensesPhenotype.toxin.sensorArray.store(where, toxin);
   },
   
   tick: function(frameCount) {
@@ -177,7 +167,7 @@ Archonia.Form.Brain.prototype = {
       break;
       
     default:  // For all the non-spatial inputs
-      robalizedAngle = 0; computerizedAngle = 0; setMovementTarget = true;
+      robalizedAngle = 0; computerizedAngle = 0;
       break;
     }
 

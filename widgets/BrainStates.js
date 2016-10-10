@@ -22,15 +22,14 @@ Archonia.Form.BrainStates = {
 
 Archonia.Form.BrainStates.FindSafeTemp = function(brain) {
   Archonia.Form.BrainStates.BrainState.call(this, brain);
-  this.tempCheck = new Archonia.Form.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
-  this.active = false; this.startPending = false;
+  this.active = false; this.startPending = false; this.tempCheck = null;
 };
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype = Object.create(Archonia.Form.BrainStates.BrainState.prototype);
 Archonia.Form.BrainStates.FindSafeTemp.prototype.constructor = Archonia.Form.BrainStates.FindSafeTemp;
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype.getInstruction = function() {
-  var foundTolerableTemp = false, radius = this.brain.archon.genome.optimalTempRange / 2;
+  var foundTolerableTemp = false, radius = this.brain.archon.genome.tempRange / 2;
       
   this.tempCheck.forEach(function(ix, delta) {
     if(delta < radius) { foundTolerableTemp = true; return false; }
@@ -43,6 +42,13 @@ Archonia.Form.BrainStates.FindSafeTemp.prototype.getInstruction = function() {
 
 Archonia.Form.BrainStates.FindSafeTemp.prototype.start = function() {
   this.active = true; this.startPending = true;
+  
+  // Can't read the genome at construction, so we 
+  // wait until our first start to create our input buffer
+  if(this.tempCheck === null) {
+    this.tempCheck = new Archonia.Form.Cbuffer(this.brain.archon.genome.howLongBadTempToEncystment);
+  }
+  
   for(var i = 0; i < this.brain.archon.genome.howLongBadTempToEncystment; i++) {
     this.tempCheck.store(this.brain.archon.genome.optimalTemp);
   }
