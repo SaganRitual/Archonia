@@ -229,7 +229,6 @@ var primordialGenome = { core: {
   senseMeasurementDepth:       new Archonia.Form.ScalarGene(10),
   inertialDamper:              new Archonia.Form.ScalarGene(0.02),
   
-  fatigue:     new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),   
   food:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, Archonia.Axioms.caloriesPerManna),
   predator:    new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),
   prey:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),

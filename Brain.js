@@ -29,7 +29,6 @@ Archonia.Form.Brain = function(archon) {
   this.velocity = Archonia.Form.XY();
   
   this.sensesPhenotype = {
-    fatigue:     { howManyPoints:  1, signalSpread: 1, action: 'moveToSecure' },
     food:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'eat' },
     predator:    { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'flee' },
     prey:        { howManyPoints: howManyPointsForSpatialInputs, signalSpread: 3, action: 'pursue' },
@@ -97,12 +96,6 @@ Archonia.Form.Brain.prototype = {
         senseInGenotype.decayRate, senseInGenotype.valuesRangeLo, senseInGenotype.valuesRangeHi
       );
     }
-  },
-
-  startSearchForFood: function() { this.searchForFood.start(); this.state = 'searchForFood'; },
-  
-  senseFatigue: function(where, fatigue) {
-    this.sensesPhenotype.fatigue.sensorArray.store(where, fatigue);
   },
   
   senseHunger: function(where, hunger) {
