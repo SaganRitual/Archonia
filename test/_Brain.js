@@ -37,11 +37,11 @@ describe('Brain', function() {
     chai.expect(c).to.not.throw();
   });
   
-  it('#launch, tick', function() {
-    var c = function() { var a = new Archon(); a.launch(); };
-    var d = function() { var a = new Archon(); a.launch(); a.tick(); };
+  it('#launch, survive the first ticks without sensory input', function() {
+    var c = function() { var a = new Archon(); a.launch(); return a; };
+    var d = function() { var a = c(); for(var i = 0; i < 30; i++) { a.tick(); } };
     chai.expect(c).to.not.throw();
-    chai.expect(d).to.throw(Error, "Sensors should never be empty");
+    chai.expect(d).to.not.throw();
   });
   
   it('#single sense, no competition', function() {

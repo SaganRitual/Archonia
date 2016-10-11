@@ -84,6 +84,10 @@ Archonia.Form.Archon.prototype.breed = function() {
   }
 };
 
+Archonia.Form.Archon.prototype.getMVelocity = function() {
+  return this.velocity.getMagnitude();
+};
+
 Archonia.Form.Archon.prototype.getPosition = function() {
   return this.position;
 };

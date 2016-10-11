@@ -46,6 +46,11 @@ Archonia.Form.Brain.prototype = {
     
     var b = this.getEffectiveSignalStrengthFromSense(this.currentAction.senseName);
     
+    // This happens for a while after we're first born;
+    // the archon ticks us right away, but it takes a while
+    // for our sense arrays to fill up
+    if(b === null) { return; }
+    
     this.currentAction.signalWeight = b.effectiveSignalStrength;
     
     var signalToBeat = this.currentAction.signalWeight + this.archon.genome.inertialDamper;
@@ -78,17 +83,19 @@ Archonia.Form.Brain.prototype = {
   getEffectiveSignalStrengthFromSense: function(senseName) {
     var brainSenseControls = this.sensesPhenotype[senseName];
 
-    if(brainSenseControls.sensorArray.isEmpty()) { throw new Error("Sensors should never be empty"); }
-  
-    var genomeSenseControls = this.archon.genome[senseName];
-    var inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
+    if(brainSenseControls.sensorArray.isEmpty()) {
+      return null;
+    } else {
+      var genomeSenseControls = this.archon.genome[senseName];
+      var inputSignal = brainSenseControls.sensorArray.getBestSignal(brainSenseControls.signalSpread);
  
-    var ret = Object.assign(inputSignal, {
-      effectiveSignalStrength: inputSignal.weight * genomeSenseControls.multiplier,
-      action: brainSenseControls.action
-    });
+      var ret = Object.assign(inputSignal, {
+        effectiveSignalStrength: inputSignal.weight * genomeSenseControls.multiplier,
+        action: brainSenseControls.action
+      });
     
-    return ret;
+      return ret;
+    }
   },
   
   launch: function() {
@@ -131,7 +138,7 @@ Archonia.Form.Brain.prototype = {
     var stateInstruction = this.state_searchForFood.getInstruction();
     
     if(stateInstruction.action === 'continue') {
-      if(this.archon.mVelocity.getMagnitude() === 0) {
+      if(this.archon.getMVelocity() === 0) {
         stateInstruction.dVelocity =
           Archonia.Axioms.computerizeAngle(Archonia.Axioms.realInRange(0, 2 * Math.PI));
         

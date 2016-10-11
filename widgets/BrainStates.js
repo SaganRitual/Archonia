@@ -16,6 +16,8 @@ if(typeof window === "undefined") {
 }
 
 (function(Archonia) {
+  
+  var foodSearchTurnAngle = 4 * Math.PI / 3;
 
 Archonia.Form.BrainStates = {
   BrainState: function(brain) { this.brain = brain; }
@@ -104,7 +106,7 @@ Archonia.Form.BrainStates.SearchForFood.prototype.getInstruction = function() {
     var v = Archonia.Form.XY(this.brain.archon.velocity);
 
     computerizedAngle = v.getAngleFrom(0);
-    robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) + (7 * Math.PI / 6) * this.turnDirection;
+    robalizedAngle = Archonia.Axioms.robalizeAngle(computerizedAngle) + foodSearchTurnAngle * this.turnDirection;
     computerizedAngle = Archonia.Axioms.computerizeAngle(robalizedAngle);
     
     return({ action: 'turn', dVelocity: computerizedAngle });

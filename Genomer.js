@@ -201,7 +201,7 @@ var primordialGenome = { core: {
   hungerMultiplier:          new Archonia.Form.ScalarGene(0.0005),
   injuryFactorThreshold:     new Archonia.Form.ScalarGene(0.5),
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),
-  maxMVelocity:              new Archonia.Form.ScalarGene(75),
+  maxMVelocity:              new Archonia.Form.ScalarGene(30),
   optimalMass:               new Archonia.Form.ScalarGene(5),
   offspringEnergy:           new Archonia.Form.ScalarGene(200),
   parasiteChaseFactor:       new Archonia.Form.ScalarGene(1),
@@ -220,7 +220,7 @@ var primordialGenome = { core: {
   
   // Archonia 0.2
   
-  foodSearchTimeBetweenTurns:  new Archonia.Form.ScalarGene(15),
+  foodSearchTimeBetweenTurns:  new Archonia.Form.ScalarGene(120),
   howLongBadTempToEncystment:  new Archonia.Form.ScalarGene(15),
   offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
   offspringMassLarvalCalories: new Archonia.Form.ScalarGene(100),
