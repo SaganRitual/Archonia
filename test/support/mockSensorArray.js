@@ -1,30 +1,16 @@
 var SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
-  this.empty = true;
-  this.bestSignal = {};
+  if(process.env["SensorArray.uniqueID"] === undefined) { throw new Error("mock SensorArray needs environment varables"); }
+  
+  this.uniqueID = parseInt(process.env["SensorArray.uniqueID"]);
+  process.env["SensorArray.uniqueID"] = (this.uniqueID + 1).toString();
+  
+  this.bestSignalEnvName = "SensorArray(" + this.uniqueID + ").signal";
+  this.directionEnvName = "SensorArray(" + this.uniqueID + ").direction";
 };
 
 SensorArray.prototype = {
-  getAverage: function(index, spread) {
-    return 0;
-  },
-  
-  getBestSignal: function(spread) {
-    return this.bestSignal;
-  },
-  
-  isEmpty: function() { return this.empty; },
-  
-  reset: function() {
-    this.empty = true;
-  },
-  
-  setDirection: function(direction) { this.bestSignal.direction = direction; },
-  setReturnValue: function(bestSignal) { this.bestSignal = bestSignal; },
-
-  store: function(where, value) {
-    this.bestSignal = { weight: value, direction: 0};
-    this.empty = false;
-  }
+  getBestSignal: function(spread) { var r = JSON.parse(process.env[this.bestSignalEnvName]); return r; },
+  store: function(where, value) {}
 };
 
 module.exports = SensorArray;
