@@ -54,7 +54,7 @@ Archonia.Form.Archon = function(phaseron) {
   
   Archonia.Cosmos.Genomer.genomifyMe(this); // No inheritance here; just getting a skeleton genome
 
-  this.brain = new Archonia.Form.Brain(this);
+  this.mover = new Archonia.Form.Mover(this.sprite, 25, this.velocity, this.position);
 };
 
 Archonia.Form.Archon.prototype.activatePhysicsBodies = function() {
@@ -140,7 +140,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
 
   this.firstLaunch = false;
   
-  this.brain.launch();
+  this.mover.launch();
 
 	this.sprite.revive(); this.button.revive(); this.sensor.revive();
 };
@@ -233,7 +233,7 @@ Archonia.Form.Archon.prototype.tick = function() {
   this.sensor.x = this.sprite.x; // So the sensor will stay attached
   this.sensor.y = this.sprite.y; // So the sensor will stay attached
   
-  this.brain.tick(this.frameCount);
+  this.mover.tick(this.frameCount);
 };
 
 })(Archonia);

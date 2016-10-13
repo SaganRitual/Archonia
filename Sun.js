@@ -35,11 +35,10 @@ if(typeof window === "undefined") {
       );
     },
     
-    getTemperature: function(where, whereY) {
-      if(where === undefined || !(where instanceof Archonia.Form.XY)) { throw new Error("Bad arguments"); }
+    getTemperature: function(w, wY) {
+      if(w === undefined || !(w instanceof Archonia.Form.XY)) { throw new Error("Bad arguments"); }
 
-      where.set(where, whereY);
-      where.floor();
+      var where = Archonia.Form.XY(w, wY).floored();
 
       var rgb = {};
       Archonia.Cosmos.Sea.bm.getPixelRGB(where.x, where.y, rgb, true);
