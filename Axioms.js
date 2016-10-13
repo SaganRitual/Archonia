@@ -79,6 +79,13 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.integerInRange = function(lo, hi) {
     return Math.floor(Archonia.Axioms.realInRange(lo, hi));
   };
+
+  Archonia.Axioms.isWithinRange = function(value, percentage, targetValue) {
+    var lo = targetValue * (1 - percentage);
+    var hi = targetValue * (1 + percentage);
+  
+    return value >= lo && value <= hi;
+  };
   
   Archonia.Axioms.realInRange = function(lo, hi) {
     return Math.random() * (hi - lo) + lo;
