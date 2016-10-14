@@ -90,13 +90,15 @@ describe('Genomer', function() {
   });
   
   describe('ColorGene', function() {
-    var cg = new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 50%, 50%)')),
-        dg = new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 50%, 50%)'));
+    var cg = new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 50%, 50%)'), 400),
+        dg = new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 50%, 50%)'), 400);
     
     it('Gene should construct properly', function() {
       chai.expect(cg).to.include({ changeProbability: 10, changeRange: 10 });
       chai.expect(cg).to.have.property('color');
       chai.expect(cg.color.toRgb()).to.include({ r: 64, g: 191, b: 191 });
+      chai.expect(cg).to.have.property('tempRangeGene');
+      chai.expect(cg.tempRangeGene).to.include({value: 400, changeProbability: 10, changeRange: 10});
     });
     
     it('mutateYN() Should return true or false', function() {
@@ -108,6 +110,12 @@ describe('Genomer', function() {
       chai.expect(isNaN(cg.changeProbability)).false;
       chai.expect(isNaN(cg.changeRange)).false;
     });
+    
+    it('tempRange, optimalHi, optimalLo', function() {
+      chai.expect(cg.getOptimalTemp()).equal(0);
+      chai.expect(cg.getOptimalHiTemp()).equal(200);
+      chai.expect(cg.getOptimalLoTemp()).equal(-200);
+    }),
 
     it('Should inherit with add', function() {
       cg.inherit(dg);
@@ -119,6 +127,11 @@ describe('Genomer', function() {
 
       var t = Archonia.Form.tinycolor(cg.color).toHsl();
       chai.expect(t.h).within(0, 360); chai.expect(t.s).within(0, 100); chai.expect(t.l).within(0, 100);
+      
+      possibleChangeRange = dg.tempRangeGene.changeRange + 30;  // Because of the twist in mutateScalar()
+      
+      chai.expect(cg.tempRangeGene.changeProbability).within(dg.tempRangeGene.changeProbability * (1 - possibleChangeRange / 100), dg.tempRangeGene.changeProbability * (1 + possibleChangeRange / 100));
+      chai.expect(cg.tempRangeGene.changeRange).within(dg.tempRangeGene.changeRange * (1 - possibleChangeRange / 100), dg.tempRangeGene.changeRange * (1 + possibleChangeRange / 100));
     });
   });
 

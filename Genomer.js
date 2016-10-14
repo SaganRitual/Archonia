@@ -85,7 +85,13 @@ Archonia.Form.ScalarGene.prototype.inherit = function(parentGene) {
   this.value = this.mutateScalar(parentGene.value);
 };
 
-Archonia.Form.ColorGene = function(gene) { this.color = Archonia.Form.tinycolor(gene); Archonia.Form.Gene.call(this); };
+Archonia.Form.ColorGene = function(gene, tempRange) {
+  this.color = Archonia.Form.tinycolor(gene);
+
+  this.tempRangeGene = new Archonia.Form.ScalarGene(tempRange);
+
+  Archonia.Form.Gene.call(this);
+};
 
 Archonia.Form.ColorGene.prototype = Object.create(Archonia.Form.Gene.prototype);
 Archonia.Form.ColorGene.prototype.constructor = Archonia.Form.ColorGene;
@@ -93,6 +99,8 @@ Archonia.Form.ColorGene.prototype.newGene = function() { return new Archonia.For
 
 Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
+  
+  this.tempRangeGene.inherit(parentGene.tempRangeGene);
 
   var color = Archonia.Form.tinycolor(parentGene.color);
 
@@ -111,8 +119,10 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
 };
 
 Archonia.Form.ColorGene.prototype.getColorAsDecimal = function() { return parseInt(this.color.toHex(), 16); };
-Archonia.Form.ColorGene.prototype.getOptimalHiTemp = function() { return this.getOptimalTemp() + this.archon.tempRange / 2; };
-Archonia.Form.ColorGene.prototype.getOptimalLoTemp = function() { return this.getOptimalTemp() - this.archon.tempRange / 2; };
+Archonia.Form.ColorGene.prototype.getTempRange = function() { return this.tempRangeGene.value; };
+Archonia.Form.ColorGene.prototype.getTempRadius = function() { return this.tempRangeGene.value / 2; };
+Archonia.Form.ColorGene.prototype.getOptimalHiTemp = function() { return this.getOptimalTemp() + this.tempRangeGene.value / 2; };
+Archonia.Form.ColorGene.prototype.getOptimalLoTemp = function() { return this.getOptimalTemp() - this.tempRangeGene.value / 2; };
 
 Archonia.Form.ColorGene.prototype.getOptimalTemp = function() {
   var L = this.color.toHsl().l;
@@ -195,7 +205,7 @@ Archonia.Form.Genome.prototype = {
 var primordialGenome = { core: {
   avoidDangerousPreyFactor:  new Archonia.Form.ScalarGene(10),
   birthThresholdMultiplier:  new Archonia.Form.ScalarGene(1),
-  color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)')),
+  color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)'), 400),
   feedingAccelerationDamper: new Archonia.Form.ScalarGene(1),
   feedingSpeedDamper:        new Archonia.Form.ScalarGene(1),
   hungerMultiplier:          new Archonia.Form.ScalarGene(0.0005),
@@ -210,13 +220,14 @@ var primordialGenome = { core: {
   targetChangeDelay:         new Archonia.Form.ScalarGene(5),
   tasteFactor:               new Archonia.Form.ScalarGene(100),
   tempFactor:                new Archonia.Form.ScalarGene(1),
-  tempRange:                 new Archonia.Form.ScalarGene(400),
   tempRangeDamping:          new Archonia.Form.ScalarGene(0.5),
 
   // dummy entries so the getters will work
   optimalTemp: null,
   optimalHiTemp: null,
   optimalLoTemp: null,
+  tempRange: null,
+  tempRadius: null,
   
   // Archonia 0.2
   
@@ -285,6 +296,18 @@ Archonia.Cosmos.Genomer = {
       case 'optimalTemp':
         Object.defineProperty(Archonia.Form.Genome.prototype, i,
           { get: function () { return this.core.color.getOptimalTemp(); } }
+        );
+        break;
+      
+      case 'tempRange':
+        Object.defineProperty(Archonia.Form.Genome.prototype, i,
+          { get: function () { return this.core.color.getTempRange(); } }
+        );
+        break;
+      
+      case 'tempRadius':
+        Object.defineProperty(Archonia.Form.Genome.prototype, i,
+          { get: function () { return this.core.color.getTempRadius(); } }
         );
         break;
       
