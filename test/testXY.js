@@ -92,6 +92,18 @@ describe('Archonia.Form.XY', function() {
     });
     
     it('Should be graceful about normalizing a zero vector', function() { chai.expect(Archonia.Form.XY(0, 0).normalized()).to.include({ x: 0, y: 0 }); });
+
+    it("Might as well have a toString()", function() {
+      var rxy = new Archonia.Form.RandomXY(); rxy.setMin(-500, 500); rxy.setMax(-500, 500);
+    
+      for(var i = 0; i < 10; i++) {
+        rxy.random();
+      
+        var checkString = "(" + rxy.point.x + ", " + rxy.point.y + ")";
+      
+        chai.expect(rxy.point.toString()).equal(checkString);
+      }
+    });
   });
   
   describe('Test reflexive arithmetic:', function() {

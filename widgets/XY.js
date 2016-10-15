@@ -71,6 +71,8 @@ Archonia.Form.XY.prototype = {
   subtract: function(a1, a2) { rp(a1, a2); var subtrahend = Archonia.Form.XY(a1, a2); this.x -= subtrahend.x; this.y -= subtrahend.y; },
   
   timesScalar: function(scalar) { rp(scalar); var scratch = Archonia.Form.XY(this); scratch.scalarMultiply(scalar); return scratch; },
+
+  toString: function() { return "(" + this.x + ", " + this.y + ")"; },
   
   X: function(places) { if(places === undefined) { places = 0; } return this.x.toFixed(places); },
   
@@ -139,6 +141,7 @@ Archonia.Form.RandomXY.prototype = {
     if(minX === undefined || minY === undefined) { throw new Error("Bad arguments"); }
     else { this.min.set(minX, minY); }
   },
+  
   setMax: function(maxX, maxY) {
     if(maxX === undefined || maxY === undefined) { throw new Error("Bad arguments"); }
     else { this.max.set(maxX, maxY); }
