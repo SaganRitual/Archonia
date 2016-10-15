@@ -6,6 +6,7 @@ Archonia.Form.XY = xy.XY;
 Archonia.Form.RandomXY = xy.RandomXY;
 
 var chai = require('chai');
+var data_driven = require('data-driven');
 
 describe('RandomXY', function() {
   it('#set min/max', function() {
@@ -245,5 +246,23 @@ describe('Archonia.Form.XY', function() {
     
     it('Should reflexive-scale from u to v', function() { chai.expect(uToV.equals(uScaled)).true; })
     it('Should reflexive-scale from v to u', function() { chai.expect(vToU.equals(vScaled)).true; })
+  });
+  
+  describe('Functions that should reject undefined input', function() {
+    var xy = Archonia.Form.XY();
+    
+    var shouldThrow = [
+      { fn: "dividedByScalar" }, { fn: "equals" }, { fn: "getAngleFrom" },
+      { fn: "getAngleTo" }, { fn: "getDistanceTo" }, { fn: "plus" },
+      { fn: "minus" }, { fn: "scalarDivide" }, { fn: "scalarMultiply" },
+      { fn: "scaleTo" }, { fn: "scaledTo" }, { fn: "setByMagnitude" },
+      { fn: "subtract" }, { fn: "timesScalar" }
+    ];
+    
+    data_driven(shouldThrow, function() {
+      it("{fn} with no arguments should throw", function(f) {
+        chai.expect(xy[f.fn]).to.throw(TypeError, "Bad arg");
+      });
+    });
   });
 });

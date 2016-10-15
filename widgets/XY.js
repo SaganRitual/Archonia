@@ -20,21 +20,21 @@ Archonia.Form.XY = function(sourceOrMaybeX, maybeY) {
 };
 
 Archonia.Form.XY.prototype = {
-  add: function(a1, a2) { var addend = Archonia.Form.XY(a1, a2); this.x += addend.x; this.y += addend.y; },
+  add: function(a1, a2) { rp(a1, a2); var addend = Archonia.Form.XY(a1, a2); this.x += addend.x; this.y += addend.y; },
   
   dividedByScalar: function(scalar) { var scratch = Archonia.Form.XY(this); scratch.scalarDivide(scalar); return scratch; },
   
-  equals: function(a1, a2) { var rhs = Archonia.Form.XY(a1, a2); return this.x === rhs.x && this.y === rhs.y; },
+  equals: function(a1, a2) { rp(a1, a2); var rhs = Archonia.Form.XY(a1, a2); return this.x === rhs.x && this.y === rhs.y; },
   
   floor: function() { this.x = Math.floor(this.x); this.y = Math.floor(this.y); },
   
   floored: function() { var scratch = Archonia.Form.XY(this); scratch.floor(); return scratch; },
   
-  getAngleFrom: function(a1, a2) { var c = Archonia.Form.XY(a1, a2); return Math.atan2(this.y - c.y, this.x - c.x); },
+  getAngleFrom: function(a1, a2) { rp(a1, a2); var c = Archonia.Form.XY(a1, a2); return Math.atan2(this.y - c.y, this.x - c.x); },
 
-  getAngleTo: function(a1, a2) { var c = Archonia.Form.XY(a1, a2); return c.getAngleFrom(this); },
+  getAngleTo: function(a1, a2) { rp(a1, a2); var c = Archonia.Form.XY(a1, a2); return c.getAngleFrom(this); },
   
-  getDistanceTo: function(a1, a2) { return getMagnitude(this.minus(a1, a2)); },
+  getDistanceTo: function(a1, a2) { rp(a1, a2); return getMagnitude(this.minus(a1, a2)); },
   
   getMagnitude: function() { return getMagnitude(this); },
   
@@ -52,11 +52,12 @@ Archonia.Form.XY.prototype = {
   
   reset: function() { this.set(0, 0); },
   
-  scalarDivide: function(scalar) { this.x /= scalar; this.y /= scalar; },
+  scalarDivide: function(scalar) { rp(scalar); this.x /= scalar; this.y /= scalar; },
   
-  scalarMultiply: function(scalar) { this.x *= scalar; this.y *= scalar; },
+  scalarMultiply: function(scalar) { rp(scalar); this.x *= scalar; this.y *= scalar; },
   
   scaleTo: function(a1, a2) {
+    rp(a1, a2);
     var scratch = Archonia.Form.XY(a1, a2);
     var mS = scratch.getMagnitude();
     var mThis = this.getMagnitude();
@@ -65,11 +66,11 @@ Archonia.Form.XY.prototype = {
   
   scaledTo: function(a1, a2) { var scratch = Archonia.Form.XY(this); scratch.scaleTo(a1, a2); return scratch; },
   
-  setByMagnitude: function(magnitude) { var a = magnitude / Math.sqrt(2); this.x = a; this.y = a; },
+  setByMagnitude: function(magnitude) { rp(magnitude); var a = magnitude / Math.sqrt(2); this.x = a; this.y = a; },
   
-  subtract: function(a1, a2) { var subtrahend = Archonia.Form.XY(a1, a2); this.x -= subtrahend.x; this.y -= subtrahend.y; },
+  subtract: function(a1, a2) { rp(a1, a2); var subtrahend = Archonia.Form.XY(a1, a2); this.x -= subtrahend.x; this.y -= subtrahend.y; },
   
-  timesScalar: function(scalar) { var scratch = Archonia.Form.XY(this); scratch.scalarMultiply(scalar); return scratch; },
+  timesScalar: function(scalar) { rp(scalar); var scratch = Archonia.Form.XY(this); scratch.scalarMultiply(scalar); return scratch; },
   
   X: function(places) { if(places === undefined) { places = 0; } return this.x.toFixed(places); },
   
@@ -143,6 +144,9 @@ Archonia.Form.RandomXY.prototype = {
     else { this.max.set(maxX, maxY); }
   }
 };
+
+// Although many of our functions are ok with undefined arguments, a number of them are not
+function rp(a1) { if(a1 === undefined) { throw new TypeError("Bad arguments"); } }
 
 function getMagnitude(a1, a2) {
   var xy = Archonia.Form.XY(a1, a2);
