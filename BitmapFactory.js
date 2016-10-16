@@ -46,11 +46,11 @@ if(typeof window === "undefined") {
 
       var g = cx.createLinearGradient(Archonia.Axioms.gameRadius, 0, Archonia.Axioms.gameRadius, Archonia.Axioms.gameHeight);
 
-      g.addColorStop(0.00, 'hsl(202, 100%, 100%)');
-      g.addColorStop(0.40, 'hsl(202, 100%, 50%)');
-      g.addColorStop(0.70, 'hsl(202, 100%, 50%)');
-      g.addColorStop(0.90, 'hsl(218, 100%, 40%)');
-      g.addColorStop(1.00, 'hsl(218, 100%, 00%)');
+      g.addColorStop(0.00, 'hsla(202, 100%, 100%, 1)');
+      g.addColorStop(0.40, 'hsla(202, 100%, 50%, 1)');
+      g.addColorStop(0.70, 'hsla(202, 100%, 50%, 1)');
+      g.addColorStop(0.90, 'hsla(218, 100%, 40%, 1)');
+      g.addColorStop(1.00, 'hsla(218, 100%, 00%, 1)');
 
       cx.fillStyle = g;
       cx.fillRect(0, 0, Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
@@ -76,6 +76,18 @@ if(typeof window === "undefined") {
 
       Archonia.Engine.game.cache.addBitmapData('archoniaGoo', bm);
     
+      return new Archonia.Essence.Bitmap(bm);
+    },
+  
+    debug: function() {
+      var bm = Archonia.Engine.game.add.bitmapData(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
+      var cx = bm.context;
+
+      cx.fillStyle = 'rgba(255, 255, 255, 1)';
+      cx.strokeStyle = 'rgba(255, 255, 255, 1)';
+
+      Archonia.Engine.game.add.image(0, 0, bm);
+
       return new Archonia.Essence.Bitmap(bm);
     },
     

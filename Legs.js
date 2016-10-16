@@ -11,42 +11,145 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
 
-Archonia.Form.Legs = function(position, maxMVelocity, velocity, maxMAcceleration) {
-  this.position = position; this.maxMVelocity = maxMVelocity;
-  this.velocity = velocity; this.maxMAcceleration = maxMAcceleration;
+Archonia.Form.Legs = function() {
+  this.damper = 10;
+  this.running = false;
+  this.nextUpdate = 0;
+  this.frameCount = 0;
   
+  this.targetType = null;
   this.targetPosition = Archonia.Form.XY();
+  this.targetVelocity = Archonia.Form.XY();
+  this.targetAngle = null;
 };
 
 Archonia.Form.Legs.prototype = {
+  drift: function() {
+    this.running = false;
+  },
+  
+  launch: function(position, maxMVelocity, velocity, maxMAcceleration) {
+    this.position = position; this.maxMVelocity = maxMVelocity;
+    this.velocity = velocity; this.maxMAcceleration = maxMAcceleration;
+  },
+  
+  reflect: function(vertical) {
+    var fromZero = Archonia.Axioms.robalizeAngle(this.velocity.getAngleFrom(0));
+    var theta = null;
+    
+    if(vertical) {
+      if(this.velocity.x > 0) {
+
+        theta = (3 * Math.PI / 2) - fromZero;
+        this.setTargetAngle(theta);
+
+      } else  if(this.velocity.x < 0) {
+
+        theta = (3 * Math.PI / 2) + fromZero;
+        this.setTargetAngle(theta);
+
+      }
+    }
+  },
+  
+  rotate: function(angle) {
+    // Angle from zero, not from the world center, because
+    // we're talking velocity here, not position
+    var theta = this.velocity.getAngleTo(0);
+    
+    theta = Archonia.Axioms.robalizeAngle(theta) + angle;
+    
+    this.targetType = 'angle';
+    this.running = true;
+    this.targetAngle = Archonia.Axioms.computerizeAngle(theta);
+  },
+  
+  setTargetAngle: function(a) {
+    this.targetType = 'angle';
+    this.running = true;
+    this.targetAngle = Archonia.Axioms.computerizeAngle(a);
+  },
+  
   setTargetPosition: function(p) {
     this.currentMVelocity = this.maxMVelocity;
-    
+
+    // Force update on next tick, in case we're in the middle of a maneuver
+    this.nextUpdate = 0;
+
+    this.targetType = 'point';
+    this.running = true;
     this.targetPosition.set(p);
   },
   
-/*  setTargetRotaton: function(t) {
+  setTargetVelocity: function(v) {
+    this.currentMVelocity = this.maxMVelocity;
+
+    // Force update on next tick, in case we're in the middle of a maneuver
+    this.nextUpdate = 0;
+
+    this.targetType = 'velocity';
+    this.running = true;
+    this.targetVelocity.set(v);
+  },
+
+  tick: function(frameCount) {
+    this.frameCount = frameCount;
     
-  },*/
-  
-/*  setTargetVelocity: function(v) {
-    
-  },*/
-  
-  tick: function(/*frameCount*/) {
-    if(this.targetPosition.getDistanceTo(this.position) > 50) { this.needUpdate = true; }
-    
-    this.updateMotion();
+    var drawDebugLines = false;
+    if(drawDebugLines) {
+      var v1 = Archonia.Form.XY(), s1 = null;
+
+      Archonia.Essence.Dbitmap.bm.clear();
+
+      s1 = this.velocity.getAngleFrom(0);
+      v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.position));
+      Archonia.Essence.Dbitmap.aLine(this.position, v1, 'red');
+
+      if(this.targetType === 'point') {
+
+        Archonia.Essence.Dbitmap.aLine(this.position, this.targetPosition, 'black');
+
+      } else if(this.targetType === 'angle') {
+
+        s1 = this.targetVelocity.getAngleTo(0);
+        v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.position));
+        Archonia.Essence.Dbitmap.aLine(this.position, v1, 'green');
+
+      }
+    }
+
+    if(this.running && frameCount > this.nextUpdate) {
+      this.updateMotion();
+      this.nextUpdate = frameCount + this.damper;
+    }
   },
   
   updateMotion: function() {
+    if(!this.running) { return; }
 
-    // Get the target into the same frame of reference as my
-    // velocity vector. To do so, we need to get the angle between 
-    // my vector and the distance vector from me to the target
+    var optimalDeltaV = Archonia.Form.XY();
+
+    if(this.targetType === 'point') {
+      
+      // Get the target into the same frame of reference as my
+      // velocity vector. To do so, we need to get the angle between 
+      // my vector and the distance vector from me to the target
     
-    // This is the vector from my velocity to the target position
-    var optimalDeltaV = this.targetPosition.minus(this.position).plus(this.velocity);
+      // This is the vector from my velocity to the target position
+      optimalDeltaV.set(this.targetPosition.minus(this.position).plus(this.velocity));
+
+    } else if(this.targetType === 'angle') {
+      
+      this.targetVelocity = Archonia.Form.XY.fromPolar(this.maxMVelocity, this.targetAngle);
+      optimalDeltaV.set(this.velocity.minus(this.targetVelocity));
+      
+    } else if(this.targetType === 'velocity') {
+      
+      optimalDeltaV.set(this.velocity.minus(this.targetVelocity));
+
+    } else {
+      throw new Error("Bad target type");
+    }
     
     // The magnitude of that vector
     var optimalDeltaM = optimalDeltaV.getMagnitude();
@@ -88,9 +191,20 @@ Archonia.Form.Legs.prototype = {
     
       bestDeltaV.scalarMultiply(this.maxMAcceleration / bestDeltaM);
     }
-
-    // And finally, the max change in mVelocity and mAcceleration allowed
+    
     this.velocity.add(bestDeltaV);
+
+    if(this.velocity.getMagnitude() > this.maxMVelocity) {
+      this.velocity.normalize();
+      this.velocity.scalarMultiply(this.maxMVelocity);
+    }
+    
+    // Note: doing it this way means we're never actually setting
+    // a target position, even though I've called one of the
+    // functions setTargetPosition(). This way, it's more like we're
+    // aiming at the target, but not bothering to aim super-carefully
+    // or slow down when we get there
+    if(!this.needUpdate) { this.drift(); }  // We've reached our target velocity
   }
 };
 

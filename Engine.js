@@ -30,6 +30,7 @@ if(typeof window === "undefined") {
 
       Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
       Archonia.Essence.Goo = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
+      Archonia.Essence.Dbitmap = Archonia.Essence.BitmapFactory.makeBitmap('debug');
 
       Archonia.Cosmos.Sun.ignite();
       Archonia.Cosmos.MannaGenerator.start();

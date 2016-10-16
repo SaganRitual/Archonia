@@ -27,6 +27,11 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.gameHeight = 600;
   Archonia.Axioms.gameWidth = 600;
   Archonia.Axioms.gameRadius = Archonia.Axioms.gameWidth / 2;
+  Archonia.Axioms.goddamnedBorder = 5;
+  Archonia.Axioms.goddamnedTop = Archonia.Axioms.goddamnedBorder;
+  Archonia.Axioms.goddamnedRight = Archonia.Axioms.gameWidth - Archonia.Axioms.goddamnedBorder;
+  Archonia.Axioms.goddamnedBottom = Archonia.Axioms.gameHeight - Archonia.Axioms.goddamnedBorder;
+  Archonia.Axioms.goddamnedLeft = Archonia.Axioms.goddamnedBorder;
   Archonia.Axioms.howManyPointsForNonSpatialInputs = 1;
   Archonia.Axioms.howManyPointsForSpatialInputs = 12;
   Archonia.Axioms.howManyPointsForTemperatureInputs = 2;
@@ -37,7 +42,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.minimumAdultMass = 1;            // Below this, an adult will die
   Archonia.Axioms.temperatureHi = 1000;
   Archonia.Axioms.temperatureLo = -1000;
-  Archonia.Axioms.worldBoundsBorder = 15;
   
   Archonia.Axioms.clamp = function(value, min, max) {
     value = Math.max(value, min); value = Math.min(value, max); return value;

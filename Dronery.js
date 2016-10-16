@@ -72,7 +72,7 @@ Archonia.Cosmos.Dronery = {
   },
 
   render: function() {
-  	var showDebugOutlines = false;
+  	var showDebugOutlines = true;
 
   	if(showDebugOutlines) {
   		this.phaseronPool.forEachAlive(function(a) {
