@@ -42,6 +42,13 @@ Archonia.Form.XY.prototype = {
 
   getSignedMagnitude: function() { return this.getMagnitude() * this.getSign(); },
   
+  isInBounds: function() {
+    return(
+      this.y > Archonia.Axioms.goddamnedTop && this.x < Archonia.Axioms.goddamnedRight &&
+      this.y < Archonia.Axioms.goddamnedBottom && this.x > Archonia.Axioms.goddamnedLeft
+    );
+  },
+  
   plus: function(a1, a2) { var scratch = Archonia.Form.XY(this); scratch.add(a1, a2); return scratch; },
   
   minus: function(a1, a2) { var scratch = Archonia.Form.XY(this); scratch.subtract(a1, a2); return scratch; },
@@ -72,7 +79,7 @@ Archonia.Form.XY.prototype = {
   
   timesScalar: function(scalar) { rp(scalar); var scratch = Archonia.Form.XY(this); scratch.scalarMultiply(scalar); return scratch; },
 
-  toString: function() { return "(" + this.x + ", " + this.y + ")"; },
+  toString: function(places) { return "(" + this.X(places) + ", " + this.Y(places) + ")"; },
   
   X: function(places) { if(places === undefined) { places = 0; } return this.x.toFixed(places); },
   

@@ -50,11 +50,13 @@ if(typeof window === 'undefined') {
       for(var i = 0; i < this.elements.length; i++) {
         var valueToPass = this.elements[ix];
 
-        if(callback.call(context, ix, valueToPass) === false) { return false; }
+        if(callback.call(context, ix, valueToPass) === false) { return ix; }
 
         ix = this.add(ix, 1);
       }
     },
+    
+    getElementAt: function(ix) { ix = this.add(ix, 0); return this.elements[ix]; },
     
     getIndexOfNewestElement: function() {
       if(this.elements.length === 0) { throw new ReferenceError("getIndexOfNewestElement() can't work with an empty Cbuffer"); }
