@@ -73,7 +73,7 @@ Archonia.Form.Legs.prototype = {
   
   setTargetPosition: function(p, damper, damperDecay) {
     if(damper === undefined) { damper = 10; }
-    if(damperDecay === undefined) { damperDecay = 0.1; }
+    if(damperDecay === undefined) { damperDecay = 0; }
     
     this.currentMVelocity = this.maxMVelocity;
     
