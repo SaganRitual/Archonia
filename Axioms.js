@@ -8,12 +8,12 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 1;
+  Archonia.Axioms.archonCount = 10;
   Archonia.Axioms.archoniaGooDiameter = 100;
   Archonia.Axioms.archoniaGooRadius = 50;
   Archonia.Axioms.babyFatAtBirth = 100;
   Archonia.Axioms.babyFatDensity = 1000;
-  Archonia.Axioms.caloriesPerManna = 1;
+  Archonia.Axioms.caloriesPerManna = 2.5;
   Archonia.Axioms.costFactorForGivingBirth = 2;
   Archonia.Axioms.costFactorForBeingBorn = 1;
   Archonia.Axioms.dailyBirthCounter = 0;
@@ -39,6 +39,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.maxMagnitudeV = 75;
   Archonia.Axioms.maxSpeed = 75;                   // pix/sec
   Archonia.Axioms.minimumAdultMass = 1;            // Below this, an adult will die
+  Archonia.Axioms.reproductionCostFactor = 1.25;
   Archonia.Axioms.temperatureHi = 1000;
   Archonia.Axioms.temperatureLo = -1000;
   

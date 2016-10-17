@@ -33,8 +33,6 @@ Archonia.Form.Goo = function(archon) {
 
 Archonia.Form.Goo.prototype = {
   
-  reproductionCostFactor: 1.25,
-
   applyBenefit: function(bucket, benefit, threshold) {
     this[bucket] += benefit;
     
@@ -54,11 +52,12 @@ Archonia.Form.Goo.prototype = {
   },
   
   breed: function() {
+    
+    console.log('breed', this.getMass().toFixed(4));
 
     var remainingReproductionCost = (
-      200
-//      this.genome.offspringMass.adultCalories + this.genome.offspringMass.larvalCalories
-    ) * this.reproductionCostFactor;
+      this.genome.offspringMassAdultCalories + this.genome.offspringMassLarvalCalories
+    ) * Archonia.Axioms.reproductionCostFactor;
     
     remainingReproductionCost = this.applyCost('embryoCalorieBudget', remainingReproductionCost);
     
@@ -92,11 +91,13 @@ Archonia.Form.Goo.prototype = {
   },
   
   die: function() {
-    // Dummy for talking to test harness until we have an archon to talk to
+    console.log('die');
     this.archon.die();
   },
 
   eat: function(food) {
+    if(this.archon.encysted) { return; }
+
     var benefit = food.calories;
 
     benefit = this.applyBenefit('adultCalorieBudget', benefit, this.genome.embryoThreshold);
@@ -121,7 +122,7 @@ Archonia.Form.Goo.prototype = {
   },
   
   getMotionCost: function() {
-    return this.getMass();
+    return this.getMass() * (this.genome.maxMVelocity / 8) + (this.genome.maxMAcceleration / 6);
   },
 
   getTempCost: function() {
@@ -134,13 +135,25 @@ Archonia.Form.Goo.prototype = {
   },
   
   launch: function(genome) {
+    this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+    
     this.genome = genome;
-    this.larvalCalorieBudget = 100;//this.genome.birthMass.larvalCalories;
-    this.adultCalorieBudget = 100;//this.genome.birthMass.adultCalories;
+    this.larvalCalorieBudget = this.genome.birthMassLarvalCalories;
+    this.adultCalorieBudget = this.genome.birthMassAdultCalories;
     
     this.optimalTempRange = new Archonia.Form.Range(this.genome.optimalTempLo, this.genome.optimalTempHi);
     
     this.setSize();
+  },
+  
+  metabolize: function() {
+    var m = this.getMotionCost();
+    var t = this.getTempCost();
+    var c = (m + t) / 100;
+    
+    if(this.archon.encysted) { c /= 10; }
+    
+    this.debit(c);
   },
 
   setButtonColor: function(temp) {
@@ -171,14 +184,12 @@ Archonia.Form.Goo.prototype = {
   	this.archon.sprite.body.setCircle(w / 2);
   },
   
-  tick: function() {}
-  
-  /*tick: function(frameCount) {
-    this.setColors();
+  tick: function(frameCount) {
+    this.frameCount = frameCount;
     
-    var m = this.getMotionCost();
-    var t = this.getTempCost();
-  }*/
+    this.setColors();
+    this.metabolize();
+  }
 };
   
 })(Archonia);

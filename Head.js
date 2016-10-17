@@ -68,21 +68,24 @@ Archonia.Form.Head.prototype = {
       var p1 = Archonia.Form.XY(), p2 = Archonia.Form.XY();
     
       if(!this.trail.isEmpty()) {
-        var color = 0x1111ff;
+        var hue = 0;
         this.trail.forEach(function(ix, value) {
-          p1.set(value.plus(-squareSize / 2, -squareSize / 2)); p2.set(value.plus(squareSize / 2, -squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p1, p2, '#' + color.toString(16));
+          var color = 'hsl(' + hue + ', 100%, 50%)';
+          
+          p1.set(value.plus(-squareSize / 2, -squareSize / 2));
+          p2.set(value.plus(squareSize / 2, -squareSize / 2));
+          Archonia.Essence.Dbitmap.aLine(p1, p2, color);
         
           p2.set(value.plus(-squareSize / 2, squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p1, p2, '#' + color.toString(16));
+          Archonia.Essence.Dbitmap.aLine(p1, p2, color);
 
           p1.set(value.plus(squareSize / 2, squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p2, p1, '#' + color.toString(16));
+          Archonia.Essence.Dbitmap.aLine(p2, p1, color);
         
           p2.set(value.plus(squareSize / 2, -squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p1, p2, '#' + color.toString(16));
+          Archonia.Essence.Dbitmap.aLine(p1, p2, color);
           
-          color += 0x220000;
+          hue += 30;
         });
       }
     }
@@ -98,7 +101,7 @@ Archonia.Form.Head.prototype = {
 
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
     
-    this.start();
+    this.active = true;
   },
   
   move: function() {
@@ -132,7 +135,7 @@ Archonia.Form.Head.prototype = {
       p = bestChoices[i];
     } else {
       p = this.doubleBack();
-      if(p === null) { console.log("encyst"); this.reset();  this.archon.encyst(); return;}
+      if(p === null) { console.log("encyst"); this.trail.reset();  this.archon.encyst(); return;}
     }
     
     this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
@@ -148,11 +151,23 @@ Archonia.Form.Head.prototype = {
     this.trail.store(p);
   },
     
-  start: function() { this.active = true; },
-  reset: function() {
-    if(!this.trail.isEmpty()) { this.trail.reset(); }
-    this.whenToIssueNextMoveOrder = 0;
-    this.previousMoveTarget.reset();
+  clearFoodGrab: function() {
+    if(this.foodGrab) {
+      // Wait a bit before starting the search again; a bit of
+      // drifting in the general area of the food we just
+      // ate might get us closer to more
+      this.legs.drift();
+      this.foodGrab = false;
+      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves * 2;
+    }
+  },
+  
+  setFoodGrab: function() {
+    if(!this.foodGrab) {
+      if(!this.trail.isEmpty()) { this.trail.reset(); }
+      this.previousMoveTarget.reset();
+      this.foodGrab = true;
+    }
   },
   
   tick: function(frameCount, foodTarget) {
@@ -161,6 +176,8 @@ Archonia.Form.Head.prototype = {
     this.drawMemory();
 
     if(foodTarget.equals(0)) {
+      this.clearFoodGrab();
+      
       if(this.active && this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
     } else {
       var drawDebugLines = false;
@@ -168,8 +185,8 @@ Archonia.Form.Head.prototype = {
         Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
       }
       
-      this.reset();
-      
+      this.setFoodGrab();
+
       if(!this.currentFoodTarget.equals(foodTarget)) {
         this.currentFoodTarget.set(foodTarget);
         this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);

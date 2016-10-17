@@ -82,6 +82,10 @@ Archonia.Form.Archon.prototype.breed = function() {
   }
 };
 
+Archonia.Form.Archon.prototype.die = function() {
+  this.sprite.kill(); this.button.kill(); this.sensor.kill();
+};
+
 Archonia.Form.Archon.prototype.eat = function(manna) {
   this.goo.eat(manna);
 };

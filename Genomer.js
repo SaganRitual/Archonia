@@ -221,6 +221,11 @@ var primordialGenome = { core: {
   tasteFactor:               new Archonia.Form.ScalarGene(100),
   tempFactor:                new Archonia.Form.ScalarGene(1),
   tempRangeDamping:          new Archonia.Form.ScalarGene(0.5),
+  
+  birthMassAdultCalories:      new Archonia.Form.ScalarGene(100),
+  birthMassLarvalCalories:     new Archonia.Form.ScalarGene(100),
+  offspringMassLarvalCalories: new Archonia.Form.ScalarGene(100),
+  offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
 
   // dummy entries so the getters will work
   optimalTemp: null,
@@ -233,8 +238,6 @@ var primordialGenome = { core: {
   
   foodSearchTimeBetweenTurns:  new Archonia.Form.ScalarGene(120),
   howLongBadTempToEncystment:  new Archonia.Form.ScalarGene(15),
-  offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
-  offspringMassLarvalCalories: new Archonia.Form.ScalarGene(100),
   reproductionThreshold:       new Archonia.Form.ScalarGene(500),
   embryoThreshold:             new Archonia.Form.ScalarGene(200),
   senseMeasurementDepth:       new Archonia.Form.ScalarGene(10),
