@@ -36,7 +36,7 @@ if(typeof window === "undefined") {
     },
     
     getTemperature: function(w, wY) {
-      if(w === undefined || !(w instanceof Archonia.Form.XY)) { throw new Error("Bad arguments"); }
+      if(w === undefined) { throw new Error("Bad arguments"); }
 
       var where = Archonia.Form.XY(w, wY).floored();
 

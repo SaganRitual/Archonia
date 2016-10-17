@@ -74,7 +74,7 @@ Archonia.Cosmos.Dronery = {
   eat: function(phaseron, manna) { manna.kill(); },
 
   render: function() {
-  	var showDebugOutlines = false;
+  	var showDebugOutlines = true;
 
   	if(showDebugOutlines) {
   		spritePools.phaserons.forEachAlive(function(a) {

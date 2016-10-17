@@ -18,25 +18,20 @@ if(typeof window === "undefined") {
   var larvaFatDensity = 1000;
   var embryoFatDensity = 1000;
 
-Archonia.Form.Phenotype = function(archon, theSun) {
+Archonia.Form.Goo = function(archon) {
   
   if(archon === undefined) {
-    throw new TypeError("Phenotype needs an archon");
+    throw new TypeError("Goo needs an archon");
   }
   
-  this.sun = theSun;
-  
   this.archon = archon;
-  this.genome = archon.genome;
   this.embryoCalorieBudget = 0;
   this.larvalCalorieBudget = 0;
   this.adultCalorieBudget = 0;
   
-  this.optimalTempRange = null;
-  
 };
 
-Archonia.Form.Phenotype.prototype = {
+Archonia.Form.Goo.prototype = {
   
   reproductionCostFactor: 1.25,
 
@@ -61,7 +56,8 @@ Archonia.Form.Phenotype.prototype = {
   breed: function() {
 
     var remainingReproductionCost = (
-      this.genome.offspringMass.adultCalories + this.genome.offspringMass.larvalCalories
+      200
+//      this.genome.offspringMass.adultCalories + this.genome.offspringMass.larvalCalories
     ) * this.reproductionCostFactor;
     
     remainingReproductionCost = this.applyCost('embryoCalorieBudget', remainingReproductionCost);
@@ -129,7 +125,7 @@ Archonia.Form.Phenotype.prototype = {
   },
 
   getTempCost: function() {
-    var t = this.sun.getTemperature(this.archon);
+    var t = Archonia.Cosmos.Sun.getTemperature(this.archon.position);
     var d = Math.abs(t - this.genome.optimalTemp);
     var s = this.getMass();
     var p = Math.log((d || 1) + 1) * Math.log(s + 1);
@@ -137,12 +133,12 @@ Archonia.Form.Phenotype.prototype = {
     return p;
   },
   
-  launch: function() {
-    this.larvalCalorieBudget = this.genome.birthMass.larvalCalories;
-    this.adultCalorieBudget = this.genome.birthMass.adultCalories;
+  launch: function(genome) {
+    this.genome = genome;
+    this.larvalCalorieBudget = 100;//this.genome.birthMass.larvalCalories;
+    this.adultCalorieBudget = 100;//this.genome.birthMass.adultCalories;
     
-    var tempRangeRadius = this.genome.optimalTempRangeWidth / 2;
-    this.optimalTempRange = new Archonia.Form.Range(this.genome.optimalTemp - tempRangeRadius, this.genome.optimalTemp + tempRangeRadius);
+    this.optimalTempRange = new Archonia.Form.Range(this.genome.optimalTempLo, this.genome.optimalTempHi);
     
     this.setSize();
   },
@@ -159,7 +155,7 @@ Archonia.Form.Phenotype.prototype = {
   },
   
   setColors: function() {
-    var t = this.sun.getTemperature(this.archon);
+    var t = Archonia.Cosmos.Sun.getTemperature(this.archon.position);
 
     this.setButtonColor(t);
   },
@@ -168,15 +164,23 @@ Archonia.Form.Phenotype.prototype = {
     var m = this.getMass();
     var s = m / Archonia.Axioms.archoniaGooDiameter;
     
-    this.archon.phaseron.scale.setTo(s, s);
+    this.archon.sprite.scale.setTo(s, s);
     
-    this.archon.phaseron.body.setSize(s, s);
-    this.archon.phaseron.body.setCircle(s / 2);
-  }
+    this.archon.sprite.body.setSize(s, s);
+    this.archon.sprite.body.setCircle(s / 2);
+  },
+  
+  tick: function() {}
+  /*tick: function(frameCount) {
+    this.setColors();
+    
+    var m = this.getMotionCost();
+    var t = this.getTempCost();
+  }*/
 };
   
 })(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archonia.Form.Phenotype;
+  module.exports = Archonia.Form.Goo;
 }
