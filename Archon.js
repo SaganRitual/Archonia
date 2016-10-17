@@ -126,7 +126,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     this.sprite.tint = 0x00FFFF;  // For debugging, so I can see archon 0
   }*/
   
-  this.sensor.scale.setTo(this.sensorScale, this.sensorScale);  
+  this.sensor.scale.setTo(1, 1); //this.genome.sensorScale, this.genome.sensorScale);  
 
   if(myParentArchon === undefined) {
     this.position.set(
@@ -145,6 +145,12 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.head.launch(this.genome, this.legs, this.position);
 
   this.sprite.revive(); this.button.revive(); this.sensor.revive();
+};
+
+Archonia.Form.Archon.prototype.sense = function(manna) {
+  if(this.position.getDistanceTo(manna) < this.sensorRadius) {
+    Archonia.Essence.Dbitmap.aLine(this.position, manna, 'yellow');
+  }
 };
 
 Archonia.Form.Archon.prototype.setPosition = function(a1, a2) {

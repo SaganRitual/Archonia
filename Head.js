@@ -62,20 +62,21 @@ Archonia.Form.Head.prototype = {
       var p1 = Archonia.Form.XY(), p2 = Archonia.Form.XY();
     
       if(!this.trail.isEmpty()) {
-        Archonia.Essence.Dbitmap.bm.clear();
-
+        var color = 0x1111ff;
         this.trail.forEach(function(ix, value) {
           p1.set(value.plus(-squareSize / 2, -squareSize / 2)); p2.set(value.plus(squareSize / 2, -squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p1, p2, 'blue');
+          Archonia.Essence.Dbitmap.aLine(p1, p2, '#' + color.toString(16));
         
           p2.set(value.plus(-squareSize / 2, squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p1, p2, 'blue');
+          Archonia.Essence.Dbitmap.aLine(p1, p2, '#' + color.toString(16));
 
           p1.set(value.plus(squareSize / 2, squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p2, p1, 'blue');
+          Archonia.Essence.Dbitmap.aLine(p2, p1, '#' + color.toString(16));
         
           p2.set(value.plus(squareSize / 2, -squareSize / 2));
-          Archonia.Essence.Dbitmap.aLine(p1, p2, 'blue');
+          Archonia.Essence.Dbitmap.aLine(p1, p2, '#' + color.toString(16));
+          
+          color += 0x220000;
         });
       }
     }

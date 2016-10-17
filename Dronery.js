@@ -29,7 +29,7 @@ if(typeof window === "undefined") {
   		var b = spritePools.buttons.getChildAt(0);
   		a.addChild(b);	// b is removed from its pool by this call
     
-      a.sensor = s; a.button = b; s.sprite = a;
+        a.sensor = s; a.button = b; s.sprite = a;
   	}, Archonia.Cosmos.Dronery);
   };
 
@@ -70,22 +70,38 @@ Archonia.Cosmos.Dronery = {
   
     phaseron.archon.launch(parentArchon);
   },
+  
+  eat: function(phaseron, manna) { manna.kill(); },
 
   render: function() {
   	var showDebugOutlines = true;
 
   	if(showDebugOutlines) {
-  		this.phaseronPool.forEachAlive(function(a) {
-  	    Archonia.Engine.game.debug.body(a, 'yellow', false);
-  		  Archonia.Engine.game.debug.body(a.archon.sensor, 'blue', false);
-
-  			Archonia.Engine.game.debug.spriteBounds(a, 'blue', false);
-  	    Archonia.Engine.game.debug.spriteBounds(a.archon.sensor, 'magenta', false);
-  		}, this);
+  		spritePools.phaserons.forEachAlive(function(a) {
+        Archonia.Engine.game.debug.body(a, 'yellow', false);
+        Archonia.Engine.game.debug.body(a.archon.sensor, 'blue', false);
+        
+        Archonia.Engine.game.debug.spriteBounds(a, 'blue', false);
+        Archonia.Engine.game.debug.spriteBounds(a.archon.sensor, 'magenta', false);
+      });
   	}
   },
+  
+  sense: function(sensor, manna) { sensor.archon.sense(manna); },
 
   tick: function() {
+    Archonia.Essence.Dbitmap.bm.clear();
+
+    Archonia.Engine.game.physics.arcade.overlap(
+      spritePools.sensors, Archonia.Cosmos.MannaGenerator.spriteGroup,
+      Archonia.Cosmos.Dronery.sense
+    );
+
+    Archonia.Engine.game.physics.arcade.overlap(
+      spritePools.phaserons, Archonia.Cosmos.MannaGenerator.spriteGroup,
+      Archonia.Cosmos.Dronery.eat
+    );
+    
   	spritePools.phaserons.forEachAlive(function(a) {
       a.archon.tick();
   	});
