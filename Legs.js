@@ -13,6 +13,7 @@ if(typeof window === "undefined") {
 
 Archonia.Form.Legs = function() {
   this.damper = 10;
+  this.damperDecay = 0.1;
   this.running = false;
   this.nextUpdate = 0;
   this.frameCount = 0;
@@ -70,10 +71,13 @@ Archonia.Form.Legs.prototype = {
     this.targetAngle = Archonia.Axioms.computerizeAngle(a);
   },
   
-  setTargetPosition: function(p, damper) {
+  setTargetPosition: function(p, damper, damperDecay) {
     if(damper === undefined) { damper = 10; }
+    if(damperDecay === undefined) { damperDecay = 0.1; }
+    
     this.currentMVelocity = this.maxMVelocity;
-    this.damper = damper;
+    
+    this.damper = damper; this.damperDecay = damperDecay;
 
     // Force update on next tick, in case we're in the middle of a maneuver
     this.nextUpdate = 0;
@@ -129,7 +133,7 @@ Archonia.Form.Legs.prototype = {
   updateMotion: function() {
     if(!this.running) { return; }
     
-    if(this.damper > 0) { this.damper--; }
+    if(this.damper > 0) { this.damper -= this.damperDecay; }
 
     var optimalDeltaV = Archonia.Form.XY();
 

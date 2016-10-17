@@ -158,7 +158,7 @@ Archonia.Form.Head.prototype = {
 
       if(!this.currentFoodTarget.equals(foodTarget)) {
         this.currentFoodTarget.set(foodTarget);
-        this.legs.setTargetPosition(this.currentFoodTarget, 0);
+        this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
       }
     }
     
