@@ -133,7 +133,7 @@ Archonia.Form.Legs.prototype = {
   updateMotion: function() {
     if(!this.running) { return; }
     
-    if(this.damper > 0) { this.damper -= this.damperDecay; }
+    this.damper -= this.damperDecay; if(this.damper < 0) { this.damper = 0; }
 
     var optimalDeltaV = Archonia.Form.XY();
 
