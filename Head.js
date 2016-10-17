@@ -19,7 +19,7 @@ Archonia.Form.Head = function() {
   
   this.previousMoveTarget = Archonia.Form.XY();
   
-  this.trail = new Archonia.Form.Cbuffer(20);
+  this.trail = new Archonia.Form.Cbuffer(8);
 };
 
 Archonia.Form.Head.prototype = {
@@ -43,12 +43,14 @@ Archonia.Form.Head.prototype = {
   },
   
   drawMemory: function() {
-    var drawDebugLines = false;
+    var drawDebugLines = true;
     
     if(drawDebugLines) {
       var p1 = Archonia.Form.XY(), p2 = Archonia.Form.XY();
     
       if(!this.trail.isEmpty()) {
+        Archonia.Essence.Dbitmap.bm.clear();
+
         this.trail.forEach(function(ix, value) {
           p1.set(value.plus(-squareSize / 2, -squareSize / 2)); p2.set(value.plus(squareSize / 2, -squareSize / 2));
           Archonia.Essence.Dbitmap.aLine(p1, p2, 'blue');
@@ -82,10 +84,25 @@ Archonia.Form.Head.prototype = {
     
     if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
     
+    var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
+    //var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
+    
+    //var tooHot = tempBottom > this.genome.optimalTempHi;
+    var tooCold = tempTop < this.genome.optimalTempLo;
+    
     for(i = 0; i < 8; i++) {
       p = relativePositions[i].plus(this.previousMoveTarget);
+
+      if(p.isInBounds) {
+        // if it's too cold, your only choices are up, and it doesn't
+        // matter whether we've been there before; just find
+        // a safe place to be
+        if(tooCold) { if(i === 0 || i === 1 || i === 7) { bestChoices.push(p); } }
       
-      if(!this.doWeRemember(p) && p.isInBounds()) { bestChoices.push(p); }
+        else if(tempTop > this.genome.optimalTempHi) { if(i === 3 || i === 4 || i === 5) { bestChoices.push(p); } }
+
+        else if(!this.doWeRemember(p)) { bestChoices.push(p); }
+      }
     }
     
     if(bestChoices.length > 0) {
@@ -105,6 +122,7 @@ Archonia.Form.Head.prototype = {
     this.previousMoveTarget.set(p);
     
     this.legs.setTargetPosition(p);
+    
     this.trail.store(p);
   },
     
