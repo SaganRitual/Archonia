@@ -49,6 +49,10 @@ Archonia.Form.Archon = function(phaseron) {
   
   generateArchonoidPrototype(); // This happens only once
   
+  this.foundCurrentFoodTarget = false;
+  this.currentFoodTarget = Archonia.Form.XY();
+  this.newFoodTarget = Archonia.Form.XY();
+  
   this.position = new Archonia.Form.Archonoid(p);
   this.velocity = new Archonia.Form.Archonoid(p.body.velocity);
   
@@ -149,6 +153,18 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
 
 Archonia.Form.Archon.prototype.sense = function(manna) {
   if(this.position.getDistanceTo(manna) < this.sensorRadius) {
+    
+    if(this.currentFoodTarget.equals(manna)) {
+      this.foundCurrentFoodTarget = true;
+    } else {
+      var c = this.position.getDistanceTo(this.newFoodTarget);
+      var n = this.position.getDistanceTo(manna);
+    
+      if(this.newFoodTarget.equals(0) || n < c) {
+        this.newFoodTarget.set(manna);
+      }
+    }
+    
     Archonia.Essence.Dbitmap.aLine(this.position, manna, 'yellow');
   }
 };
@@ -241,8 +257,15 @@ Archonia.Form.Archon.prototype.tick = function() {
   this.sensor.x = this.sprite.x; // So the sensor will stay attached
   this.sensor.y = this.sprite.y; // So the sensor will stay attached
   
+  if(!this.foundCurrentFoodTarget) {
+    this.currentFoodTarget.set(this.newFoodTarget);
+  }
+  
+  this.foundCurrentFoodTarget = false;
+  this.newFoodTarget.set(0);
+  
   this.legs.tick(this.frameCount);
-  this.head.tick(this.frameCount);
+  this.head.tick(this.frameCount, this.currentFoodTarget);
 };
 
 })(Archonia);

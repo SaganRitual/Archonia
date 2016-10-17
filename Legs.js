@@ -72,6 +72,7 @@ Archonia.Form.Legs.prototype = {
   
   setTargetPosition: function(p) {
     this.currentMVelocity = this.maxMVelocity;
+    this.damper = 10;
 
     // Force update on next tick, in case we're in the middle of a maneuver
     this.nextUpdate = 0;
@@ -126,6 +127,8 @@ Archonia.Form.Legs.prototype = {
   
   updateMotion: function() {
     if(!this.running) { return; }
+    
+    if(this.damper > 0) { this.damper--; }
 
     var optimalDeltaV = Archonia.Form.XY();
 

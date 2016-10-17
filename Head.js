@@ -18,6 +18,7 @@ Archonia.Form.Head = function() {
   this.whenToIssueNextMoveOrder = 0;
   
   this.previousMoveTarget = Archonia.Form.XY();
+  this.currentFoodTarget =  Archonia.Form.XY();
   
   this.trail = new Archonia.Form.Cbuffer(8);
 };
@@ -142,12 +143,24 @@ Archonia.Form.Head.prototype = {
     
   start: function() { this.active = true; },
   
-  tick: function(frameCount) {
+  tick: function(frameCount, foodTarget) {
     this.frameCount = frameCount;
     
     this.drawMemory();
+
+    if(foodTarget.equals(0)) {
+      if(this.active && this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
+    } else {
+      Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
+
+      if(!this.currentFoodTarget.equals(foodTarget)) {
+        this.currentFoodTarget.set(foodTarget);
+        this.legs.setTargetPosition(this.currentFoodTarget);
+      }
+    }
     
-    if(this.active && this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
+    this.currentFoodTarget.set(foodTarget);
+    
   },
 };
 
