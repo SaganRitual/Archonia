@@ -74,12 +74,6 @@ Archonia.Form.Archon.prototype.activatePhysicsBodies = function() {
 	this.setSize(false);
 
 	enable(this.sensor);
-  
-  this.sensorWidth = this.sensor.width;
-  this.sensorRadius = this.sensor.width / 2;
-
-	this.sensor.body.setSize(this.sensorRadius, this.sensorRadius);
-	this.sensor.body.setCircle(this.sensorRadius);
 };
 
 Archonia.Form.Archon.prototype.breed = function() {
@@ -106,6 +100,8 @@ Archonia.Form.Archon.prototype.getVelocity = function() {
 };
 
 Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
+  this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+  
   Archonia.Cosmos.Genomer.inherit(this, myParentArchon);
   
   this.myParentArchon = myParentArchon;
@@ -131,6 +127,12 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   }*/
   
   this.sensor.scale.setTo(this.genome.sensorScale, this.genome.sensorScale);  
+  
+  this.sensorWidth = this.sensor.width;
+  this.sensorRadius = this.sensor.width / 2;
+
+	this.sensor.body.setSize(this.sensorRadius, this.sensorRadius);
+	this.sensor.body.setCircle(this.sensorRadius);
 
   if(myParentArchon === undefined) {
     this.position.set(
@@ -165,10 +167,16 @@ Archonia.Form.Archon.prototype.sense = function(manna) {
       }
     }
     
-    var drawDebugLines = false;
+    var drawDebugLines = true;
     
     if(drawDebugLines) {
-      Archonia.Essence.Dbitmap.aLine(this.position, manna, 'yellow');
+      if(this.foundCurrentFoodTarget) {
+        Archonia.Essence.Dbitmap.aLine(this.position, this.currentFoodTarget, 'blue');
+      }
+      
+      if(!this.newFoodTarget.equals(0)) {
+        Archonia.Essence.Dbitmap.aLine(this.position, this.newFoodTarget, 'yellow');
+      }
     }
   }
 };
