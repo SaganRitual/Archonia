@@ -167,7 +167,7 @@ Archonia.Form.Archon.prototype.sense = function(manna) {
       }
     }
     
-    var drawDebugLines = true;
+    var drawDebugLines = false;
     
     if(drawDebugLines) {
       if(this.foundCurrentFoodTarget) {

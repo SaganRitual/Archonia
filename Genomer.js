@@ -216,7 +216,7 @@ var primordialGenome = { core: {
   offspringEnergy:           new Archonia.Form.ScalarGene(200),
   parasiteChaseFactor:       new Archonia.Form.ScalarGene(1),
   parasiteFlightFactor:      new Archonia.Form.ScalarGene(10),
-  sensorScale:               new Archonia.Form.ScalarGene(0.1),
+  sensorScale:               new Archonia.Form.ScalarGene(0.2),
   targetChangeDelay:         new Archonia.Form.ScalarGene(5),
   tasteFactor:               new Archonia.Form.ScalarGene(100),
   tempFactor:                new Archonia.Form.ScalarGene(1),

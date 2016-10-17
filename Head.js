@@ -146,6 +146,11 @@ Archonia.Form.Head.prototype = {
   },
     
   start: function() { this.active = true; },
+  reset: function() {
+    if(!this.trail.isEmpty()) { this.trail.reset(); }
+    this.whenToIssueNextMoveOrder = 0;
+    this.previousMoveTarget.reset();
+  },
   
   tick: function(frameCount, foodTarget) {
     this.frameCount = frameCount;
@@ -159,7 +164,9 @@ Archonia.Form.Head.prototype = {
       if(drawDebugLines) {
         Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
       }
-
+      
+      this.reset();
+      
       if(!this.currentFoodTarget.equals(foodTarget)) {
         this.currentFoodTarget.set(foodTarget);
         this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
