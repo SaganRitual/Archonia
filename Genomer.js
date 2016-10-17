@@ -224,8 +224,8 @@ var primordialGenome = { core: {
 
   // dummy entries so the getters will work
   optimalTemp: null,
-  optimalHiTemp: null,
-  optimalLoTemp: null,
+  optimalTempHi: null,
+  optimalTempLo: null,
   tempRange: null,
   tempRadius: null,
   
@@ -281,13 +281,13 @@ Archonia.Cosmos.Genomer = {
         );
         break;
       
-      case 'optimalHiTemp':
+      case 'optimalTempHi':
         Object.defineProperty(Archonia.Form.Genome.prototype, i,
           { get: function () { return this.core.color.getOptimalHiTemp();  } }
         );
         break;
       
-      case 'optimalLoTemp':
+      case 'optimalTempLo':
         Object.defineProperty(Archonia.Form.Genome.prototype, i,
           { get: function () { return this.core.color.getOptimalLoTemp(); } }
         );
