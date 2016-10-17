@@ -34,7 +34,7 @@ Archonia.Form.Head.prototype = {
   doubleBack: function() {
     var safePoint = Archonia.Form.XY();
     
-    if(this.trail.isEmpty()) {
+    if(!this.trail.isEmpty()) {
       this.trail.forEach(function(ix, point) {
         var temp = Archonia.Cosmos.Sun.getTemperature(point);
 
