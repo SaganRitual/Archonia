@@ -60,7 +60,7 @@ Archonia.Form.Archon = function(phaseron) {
 
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs();
-  this.head = new Archonia.Form.Head();
+  this.head = new Archonia.Form.Head(this);
 };
 
 Archonia.Form.Archon.prototype.activatePhysicsBodies = function() {
@@ -72,16 +72,24 @@ Archonia.Form.Archon.prototype.activatePhysicsBodies = function() {
 	};
 
 	enable(this.sprite);
-	this.setSize(false);
-
 	enable(this.sensor);
 };
 
 Archonia.Form.Archon.prototype.breed = function() {
   if(!this.isDisabled) {
     this.howManyChildren++;
-    this.god.breed(this);
+    Archonia.Cosmos.Dronery.breed(this);
   }
+};
+
+Archonia.Form.Archon.prototype.eat = function(manna) {
+  this.goo.eat(manna);
+};
+
+Archonia.Form.Archon.prototype.encyst = function() {
+  this.velocity.set(0);
+  this.whenToUnencyst = this.frameCount + 5 * 60;
+  this.encysted = true;
 };
 
 Archonia.Form.Archon.prototype.getMVelocity = function() {
@@ -90,10 +98,6 @@ Archonia.Form.Archon.prototype.getMVelocity = function() {
 
 Archonia.Form.Archon.prototype.getPosition = function() {
   return this.position;
-};
-
-Archonia.Form.Archon.prototype.getSize = function() {
-  return this.sprite.width;
 };
 
 Archonia.Form.Archon.prototype.getVelocity = function() {
@@ -116,17 +120,14 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.isDisabled = false;
   this.isDefending = false;
   this.injuryFactor = 0;
+  this.encysted = false;
+  this.whenToUnencyst = 0;
   
   this.flashes = {
     birth: { on: 0xFFFFFF, off: 0 },
     defending: { on: 0xFF0000, off: 0x0000FF }
   };
 
-	/*this.uniqueID = this.god.getUniqueID();
-  if(this.uniqueID === 0) {
-    this.sprite.tint = 0x00FFFF;  // For debugging, so I can see archon 0
-  }*/
-  
   this.sensor.scale.setTo(this.genome.sensorScale, this.genome.sensorScale);  
   
   this.sensorWidth = this.sensor.width;
@@ -191,38 +192,6 @@ Archonia.Form.Archon.prototype.setVelocity = function(a1, a2) {
   this.velocity.set(a1, a2);
 };
 
-Archonia.Form.Archon.prototype.setSize = function(lizerIsLaunched) {
-  var mass = null, babyFat = 0, adultFat = 0, embryoFat = 0;
-  
-  if(lizerIsLaunched) {
-    babyFat = this.lizer.babyCalorieBudget;
-    adultFat = this.lizer.calorieBudget;
-    embryoFat = this.lizer.embryoCalorieBudget;
-  } else {
-    babyFat = Archonia.Axioms.babyFatAtBirth;
-    adultFat = Archonia.Axioms.adultFatAtBirth;
-    embryoFat = 0;
-  }
-  
-  mass = (
-    (babyFat / Archonia.Axioms.babyFatDensity) +
-    (adultFat / Archonia.Axioms.adultFatDensity) +
-    (embryoFat / Archonia.Axioms.embryoFatDensity)
-  );
-  
-	var p = Archonia.Essence.archonSizeRange.convertPoint(mass, Archonia.Essence.archonMassRange);
-
-	this.sprite.scale.setTo(p, p);
-
-	var w = this.sprite.width;	// Have to tell the body to keep up with the sprite
-	this.sprite.body.setSize(w, w);
-	this.sprite.body.setCircle(w / 2);
-};
-
-Archonia.Form.Archon.prototype.getSize = function() {
-  return this.sprite.width / Archonia.Form.rg.bm.width;
-};
-
 Archonia.Form.Archon.prototype.setMVelocity = function(vector) {
   this.velocity.set(vector);
 };
@@ -255,8 +224,10 @@ Archonia.Form.Archon.prototype.tick = function() {
     this.sprite.tint = this.flashes[this.whichFlash].on;
   } else if(this.flashDirection === -1) {
     this.sprite.tint = this.flashes[this.whichFlash].off;
+  } else if(this.encysted) {
+    this.sprite.tint = 0xFF0000;
   } else {
-    this.sprite.tint = 0x00ff00; //this.color;
+    this.sprite.tint = this.genome.color;
   }
   
   // If I've been injured so badly (or was born with a serious defect),
@@ -278,9 +249,13 @@ Archonia.Form.Archon.prototype.tick = function() {
   this.foundCurrentFoodTarget = false;
   this.newFoodTarget.set(0);
   
-  this.goo.tick(this.frameCount);
-  this.legs.tick(this.frameCount);
-  this.head.tick(this.frameCount, this.currentFoodTarget);
+  if(this.encysted) {
+    if(this.frameCount > this.whenToUnencyst) { this.encysted = false; }
+  } else {
+    this.goo.tick(this.frameCount);
+    this.legs.tick(this.frameCount);
+    this.head.tick(this.frameCount, this.currentFoodTarget);
+  }
 };
 
 })(Archonia);

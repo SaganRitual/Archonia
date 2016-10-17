@@ -57,6 +57,7 @@ if(typeof window === "undefined") {
 
       MG.spriteGroup.forEach(function(m) {
         m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+        m.calories = Archonia.Axioms.caloriesPerManna;
         m.previousEmit = 0;
         m.birthday = 0;
         m.anchor.setTo(0.5, 0.5);

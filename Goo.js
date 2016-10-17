@@ -162,15 +162,17 @@ Archonia.Form.Goo.prototype = {
   
   setSize: function() {
     var m = this.getMass();
-    var s = m / Archonia.Axioms.archoniaGooDiameter;
-    
-    this.archon.sprite.scale.setTo(s, s);
-    
-    this.archon.sprite.body.setSize(s, s);
-    this.archon.sprite.body.setCircle(s / 2);
+  	var p = Archonia.Essence.archonSizeRange.convertPoint(m, Archonia.Essence.archonMassRange);
+
+  	this.archon.sprite.scale.setTo(p, p);
+
+  	var w = this.archon.sprite.width;	// Have to tell the body to keep up with the sprite
+  	this.archon.sprite.body.setSize(w, w);
+  	this.archon.sprite.body.setCircle(w / 2);
   },
   
   tick: function() {}
+  
   /*tick: function(frameCount) {
     this.setColors();
     

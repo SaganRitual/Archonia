@@ -71,10 +71,10 @@ Archonia.Cosmos.Dronery = {
     phaseron.archon.launch(parentArchon);
   },
   
-  eat: function(phaseron, manna) { manna.kill(); },
+  eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill(); },
 
   render: function() {
-  	var showDebugOutlines = true;
+  	var showDebugOutlines = false;
 
   	if(showDebugOutlines) {
   		spritePools.phaserons.forEachAlive(function(a) {

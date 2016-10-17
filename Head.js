@@ -14,7 +14,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     Archonia.Form.XY(-squareSize, 0), Archonia.Form.XY(-squareSize, -squareSize)
   ];
 
-Archonia.Form.Head = function() {
+Archonia.Form.Head = function(archon) {
+  this.archon = archon;
   this.whenToIssueNextMoveOrder = 0;
   
   this.previousMoveTarget = Archonia.Form.XY();
@@ -32,7 +33,7 @@ Archonia.Form.Head.prototype = {
   // jshint bitwise: true
   
   doubleBack: function() {
-    var safePoint = Archonia.Form.XY();
+    var safePoint = null;
     
     if(!this.trail.isEmpty()) {
       this.trail.forEach(function(ix, point) {
@@ -89,6 +90,8 @@ Archonia.Form.Head.prototype = {
   },
   
   launch: function(genome, legs, position) {
+    this.archoniaUniqueObjectId = Archonia.Axioms.archoniaUniqueObjectId++;
+
     this.genome = genome;
     this.legs = legs;
     this.position = position;
@@ -105,7 +108,7 @@ Archonia.Form.Head.prototype = {
     
     for(i = 0; i < 8; i++) {
       p = relativePositions[i].plus(this.previousMoveTarget);
-
+      
       if(p.isInBounds()) {
         var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
         var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
@@ -129,7 +132,7 @@ Archonia.Form.Head.prototype = {
       p = bestChoices[i];
     } else {
       p = this.doubleBack();
-      if(p === null) { console.log("encyst"); return;}
+      if(p === null) { console.log("encyst"); this.reset();  this.archon.encyst(); return;}
     }
     
     this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
