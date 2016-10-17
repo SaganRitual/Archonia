@@ -14,7 +14,7 @@ if(typeof window === 'undefined') {
   Archonia.Form.Cbuffer = function(howManyElements) {
     if(howManyElements === 0) { throw new ReferenceError("Can't store in zero-length Cbuffer"); }
 
-    this.archoniaUniqueObjectId = Archonia.Form.archoniaUniqueObjectId++;
+    this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     this.reset();
     this.howManyElements = howManyElements;
   };

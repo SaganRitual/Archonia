@@ -56,6 +56,7 @@ if(typeof window === "undefined") {
       Archonia.Engine.game.physics.enable(MG.spriteGroup, Phaser.Physics.ARCADE);
 
       MG.spriteGroup.forEach(function(m) {
+        m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
         m.previousEmit = 0;
         m.birthday = 0;
         m.anchor.setTo(0.5, 0.5);
@@ -88,6 +89,7 @@ if(typeof window === "undefined") {
             MG.randomPoint.point.y += MG.gameScale.convertPoint(temp, MG.tempScale);
           
             if(MG.randomPoint.point.y > 0 && MG.randomPoint.point.y < Archonia.Axioms.gameHeight) {
+              thisParticle.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
               thisParticle.position.setTo(MG.randomPoint.point.x, MG.randomPoint.point.y);
               thisParticle.revive();
             }

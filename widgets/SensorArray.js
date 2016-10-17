@@ -14,7 +14,7 @@ if(typeof window === "undefined") {
 (function(Archonia) {
 
 Archonia.Form.SensorArray = function(howManyMeasurementPoints, measurementDepth, decayRate, valuesRangeLo, valuesRangeHi) {
-  this.id = Archonia.Axioms.archoniaUniqueObjectId++;
+  this.id = Archonia.Essence.archoniaUniqueObjectId++;
 
   this.empty = true;
   this.howManyMeasurementPoints = howManyMeasurementPoints;

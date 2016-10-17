@@ -22,6 +22,8 @@ if(typeof window === "undefined") {
     mouseUp: true,
     
     create: function() {
+      Archonia.Essence.archoniaUniqueObjectId = 0;
+      
       Archonia.Engine.game.physics.startSystem(Phaser.Physics.ARCADE);
 
       Archonia.Engine.cursors = Archonia.Engine.game.input.keyboard.createCursorKeys();
@@ -56,6 +58,7 @@ if(typeof window === "undefined") {
     
     render: function() {
       Archonia.Cosmos.MannaGenerator.render();
+      Archonia.Cosmos.Dronery.render();
     },
     
     start: function() {
