@@ -30,6 +30,19 @@ Archonia.Form.Head.prototype = {
   setFlags: function(whichField, whichFlags) { this[whichField] = this[whichField] | whichFlags; },
   // jshint bitwise: true
   
+  doubleBack: function() {
+    var safePoint = Archonia.Form.XY();
+    
+    this.trail.forEach(function(ix, point) {
+      var temp = Archonia.Cosmos.Sun.getTemperature(point);
+
+      if(temp < this.genome.optimalTempHi &&
+          temp > this.genome.optimalTempLo) { safePoint = Archonia.Form.XY(point); return false;}
+      }, this);
+    
+    return safePoint;
+  },
+  
   doWeRemember: function(p) {
     var weRememberIt = false;
     
@@ -84,22 +97,22 @@ Archonia.Form.Head.prototype = {
     
     if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
     
-    var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
-    //var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
-    
-    //var tooHot = tempBottom > this.genome.optimalTempHi;
-    var tooCold = tempTop < this.genome.optimalTempLo;
-    
     for(i = 0; i < 8; i++) {
       p = relativePositions[i].plus(this.previousMoveTarget);
 
-      if(p.isInBounds) {
+      if(p.isInBounds()) {
+        var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
+        var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
+    
+        var tooHot = tempBottom > this.genome.optimalTempHi;
+        var tooCold = tempTop < this.genome.optimalTempLo;
+
         // if it's too cold, your only choices are up, and it doesn't
         // matter whether we've been there before; just find
         // a safe place to be
         if(tooCold) { if(i === 0 || i === 1 || i === 7) { bestChoices.push(p); } }
       
-        else if(tempTop > this.genome.optimalTempHi) { if(i === 3 || i === 4 || i === 5) { bestChoices.push(p); } }
+        else if(tooHot) { if(i === 3 || i === 4 || i === 5) { bestChoices.push(p); } }
 
         else if(!this.doWeRemember(p)) { bestChoices.push(p); }
       }
@@ -109,8 +122,8 @@ Archonia.Form.Head.prototype = {
       i = Archonia.Axioms.integerInRange(0, bestChoices.length);
       p = bestChoices[i];
     } else {
-      i = this.trail.getIndexOfOldestElement();
-      p = this.trail.getElementAt(i);
+      p = this.doubleBack();
+      if(p === null) { console.log("encyst"); return;}
     }
     
     this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;

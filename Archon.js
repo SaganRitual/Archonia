@@ -220,7 +220,7 @@ Archonia.Form.Archon.prototype.tick = function() {
   } else if(this.flashDirection === -1) {
     this.sprite.tint = this.flashes[this.whichFlash].off;
   } else {
-    this.sprite.tint = this.color;
+    this.sprite.tint = 0x00ff00; //this.color;
   }
   
   // If I've been injured so badly (or was born with a serious defect),

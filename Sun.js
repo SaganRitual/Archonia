@@ -83,7 +83,7 @@ if(typeof window === "undefined") {
       Archonia.Cosmos.Sun.darkness.alpha = Archonia.Axioms.darknessAlphaHi; // Note: dark sprite, so high alpha means dark world
       Archonia.Cosmos.Sun.darkness.tint = 0x9900;
       
-      Archonia.Cosmos.Sun.darkness.visible = false;
+      Archonia.Cosmos.Sun.darkness.visible = true;
 
       Archonia.Cosmos.Sun.darknessTween = Archonia.Engine.game.add.tween(Archonia.Cosmos.Sun.darkness).to(
         {alpha: Archonia.Axioms.darknessAlphaLo}, Archonia.Axioms.dayLength, Archonia.Cosmos.Sun.easingFunction, true, 0, -1, true
