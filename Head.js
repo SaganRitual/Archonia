@@ -57,7 +57,7 @@ Archonia.Form.Head.prototype = {
   },
   
   drawMemory: function() {
-    var drawDebugLines = true;
+    var drawDebugLines = false;
     
     if(drawDebugLines) {
       var p1 = Archonia.Form.XY(), p2 = Archonia.Form.XY();
@@ -151,11 +151,14 @@ Archonia.Form.Head.prototype = {
     if(foodTarget.equals(0)) {
       if(this.active && this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
     } else {
-      Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
+      var drawDebugLines = false;
+      if(drawDebugLines) {
+        Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
+      }
 
       if(!this.currentFoodTarget.equals(foodTarget)) {
         this.currentFoodTarget.set(foodTarget);
-        this.legs.setTargetPosition(this.currentFoodTarget);
+        this.legs.setTargetPosition(this.currentFoodTarget, 0);
       }
     }
     

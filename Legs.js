@@ -70,9 +70,10 @@ Archonia.Form.Legs.prototype = {
     this.targetAngle = Archonia.Axioms.computerizeAngle(a);
   },
   
-  setTargetPosition: function(p) {
+  setTargetPosition: function(p, damper) {
+    if(damper === undefined) { damper = 10; }
     this.currentMVelocity = this.maxMVelocity;
-    this.damper = 10;
+    this.damper = damper;
 
     // Force update on next tick, in case we're in the middle of a maneuver
     this.nextUpdate = 0;

@@ -165,7 +165,11 @@ Archonia.Form.Archon.prototype.sense = function(manna) {
       }
     }
     
-    Archonia.Essence.Dbitmap.aLine(this.position, manna, 'yellow');
+    var drawDebugLines = false;
+    
+    if(drawDebugLines) {
+      Archonia.Essence.Dbitmap.aLine(this.position, manna, 'yellow');
+    }
   }
 };
 
