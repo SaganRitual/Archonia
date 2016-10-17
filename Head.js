@@ -34,12 +34,16 @@ Archonia.Form.Head.prototype = {
   doubleBack: function() {
     var safePoint = Archonia.Form.XY();
     
-    this.trail.forEach(function(ix, point) {
-      var temp = Archonia.Cosmos.Sun.getTemperature(point);
+    if(this.trail.isEmpty()) {
+      this.trail.forEach(function(ix, point) {
+        var temp = Archonia.Cosmos.Sun.getTemperature(point);
 
-      if(temp < this.genome.optimalTempHi &&
-          temp > this.genome.optimalTempLo) { safePoint = Archonia.Form.XY(point); return false;}
+        if(temp < this.genome.optimalTempHi && temp > this.genome.optimalTempLo) {
+          safePoint = Archonia.Form.XY(point);
+          return false;
+        }
       }, this);
+    }
     
     return safePoint;
   },
