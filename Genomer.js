@@ -236,19 +236,13 @@ var primordialGenome = { core: {
   
   // Archonia 0.2
   
-  foodSearchTimeBetweenTurns:  new Archonia.Form.ScalarGene(120),
-  howLongBadTempToEncystment:  new Archonia.Form.ScalarGene(15),
   reproductionThreshold:       new Archonia.Form.ScalarGene(500),
   embryoThreshold:             new Archonia.Form.ScalarGene(200),
-  senseMeasurementDepth:       new Archonia.Form.ScalarGene(10),
-  inertialDamper:              new Archonia.Form.ScalarGene(0.02),
+  encystThreshold:             new Archonia.Form.ScalarGene(0.85),
+  unencystThreshold:           new Archonia.Form.ScalarGene(0.50),
+  tempSignalBufferSize:        new Archonia.Form.ScalarGene(10),
+  tempSignalDecayRate:         new Archonia.Form.ScalarGene(0.03)
   
-  food:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, Archonia.Axioms.caloriesPerManna),
-  predator:    new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),
-  prey:        new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),
-  hunger:      new Archonia.Form.SenseGeneVariable(1, 0.1, 1000, 0),  // Just hacking in hi/lo for now
-  temperature: new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1),         // Color gene should fill in hi/lo?
-  toxin:       new Archonia.Form.SenseGeneFixed(1, 0.1, 0, 1)
 } };
 
 var genomePrototypeSetup = false;

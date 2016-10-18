@@ -54,8 +54,8 @@ Archonia.Form.Head.prototype = {
       var weWereHandlingBadWeather = this.handlingBadWeather;
       
       var s = this.temps.getSignalStrength();
-      if(Math.abs(s) > 0.85) { this.handlingBadWeather = true; }
-      else if(Math.abs(s) < 0.50) { this.handlingBadWeather = false; }
+      if(Math.abs(s) > this.genome.encystThreshold) { this.handlingBadWeather = true; }
+      else if(Math.abs(s) < this.genome.unencystThreshold) { this.handlingBadWeather = false; }
     
       if(this.handlingBadWeather) {
         if(!weWereHandlingBadWeather) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
@@ -155,7 +155,8 @@ Archonia.Form.Head.prototype = {
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
 
     this.temps = new Archonia.Form.SignalSmoother(
-      10, 0.03, this.genome.optimalTempLo - this.genome.tempRadius, this.genome.optimalTempHi + this.genome.tempRadius
+      this.genome.tempSignalBufferSize, this.genome.tempSignalDecayRate,
+      this.genome.optimalTempLo - this.genome.tempRadius, this.genome.optimalTempHi + this.genome.tempRadius
     );
   },
   
