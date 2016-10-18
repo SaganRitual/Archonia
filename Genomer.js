@@ -207,23 +207,12 @@ var primordialGenome = { core: {
     Archonia.Form.tinycolor('hsl(180, 100%, 50%)'), Archonia.Axioms.standardArchonTempRange
   ),
 
-  avoidDangerousPreyFactor:  new Archonia.Form.ScalarGene(10),
-  birthThresholdMultiplier:  new Archonia.Form.ScalarGene(1),
-  feedingAccelerationDamper: new Archonia.Form.ScalarGene(1),
-  feedingSpeedDamper:        new Archonia.Form.ScalarGene(1),
-  hungerMultiplier:          new Archonia.Form.ScalarGene(0.0005),
-  injuryFactorThreshold:     new Archonia.Form.ScalarGene(0.5),
+  hungerToleranceFactor:     new Archonia.Form.ScalarGene(0.0005),
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),
   maxMVelocity:              new Archonia.Form.ScalarGene(30),
-  optimalMass:               new Archonia.Form.ScalarGene(5),
-  offspringEnergy:           new Archonia.Form.ScalarGene(200),
-  parasiteChaseFactor:       new Archonia.Form.ScalarGene(1),
-  parasiteFlightFactor:      new Archonia.Form.ScalarGene(10),
   sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),
   targetChangeDelay:         new Archonia.Form.ScalarGene(5),
-  tasteFactor:               new Archonia.Form.ScalarGene(100),
-  tempFactor:                new Archonia.Form.ScalarGene(1),
-  tempRangeDamping:          new Archonia.Form.ScalarGene(0.5),
+  tempToleranceFactor:       new Archonia.Form.ScalarGene(1),
   
   birthMassAdultCalories:      new Archonia.Form.ScalarGene(100),
   birthMassLarvalCalories:     new Archonia.Form.ScalarGene(100),
@@ -236,8 +225,6 @@ var primordialGenome = { core: {
   optimalTempLo: null,
   tempRange: null,
   tempRadius: null,
-  
-  // Archonia 0.2
   
   reproductionThreshold:       new Archonia.Form.ScalarGene(500),
   embryoThreshold:             new Archonia.Form.ScalarGene(200),
