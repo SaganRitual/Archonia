@@ -203,9 +203,12 @@ Archonia.Form.Genome.prototype = {
 };
 
 var primordialGenome = { core: {
+  color:                     new Archonia.Form.ColorGene(
+    Archonia.Form.tinycolor('hsl(180, 100%, 50%)'), Archonia.Axioms.standardArchonTempRange
+  ),
+
   avoidDangerousPreyFactor:  new Archonia.Form.ScalarGene(10),
   birthThresholdMultiplier:  new Archonia.Form.ScalarGene(1),
-  color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)'), 400),
   feedingAccelerationDamper: new Archonia.Form.ScalarGene(1),
   feedingSpeedDamper:        new Archonia.Form.ScalarGene(1),
   hungerMultiplier:          new Archonia.Form.ScalarGene(0.0005),
@@ -216,7 +219,7 @@ var primordialGenome = { core: {
   offspringEnergy:           new Archonia.Form.ScalarGene(200),
   parasiteChaseFactor:       new Archonia.Form.ScalarGene(1),
   parasiteFlightFactor:      new Archonia.Form.ScalarGene(10),
-  sensorScale:               new Archonia.Form.ScalarGene(0.2),
+  sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),
   targetChangeDelay:         new Archonia.Form.ScalarGene(5),
   tasteFactor:               new Archonia.Form.ScalarGene(100),
   tempFactor:                new Archonia.Form.ScalarGene(1),

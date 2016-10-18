@@ -40,6 +40,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.maxSpeed = 75;                   // pix/sec
   Archonia.Axioms.minimumAdultMass = 1;            // Below this, an adult will die
   Archonia.Axioms.reproductionCostFactor = 1.25;
+  Archonia.Axioms.standardArchonTempRange = 400;
+  Archonia.Axioms.standardSensorScale = 0.2;
   Archonia.Axioms.temperatureHi = 1000;
   Archonia.Axioms.temperatureLo = -1000;
   
