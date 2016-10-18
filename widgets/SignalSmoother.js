@@ -18,6 +18,14 @@ Archonia.Form.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   if(rangeLo === undefined) { rangeLo = 0; }
   if(rangeHi === undefined) { rangeHi = 1; }
 
+  this.zeroCentered = rangeLo < 0 && rangeHi > 0;
+  if(this.zeroCentered && (rangeLo + rangeHi) !== 0) {
+    throw new Error("Scale across zero must be centered on zero");
+  }
+  
+  if(this.zeroCentered) { this.storedValuesRange = Archonia.Essence.centeredZeroRange; }
+  else { this.storedValuesRange = Archonia.Essence.zeroToOneRange; }
+  
   this.empty = true;
   this.depth = depth;
   this.rangeLo = rangeLo;
@@ -26,7 +34,7 @@ Archonia.Form.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   this.decayRate = decayRate; // Not scaled; always expressed as points on 0 - 1 scale
   
   this.cbuffer = new Archonia.Form.Cbuffer(depth);
-  this.valuesRange = new Archonia.Form.Range(rangeLo, rangeHi);
+  this.inputValuesRange = new Archonia.Form.Range(rangeLo, rangeHi);
 };
 
 Archonia.Form.SignalSmoother.prototype = {
@@ -48,15 +56,24 @@ Archonia.Form.SignalSmoother.prototype = {
   },
   
   store: function(value) {
-    var s = Archonia.Essence.zeroToOneRange.convertPoint(value, this.valuesRange);
-
-    s = Archonia.Axioms.clamp(s, 0, 1);
+    var s = null;
+    
+    s = this.storedValuesRange.convertPoint(value, this.inputValuesRange);
+    s = Archonia.Axioms.clamp(s, this.storedValuesRange.lo, this.storedValuesRange.hi);
   
     this.cbuffer.store(s);
 
     this.cbuffer.deepForEach(function(ix, points) {
-      points[ix] -= this.decayRate;
-      points[ix] = Archonia.Axioms.clamp(points[ix], 0, 1);
+      if(this.zeroCentered) {
+        
+        if(points[ix] > 0) { points[ix] -= this.decayRate; }
+        else if(points[ix] < 0) { points[ix] += this.decayRate; }
+
+      } else {
+        points[ix] -= this.decayRate;
+      }
+
+      points[ix] = Archonia.Axioms.clamp(points[ix], this.storedValuesRange.lo, this.storedValuesRange.hi);
     }, this);
     
     this.empty = false;

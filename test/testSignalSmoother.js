@@ -20,7 +20,7 @@ describe('SignalSmoother', function() {
     }
   });
   
-  describe('#functionality', function() {
+  describe('#functionality -- scale n/a', function() {
     describe('#reset(), isEmpty()', function() {
       it('#before store, after store, after reset', function() {
         var depth = 10, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
@@ -35,7 +35,9 @@ describe('SignalSmoother', function() {
         chai.expect(r.isEmpty()).equal(true);
       });
     });
-    
+  });
+  
+  describe('#functionality -- scale 0 to 1', function() {
     describe('#store(), getSignalStrength()', function() {
       it('#single tick', function() {
         var depth = 10, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
@@ -43,7 +45,17 @@ describe('SignalSmoother', function() {
   
         var valueToStore = 0.1;
         r.store(valueToStore);
-        chai.expect(r.getSignalStrength().toFixed(2)).equal(((valueToStore - decayRate) / depth).toFixed(2));
+        chai.expect(r.getSignalStrength().toFixed(4)).equal(((valueToStore - decayRate) / depth).toFixed(4));
+      });
+
+      it('#negative values not allowed on positive scale', function() {
+        var depth = 10, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
+        var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+  
+        var valueToStore = -0.1;
+        var f = function() { r.store(valueToStore); };
+
+        chai.expect(f).to.throw(Error, 'Negative values not allowed on positive scale');
       });
 
       it('#constant input to max', function() {
@@ -131,5 +143,122 @@ describe('SignalSmoother', function() {
         }
       });
     });
+  });
+  
+  describe('#functionality -- scale -1 to 1', function() {
+    it('#scale across zero must be centered on zero', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -5, valuesRangeHi = 1;
+      
+      var r = function() {
+        new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+      };
+
+      chai.expect(r).to.throw(Error, "Scale across zero must be centered on zero")
+    });
+    it('#single tick, negative store', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -1, valuesRangeHi = 1;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+
+      var valueToStore = -0.1;
+      r.store(valueToStore);
+      
+      var expectedDecayResult = (valueToStore + decayRate) / depth;
+      chai.expect(r.getSignalStrength().toFixed(6)).equal((expectedDecayResult).toFixed(6));
+    });
+
+    it('#single tick, positive store', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -1, valuesRangeHi = 1;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+
+      var valueToStore = 0.1;
+      r.store(valueToStore);
+      
+      // Note: for zero-centered, the SS cuts the decay in half
+      var expectedDecayResult = (valueToStore - decayRate) / depth;
+      chai.expect(r.getSignalStrength().toFixed(6)).equal((expectedDecayResult).toFixed(6));
+    });
+
+    it('#constant input to full, all negative', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -1, valuesRangeHi = 1;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+
+      var valueToStore = -0.10;
+      for(var i = 0; i < 10; i++) {
+        r.store(valueToStore);
+    
+        var expected = -0.09;
+        for(var j = 0; j < i; j++) {
+          expected -= 0.09 - (0.01 * (j + 1));
+        }
+
+        chai.expect(r.getSignalStrength().toFixed(4)).equal((expected / 10).toFixed(4));
+        expected += 0.005;
+      }
+    });
+    
+    it('#constant input to full, all positive', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -1, valuesRangeHi = 1;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+
+      var valueToStore = 0.10;
+      for(var i = 0; i < 10; i++) {
+        r.store(valueToStore);
+    
+        var expected = 0.09;
+        for(var j = 0; j < i; j++) {
+          expected += 0.09 - (0.01 * (j + 1));
+        }
+    
+        chai.expect(r.getSignalStrength().toFixed(4)).equal((expected / 10).toFixed(4));
+        expected -= 0.005;
+      }
+    });
+    
+    it('#constant input to full, mixed signs averaging zero', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -1, valuesRangeHi = 1;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+      var sign = 1;
+
+      var baseValueToStore = 0.10;
+      var expectedResults = [ 0.009, -0.001, 0.008, -0.002, 0.007, -0.003, 0.006, -0.004 ];
+      for(var i = 0; i < expectedResults.length; i++) {
+        r.store(baseValueToStore * sign);
+
+        chai.expect(r.getSignalStrength().toFixed(4)).equal(expectedResults[i].toFixed(4));
+        
+        sign *= -1;
+      }
+    });
+  });
+  
+  describe('#functionality -- scale -200 to 200', function() {
+    it('#constant input to full, mixed signs averaging non-zero', function() {
+      var depth = 10, decayRate = 0.01, valuesRangeLo = -200, valuesRangeHi = 200;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+
+      var valuesToStore = [
+        500, 400, 400, 400, 300, 200, 100, 0, -300, -400, -500, -400, -500, -100, 0
+      ];
+      
+      var expectedResults = [
+        0.099, 0.197, 0.294, 0.390, 0.485, 0.579, 0.622, 0.615, 0.509, 0.404, 0.211, 0.020, -0.169, -0.306, -0.392
+      ];
+
+      for(var i = 0; i < expectedResults.length; i++) {
+        r.store(valuesToStore[i]);
+
+        chai.expect(r.getSignalStrength().toFixed(6)).equal(expectedResults[i].toFixed(6));
+      }
+    });
+
+    it('#various decay rates, all negative');
+    it('#various decay rates, all positive');
+    it('#various decay rates, mixed signs');
+    it('#constant input to max, zero -> decay to minimum, all negative');
+    it('#constant input to max, zero -> decay to minimum, all positive');
+    it('#constant input to max, zero -> decay to minimum, mixed signs');
+    it('#varying input, ramp / decay, all negative');
+    it('#varying input, ramp / decay, all positive');
+    it('#varying input, ramp / decay, mixed signs');
   });
 });

@@ -21,6 +21,7 @@ if(typeof window === "undefined") {
   Archonia.Essence.temperatureRange = new Archonia.Form.Range(Archonia.Axioms.temperatureLo, Archonia.Axioms.temperatureHi);
   Archonia.Essence.yAxisRange = new Archonia.Form.Range(Archonia.Axioms.gameHeight, 0);
   Archonia.Essence.zeroToOneRange = new Archonia.Form.Range(0, 1);
+  Archonia.Essence.centeredZeroRange = new Archonia.Form.Range(-1, 1);
 })(Archonia);
 
 if(typeof window === "undefined") {
