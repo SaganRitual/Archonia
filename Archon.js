@@ -256,13 +256,12 @@ Archonia.Form.Archon.prototype.tick = function() {
   this.foundCurrentFoodTarget = false;
   this.newFoodTarget.set(0);
   
-  if(this.encysted) {
-    if(this.frameCount > this.whenToUnencyst) { this.encysted = false; }
-  } else {
+  if(!this.encysted) {
     this.goo.tick(this.frameCount);
     this.legs.tick(this.frameCount);
-    this.head.tick(this.frameCount, this.currentFoodTarget);
   }
+
+  this.head.tick(this.frameCount, this.currentFoodTarget);
 };
 
 Archonia.Form.Archon.prototype.unencyst = function() { this.encysted = false; };

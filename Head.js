@@ -29,51 +29,49 @@ Archonia.Form.Head = function(archon) {
 Archonia.Form.Head.prototype = {
   
   checkBadWeather: function() {
-    var moveChoices = [], i = null, p = null;
     
-    var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
-    var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
+    if(this.frameCount > this.whenToIssueNextMoveOrder) {
+      var tooHot = false, tooCold = false;
     
-    var tooHot = tempBottom > this.genome.optimalTempHi;
-    var tooCold = tempTop < this.genome.optimalTempLo;
+      var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
+      var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
     
-    if(tooHot) { this.temps.store(Math.abs(tempBottom - this.genome.optimalTemp)); }
-    else if(tooCold) { this.temps.store(Math.abs(tempTop - this.genome.optimalTemp)); }
-    else { this.temps.store(0); }
+      // Get hot temps from my bottom and cold temps from my
+      // top. This is because if we're at the top of the world,
+      // the temp reading comes from out of bounds and it's
+      // cold. We get trapped at the top waiting for it to
+      // warm up, even in the heat of the day. Getting the low
+      // temp from my top is just for aesthetic symmetry
+      tooHot = tempBottom > this.genome.optimalTempHi;
+      tooCold = tempTop < this.genome.optimalTempLo;
     
-    var s = this.temps.getSignalStrength();
-    if(s > 0.85) { this.handlingBadWeather = true; }
-    else if(s < 0.25) { this.handlingBadWeather = false; }
+      if(this.position.y < Archonia.Engine.game.centerY) {
+        this.temps.store(tempBottom - this.genome.optimalTemp);
+      } else {
+        this.temps.store(tempTop - this.genome.optimalTemp);
+      }
     
-    if(this.handlingBadWeather) {
-      this.archon.encyst();
-    } else {
-      this.archon.unencyst();
+      var weWereHandlingBadWeather = this.handlingBadWeather;
       
-      if((tooHot || tooCold) && this.frameCount > this.whenToIssueNextMoveOrder) {
-        if(tooHot) {
-          moveChoices.push(3); moveChoices.push(4); moveChoices.push(5);
-        } else {
-          moveChoices.push(0); moveChoices.push(1); moveChoices.push(7);
-        }
-
-        i = Archonia.Axioms.integerInRange(0, moveChoices.length);
-        p = relativePositions[moveChoices[i]].plus(this.position);
-
-        this.legs.setTargetPosition(p);
+      var s = this.temps.getSignalStrength();
+      if(Math.abs(s) > 0.85) { this.handlingBadWeather = true; }
+      else if(Math.abs(s) < 0.50) { this.handlingBadWeather = false; }
     
-        this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+      if(this.handlingBadWeather) {
+        if(!weWereHandlingBadWeather) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
+
+        this.moveForTemperature();
+      } else {
+        if(weWereHandlingBadWeather) {
+          console.log("unencyst", s.toFixed(4)); this.archon.unencyst();
+          
+          // Tell move function to set a new move target
+          this.previousMoveTarget.set(0);
+        }
       }
     }
-    
-    // If we're just moving away from bad weather, tooHot or tooCold
-    // will be set, and the big flag will not. On the other hand, if
-    // we're waiting for the signal average to go down, tooHot/tooCold
-    // won't be set, so we'll depend on the big flag. Returning all
-    // of this to tell the tick that we've made the decision about
-    // where to move, so he won't pass the decision on to the main
-    // moving funciton.
-    return this.handlingBadWeather || tooHot || tooCold;
+
+    return this.handlingBadWeather;
   },
     
   clearFoodGrab: function() {
@@ -83,7 +81,7 @@ Archonia.Form.Head.prototype = {
       // ate might get us closer to more
       this.legs.drift();
       this.foodGrab = false;
-      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves * 2;
+      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
     }
   },
 
@@ -157,7 +155,7 @@ Archonia.Form.Head.prototype = {
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
 
     this.temps = new Archonia.Form.SignalSmoother(
-      10, 0.02, this.genome.optimalTemp, this.genome.optimalTemp + (this.genome.tempRange * 0.75)
+      10, 0.03, this.genome.optimalTempLo - this.genome.tempRadius, this.genome.optimalTempHi + this.genome.tempRadius
     );
   },
   
@@ -166,31 +164,76 @@ Archonia.Form.Head.prototype = {
     
     if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
     
-    for(i = 0; i < 8; i++) {
-      p = relativePositions[i].plus(this.previousMoveTarget);
+    p = this.moveForTemperature();
+    
+    if(p === null) {
+
+      // We're within normal temp range; choose a random direction
       
-      if(p.isInBounds() && !this.doWeRemember(p)) { bestChoices.push(p); }
+      for(i = 0; i < 8; i++) {
+        p = relativePositions[i].plus(this.previousMoveTarget);
+      
+        if(p.isInBounds() && !this.doWeRemember(p)) { bestChoices.push(p); }
+      }
+    
+      if(bestChoices.length > 0) {
+        i = Archonia.Axioms.integerInRange(0, bestChoices.length);
+        p = bestChoices[i];
+      } else {
+        console.log('double back?');
+        /*p = this.doubleBack();
+        if(p === null) { console.log("encyst"); this.trail.reset();  this.archon.encyst(); return;}*/
+      }
+    
+      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+    
+      // This is where we're aiming; remember it so when we come back
+      // into the move function, we can calculate our next move based on
+      // where we intended to be, rather than where the legs might have put
+      // us -- the legs don't typically get us to the specific target
+      this.previousMoveTarget.set(p);
+    
+      this.legs.setTargetPosition(p);
     }
-    
-    if(bestChoices.length > 0) {
-      i = Archonia.Axioms.integerInRange(0, bestChoices.length);
-      p = bestChoices[i];
-    } else {
-      p = this.doubleBack();
-      if(p === null) { console.log("encyst"); this.trail.reset();  this.archon.encyst(); return;}
-    }
-    
-    this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
-    
-    // This is where we're aiming; remember it so when we come back
-    // into the move function, we can calculate our next move based on
-    // where we intended to be, rather than where the legs might have put
-    // us -- the legs don't typically get us to the specific target
-    this.previousMoveTarget.set(p);
-    
-    this.legs.setTargetPosition(p);
     
     this.trail.store(p);
+  },
+  
+  moveForTemperature: function() {
+    var tooHot = false, tooCold = false, moveChoices = [], i = null, p = null;
+  
+    var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
+    var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
+  
+    // Get hot temps from my bottom and cold temps from my
+    // top. This is because if we're at the top of the world,
+    // the temp reading comes from out of bounds and it's
+    // cold. We get trapped at the top waiting for it to
+    // warm up, even in the heat of the day. Getting the low
+    // temp from my top is just for aesthetic symmetry
+    tooHot = tempBottom > this.genome.optimalTempHi;
+    tooCold = tempTop < this.genome.optimalTempLo;
+
+    if(tooHot || tooCold) {
+
+      if(tooHot) {
+        moveChoices.push(3); moveChoices.push(4); moveChoices.push(5);
+      } else if(tooCold) {
+        moveChoices.push(0); moveChoices.push(1); moveChoices.push(7);
+      }
+      
+      // Some duplicated code here; clean it up at some point; see move()
+
+      i = Archonia.Axioms.integerInRange(0, moveChoices.length);
+      p = relativePositions[moveChoices[i]].plus(this.position);
+  
+      this.legs.setTargetPosition(p);
+
+      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+    }
+    
+    return p;
+    
   },
   
   setFoodGrab: function() {
