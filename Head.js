@@ -22,16 +22,71 @@ Archonia.Form.Head = function(archon) {
   this.currentFoodTarget =  Archonia.Form.XY();
   
   this.trail = new Archonia.Form.Cbuffer(8);
+
+  this.handlingBadWeather = false;
 };
 
 Archonia.Form.Head.prototype = {
-  // jshint bitwise: false
-  allFlagsOn: function(whichField, whichFlags) { return (this[whichField] & whichFlags)  === whichFlags; },
-  anyFlagsOn: function(whichField, whichFlags) { return (this[whichField] & whichFlags) !== 0; },
-  clearFlags: function(whichField, whichFlags) { this[whichField] = this[whichField] & ~whichFlags; },
-  setFlags: function(whichField, whichFlags) { this[whichField] = this[whichField] | whichFlags; },
-  // jshint bitwise: true
   
+  checkBadWeather: function() {
+    var moveChoices = [], i = null, p = null;
+    
+    var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
+    var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
+    
+    var tooHot = tempBottom > this.genome.optimalTempHi;
+    var tooCold = tempTop < this.genome.optimalTempLo;
+    
+    if(tooHot) { this.temps.store(Math.abs(tempBottom - this.genome.optimalTemp)); }
+    else if(tooCold) { this.temps.store(Math.abs(tempTop - this.genome.optimalTemp)); }
+    else { this.temps.store(0); }
+    
+    var s = this.temps.getSignalStrength();
+    if(s > 0.85) { this.handlingBadWeather = true; }
+    else if(s < 0.25) { this.handlingBadWeather = false; }
+    
+    if(this.handlingBadWeather) {
+      this.archon.encyst();
+    } else {
+      this.archon.unencyst();
+      
+      if((tooHot || tooCold) && this.frameCount > this.whenToIssueNextMoveOrder) {
+        if(tooHot) {
+          moveChoices.push(3); moveChoices.push(4); moveChoices.push(5);
+        } else {
+          moveChoices.push(0); moveChoices.push(1); moveChoices.push(7);
+        }
+
+        i = Archonia.Axioms.integerInRange(0, moveChoices.length);
+        p = relativePositions[moveChoices[i]].plus(this.position);
+
+        this.legs.setTargetPosition(p);
+    
+        this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+      }
+    }
+    
+    // If we're just moving away from bad weather, tooHot or tooCold
+    // will be set, and the big flag will not. On the other hand, if
+    // we're waiting for the signal average to go down, tooHot/tooCold
+    // won't be set, so we'll depend on the big flag. Returning all
+    // of this to tell the tick that we've made the decision about
+    // where to move, so he won't pass the decision on to the main
+    // moving funciton.
+    return this.handlingBadWeather || tooHot || tooCold;
+  },
+    
+  clearFoodGrab: function() {
+    if(this.foodGrab) {
+      // Wait a bit before starting the search again; a bit of
+      // drifting in the general area of the food we just
+      // ate might get us closer to more
+      this.legs.drift();
+      this.foodGrab = false;
+      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves * 2;
+    }
+  },
+
   doubleBack: function() {
     var safePoint = null;
     
@@ -93,15 +148,17 @@ Archonia.Form.Head.prototype = {
   },
   
   launch: function(genome, legs, position) {
-    this.archoniaUniqueObjectId = Archonia.Axioms.archoniaUniqueObjectId++;
+    this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
 
     this.genome = genome;
     this.legs = legs;
     this.position = position;
 
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
-    
-    this.active = true;
+
+    this.temps = new Archonia.Form.SignalSmoother(
+      10, 0.02, this.genome.optimalTemp, this.genome.optimalTemp + (this.genome.tempRange * 0.75)
+    );
   },
   
   move: function() {
@@ -112,22 +169,7 @@ Archonia.Form.Head.prototype = {
     for(i = 0; i < 8; i++) {
       p = relativePositions[i].plus(this.previousMoveTarget);
       
-      if(p.isInBounds()) {
-        var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
-        var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
-    
-        var tooHot = tempBottom > this.genome.optimalTempHi;
-        var tooCold = tempTop < this.genome.optimalTempLo;
-
-        // if it's too cold, your only choices are up, and it doesn't
-        // matter whether we've been there before; just find
-        // a safe place to be
-        if(tooCold) { if(i === 0 || i === 1 || i === 7) { bestChoices.push(p); } }
-      
-        else if(tooHot) { if(i === 3 || i === 4 || i === 5) { bestChoices.push(p); } }
-
-        else if(!this.doWeRemember(p)) { bestChoices.push(p); }
-      }
+      if(p.isInBounds() && !this.doWeRemember(p)) { bestChoices.push(p); }
     }
     
     if(bestChoices.length > 0) {
@@ -150,17 +192,6 @@ Archonia.Form.Head.prototype = {
     
     this.trail.store(p);
   },
-    
-  clearFoodGrab: function() {
-    if(this.foodGrab) {
-      // Wait a bit before starting the search again; a bit of
-      // drifting in the general area of the food we just
-      // ate might get us closer to more
-      this.legs.drift();
-      this.foodGrab = false;
-      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves * 2;
-    }
-  },
   
   setFoodGrab: function() {
     if(!this.foodGrab) {
@@ -174,26 +205,30 @@ Archonia.Form.Head.prototype = {
     this.frameCount = frameCount;
     
     this.drawMemory();
-
-    if(foodTarget.equals(0)) {
-      this.clearFoodGrab();
-      
-      if(this.active && this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
-    } else {
-      var drawDebugLines = false;
-      if(drawDebugLines) {
-        Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
-      }
-      
-      this.setFoodGrab();
-
-      if(!this.currentFoodTarget.equals(foodTarget)) {
-        this.currentFoodTarget.set(foodTarget);
-        this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
-      }
-    }
     
-    this.currentFoodTarget.set(foodTarget);
+    var badWeather = this.checkBadWeather();
+    
+    if(!badWeather) {
+      if(foodTarget.equals(0)) {
+        this.clearFoodGrab();
+      
+        if(this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
+      } else {
+        var drawDebugLines = false;
+        if(drawDebugLines) {
+          Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
+        }
+      
+        this.setFoodGrab();
+
+        if(!this.currentFoodTarget.equals(foodTarget)) {
+          this.currentFoodTarget.set(foodTarget);
+          this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
+        }
+      }
+    
+      this.currentFoodTarget.set(foodTarget);
+    }
     
   },
 };

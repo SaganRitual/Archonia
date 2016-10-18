@@ -32,6 +32,7 @@ var generateArchonoidPrototype = function() {
 
 Archonia.Form.Archon = function(phaseron) {
   this.firstLaunch = true;
+  this.launched = false;
   this.sprite = phaseron;
   this.button = phaseron.button;
   this.sensor = phaseron.sensor;  this.sensor.archon = this;
@@ -92,7 +93,6 @@ Archonia.Form.Archon.prototype.eat = function(manna) {
 
 Archonia.Form.Archon.prototype.encyst = function() {
   this.velocity.set(0);
-  this.whenToUnencyst = this.frameCount + 5 * 60;
   this.encysted = true;
 };
 
@@ -152,6 +152,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   }
 
   this.firstLaunch = false;
+  this.launched = true;
   
   this.legs.launch(this.position, this.genome.maxMVelocity, this.velocity, this.genome.maxMAcceleration);
   this.goo.launch(this.genome);
@@ -207,6 +208,8 @@ Archonia.Form.Archon.prototype.throttle = function(id, interval, callback, conte
 };
 
 Archonia.Form.Archon.prototype.tick = function() {
+  if(!this.launched) { return; }
+  
   this.frameCount++;
   
   if(this.isDefending) {
@@ -261,6 +264,8 @@ Archonia.Form.Archon.prototype.tick = function() {
     this.head.tick(this.frameCount, this.currentFoodTarget);
   }
 };
+
+Archonia.Form.Archon.prototype.unencyst = function() { this.encysted = false; };
 
 })(Archonia);
 
