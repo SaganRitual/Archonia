@@ -4,7 +4,8 @@ var data_driven = require('data-driven');
 var chai = require('chai');
 
 var zeroToOne = new Range(0, 1);
-var centeredZeroToOne = new Range(-0.5, 0.5);
+var centeredZeroToOneSmall = new Range(-0.5, 0.5);
+var centeredZeroToOneBig = new Range(-10, 10);
 var temperatureRange = new Range(-1000, 1000);
 var foodDistanceRange = new Range(50, 0);
 var speedRange = new Range(-30, 30);
@@ -34,11 +35,21 @@ var tests = [
 
   {
     dest: { range: zeroToOne, name: 'zeroToOne' },
-    source: { range: centeredZeroToOne, name: 'centeredZeroToOne' },
+    source: { range: centeredZeroToOneSmall, name: 'centeredZeroToOneSmall' },
     testValues: [
       { in: -0.5, out: 0 }, { in: 0, out: 0.5 }, { in: 0.5, out: 1},
       { in: -0.3, out: 0.2 }, { in: 0.3, out: 0.8 }, { in: -0.6, out: -0.1 },
       { in: 0.6, out: 1.1 }
+    ]
+  },
+
+  {
+    dest: { range: centeredZeroToOneBig, name: 'centeredZeroToOneBig' },
+    source: { range: centeredZeroToOneSmall, name: 'centeredZeroToOneSmall' },
+    testValues: [
+      { in: -0.5, out: -10 }, { in: 0, out: 0 }, { in: 0.5, out: 10},
+      { in: -0.3, out: -6 }, { in: 0.3, out: 6 }, { in: -0.6, out: -12},
+      { in: 0.6, out: 12 }
     ]
   },
 
@@ -74,7 +85,7 @@ var tests = [
 
   {
     dest: { range: h10, name: 'h10' },
-    source: { range: centeredZeroToOne, name: 'centeredZeroToOne' },
+    source: { range: centeredZeroToOneSmall, name: 'centeredZeroToOneSmall' },
     testValues: [
       { in: 0, out: 5 }, { in: -0.5, out: 10 }, { in: 0.5, out: 0 },
       { in: 0.25, out: 2.5 }, { in: -0.25, out: 7.5 }
