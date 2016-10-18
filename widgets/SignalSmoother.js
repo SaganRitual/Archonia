@@ -19,9 +19,6 @@ Archonia.Form.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   if(rangeHi === undefined) { rangeHi = 1; }
 
   this.zeroCentered = rangeLo < 0 && rangeHi > 0;
-  if(this.zeroCentered && (rangeLo + rangeHi) !== 0) {
-    throw new Error("Scale across zero must be centered on zero");
-  }
   
   if(this.zeroCentered) { this.storedValuesRange = Archonia.Essence.centeredZeroRange; }
   else { this.storedValuesRange = Archonia.Essence.zeroToOneRange; }
