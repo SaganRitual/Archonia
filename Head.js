@@ -188,7 +188,7 @@ Archonia.Form.Head.prototype = {
   },
   
   moveForTemperature: function() {
-    var tooHot = false, tooCold = false, moveChoices = [], i = null, p = null;
+    var tooHot = false, tooCold = false, moveChoices = [], i = null, p = null, delta = null;
   
     var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
     var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
@@ -201,6 +201,17 @@ Archonia.Form.Head.prototype = {
     // temp from my top is just for aesthetic symmetry
     tooHot = tempBottom > this.genome.optimalTempHi;
     tooCold = tempTop < this.genome.optimalTempLo;
+    
+    if(tooHot) { delta = tempBottom - this.genome.optimalTemp; }
+    else if(tooCold) { delta = this.genome.optimalTemp - tempTop; }
+    
+    if(delta !== null) {
+      // If my genes tell me my current hunger level is higher than
+      // my need for good weather, then get out there and find some food
+      if(delta * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
+        tooHot = false; tooCold = false;
+      }
+    }
 
     if(tooHot || tooCold) {
 

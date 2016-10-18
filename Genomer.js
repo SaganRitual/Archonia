@@ -207,7 +207,7 @@ var primordialGenome = { core: {
     Archonia.Form.tinycolor('hsl(180, 100%, 50%)'), Archonia.Axioms.standardArchonTempRange
   ),
 
-  hungerToleranceFactor:     new Archonia.Form.ScalarGene(0.0005),
+  hungerToleranceFactor:     new Archonia.Form.ScalarGene(0.75),
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),
   maxMVelocity:              new Archonia.Form.ScalarGene(30),
   sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),

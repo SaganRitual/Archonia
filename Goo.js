@@ -150,6 +150,10 @@ Archonia.Form.Goo.prototype = {
     return p + r;
   },
   
+  howHungryAmI: function() {
+    return (this.genome.reproductionThreshold - this.embryoCalorieBudget) * this.genome.hungerToleranceFactor;
+  },
+  
   launch: function(genome) {
     this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     
@@ -166,7 +170,7 @@ Archonia.Form.Goo.prototype = {
     var m = this.getMotionCost();
     var t = this.getTempCost();
     var s = this.getSensorCost();
-    var c = (m + t + s) / 100;
+    var c = (m + t + s) / 50;
     
     if(this.archon.encysted) { c /= 10; }
     
