@@ -84,23 +84,6 @@ Archonia.Form.Head.prototype = {
       this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
     }
   },
-
-  doubleBack: function() {
-    var safePoint = null;
-    
-    if(!this.trail.isEmpty()) {
-      this.trail.forEach(function(ix, point) {
-        var temp = Archonia.Cosmos.Sun.getTemperature(point);
-
-        if(temp < this.genome.optimalTempHi && temp > this.genome.optimalTempLo) {
-          safePoint = Archonia.Form.XY(point);
-          return false;
-        }
-      }, this);
-    }
-    
-    return safePoint;
-  },
   
   doWeRemember: function(p) {
     var weRememberIt = false;
@@ -161,7 +144,7 @@ Archonia.Form.Head.prototype = {
   },
   
   move: function() {
-    var bestChoices = [], i = null, p = null;
+    var bestChoices = [], i = null, p = null, q = Archonia.Form.XY();
     
     if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
     
@@ -173,17 +156,21 @@ Archonia.Form.Head.prototype = {
       
       for(i = 0; i < 8; i++) {
         p = relativePositions[i].plus(this.previousMoveTarget);
-      
-        if(p.isInBounds() && !this.doWeRemember(p)) { bestChoices.push(p); }
+        
+        // If we can't find an old spot that we've forgotten,
+        // we'll just take one that's in bounds
+        if(p.isInBounds()) {
+          q.set(p);
+          
+          if(!this.doWeRemember(p)) { bestChoices.push(p); }
+        }
       }
-    
+      
       if(bestChoices.length > 0) {
         i = Archonia.Axioms.integerInRange(0, bestChoices.length);
         p = bestChoices[i];
       } else {
-        console.log('double back?');
-        /*p = this.doubleBack();
-        if(p === null) { console.log("encyst"); this.trail.reset();  this.archon.encyst(); return;}*/
+        p.set(q); // Couldn't find an optimal target, just take a random one
       }
     
       this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
