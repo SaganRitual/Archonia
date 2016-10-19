@@ -23,7 +23,7 @@ Archonia.Form.Head = function(archon) {
   
   this.trail = new Archonia.Form.Cbuffer(8);
 
-  this.handlingBadWeather = false;
+  this.encysted = false;
 };
 
 Archonia.Form.Head.prototype = {
@@ -66,29 +66,28 @@ Archonia.Form.Head.prototype = {
         }
       }
     
-      var weWereHandlingBadWeather = this.handlingBadWeather;
+      var weWereEncysted = this.encysted;
       
       // We might have overridden the signal strength above, if we
       // determined that hunger is more important than a sunburn
       var s = this.temps.getSignalStrength();
-      if(Math.abs(s) > this.genome.encystThreshold) { this.handlingBadWeather = true; }
-      else if(Math.abs(s) < this.genome.unencystThreshold) { this.handlingBadWeather = false; }
+      if(Math.abs(s) > this.genome.encystThreshold) { this.encysted = true; }
+      else if(Math.abs(s) < this.genome.unencystThreshold) { this.encysted = false; }
     
-      if(this.handlingBadWeather) {
-        if(!weWereHandlingBadWeather) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
+      if(this.encysted) {
 
-        this.moveForTemperature();
-      } else {
-        if(weWereHandlingBadWeather) {
-          console.log("unencyst", s.toFixed(4)); this.archon.unencyst();
-          
-          // Tell move function to set a new move target
-          this.previousMoveTarget.set(0);
-        }
+        if(!weWereEncysted) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
+
+      } else if(weWereEncysted) {
+
+        console.log("unencyst", s.toFixed(4)); this.archon.unencyst();
+        
+        // Tell move function to set a new move target
+        this.previousMoveTarget.set(0);
       }
     }
 
-    return this.handlingBadWeather;
+    return this.encysted;
   },
     
   clearFoodGrab: function() {
@@ -207,11 +206,29 @@ Archonia.Form.Head.prototype = {
     this.trail.store(p);
   },
   
+  getCardinalTemps: function() {
+    return {
+      top: Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position)),
+      bottom: Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position))
+    };
+  },
+  
+  weighTempAgainstHunger: function(tempDelta) {
+    if(tempDelta === null) {
+      return 0;
+    } else if (Math.abs(tempDelta) * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
+      // If my genes tell me my current hunger level is higher than
+      // my need for good weather, then get out there and find some 
+      return 0;
+    } else {
+      return Math.sign(tempDelta);
+    }
+  },
+  
   moveForTemperature: function() {
     var tooHot = false, tooCold = false, moveChoices = [], i = null, p = null, delta = null;
   
-    var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
-    var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
+    var t = this.getCardinalTemps();
   
     // Get hot temps from my bottom and cold temps from my
     // top. This is because if we're at the top of the world,
@@ -219,23 +236,16 @@ Archonia.Form.Head.prototype = {
     // cold. We get trapped at the top waiting for it to
     // warm up, even in the heat of the day. Getting the low
     // temp from my top is just for aesthetic symmetry
-    tooHot = tempBottom > this.genome.optimalTempHi;
-    tooCold = tempTop < this.genome.optimalTempLo;
+    tooHot = t.bottom > this.genome.optimalTempHi;
+    tooCold = t.top < this.genome.optimalTempLo;
     
-    if(tooHot) { delta = tempBottom - this.genome.optimalTemp; }
-    else if(tooCold) { delta = this.genome.optimalTemp - tempTop; }
+    if(tooHot) { delta = t.bottom - this.genome.optimalTemp; }
+    else if(tooCold) { delta = t.top - this.genome.optimalTemp; }
     
-    if(delta !== null) {
-      // If my genes tell me my current hunger level is higher than
-      // my need for good weather, then get out there and find some food
-      if(delta * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
-        tooHot = false; tooCold = false;
-      }
-    }
+    var h = this.weighTempAgainstHunger(delta);
+    if(h !== 0) {
 
-    if(tooHot || tooCold) {
-
-      if(tooHot) {
+      if(h > 0) {
         moveChoices.push(3); moveChoices.push(4); moveChoices.push(5);
       } else if(tooCold) {
         moveChoices.push(0); moveChoices.push(1); moveChoices.push(7);
@@ -268,9 +278,9 @@ Archonia.Form.Head.prototype = {
     
     this.drawMemory();
     
-    var badWeather = this.encystIf();
+    var encysted = this.encystIf();
     
-    if(!badWeather) {
+    if(!encysted) {
       if(foodTarget.equals(0)) {
         this.clearFoodGrab();
       
@@ -292,7 +302,7 @@ Archonia.Form.Head.prototype = {
       this.currentFoodTarget.set(foodTarget);
     }
     
-  },
+  }
 };
 
 })(Archonia);
