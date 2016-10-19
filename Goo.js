@@ -129,8 +129,10 @@ Archonia.Form.Goo.prototype = {
     // No cost for a standard sensor
     if(this.genome.sensorScale > Archonia.Axioms.standardSensorScale) {
       return 20 * Archonia.Axioms.standardSensorScale / this.genome.sensorScale;
+    } else if(this.genome.sensorScale < Archonia.Axioms.standardSensorScale) {
+      return 10 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale;
     } else {
-      return -10 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale;
+      return 10;
     }
   },
 
@@ -143,8 +145,10 @@ Archonia.Form.Goo.prototype = {
     var r = null;
     if(this.genome.tempRange > Archonia.Axioms.standardArchonTempRange) {
       r = 5 * Archonia.Axioms.standardArchonTempRange / this.genome.tempRange;
+    } else if(this.genome.tempRange < Archonia.Axioms.standardArchonTempRange) {
+      r = 5 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
     } else {
-      r = -2.5 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
+      r = 5;
     }
 
     return p + r;
@@ -170,9 +174,9 @@ Archonia.Form.Goo.prototype = {
     var m = this.getMotionCost();
     var t = this.getTempCost();
     var s = this.getSensorCost();
-    var c = (m + t + s) / 50;
+    var c = (m + t + s) / 500;
     
-    if(this.archon.encysted) { c /= 10; }
+    if(this.archon.encysted) { c /= 2; }
     
     this.debit(c);
   },
