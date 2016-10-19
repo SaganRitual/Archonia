@@ -28,68 +28,6 @@ Archonia.Form.Head = function(archon) {
 
 Archonia.Form.Head.prototype = {
   
-  encystIf: function() {
-    
-    if(this.frameCount > this.whenToIssueNextMoveOrder) {
-      // Get hot temps from my bottom and cold temps from my
-      // top. This is because if we're at the top of the world,
-      // the temp reading comes from out of bounds and it's
-      // cold. We get trapped at the top waiting for it to
-      // warm up, even in the heat of the day. Getting the low
-      // temp from my top is just for aesthetic symmetry
-      var tempTop = Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position));
-      var tempBottom = Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position));
-
-      // Further down, we check whether our hunger should override our
-      // temp considerations. If it does, we still want to store a
-      // temp that indicates whether we're too hot or too cold. The
-      // override lets us store a temp that's at the limit of our
-      // tolerance. That way, if the delta gets too big, we'll
-      // be ready for it, instead of waiting around for the signal buffer
-      // to fill with bad temps
-      var delta = null, deltaOverride = null;
-      if(this.position.y < Archonia.Engine.game.centerY) {
-        delta = tempBottom - this.genome.optimalTemp;
-        deltaOverride = this.tempSignalScaleHi;
-      } else {
-        delta = tempTop - this.genome.optimalTemp;
-        deltaOverride = this.tempSignalScaleLo;
-      }
-
-      if(delta !== null) {
-        // If my genes tell me my current hunger level is higher than
-        // my need for good weather, then get out there and find some food
-        if(delta * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
-          this.temps.store(deltaOverride);
-        } else {
-          this.temps.store(delta);
-        }
-      }
-    
-      var weWereEncysted = this.encysted;
-      
-      // We might have overridden the signal strength above, if we
-      // determined that hunger is more important than a sunburn
-      var s = this.temps.getSignalStrength();
-      if(Math.abs(s) > this.genome.encystThreshold) { this.encysted = true; }
-      else if(Math.abs(s) < this.genome.unencystThreshold) { this.encysted = false; }
-    
-      if(this.encysted) {
-
-        if(!weWereEncysted) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
-
-      } else if(weWereEncysted) {
-
-        console.log("unencyst", s.toFixed(4)); this.archon.unencyst();
-        
-        // Tell move function to set a new move target
-        this.previousMoveTarget.set(0);
-      }
-    }
-
-    return this.encysted;
-  },
-    
   clearFoodGrab: function() {
     if(this.foodGrab) {
       // Wait a bit before starting the search again; a bit of
@@ -142,6 +80,68 @@ Archonia.Form.Head.prototype = {
       }
     }
     
+  },
+
+  encystIf: function() {
+    
+    if(this.frameCount > this.whenToIssueNextMoveOrder) {
+      var t = this.getCardinalTemps();
+
+      // Further down, we check whether our hunger should override our
+      // temp considerations. If it does, we still want to store a
+      // temp that indicates whether we're too hot or too cold. The
+      // override lets us store a temp that's at the limit of our
+      // tolerance. That way, if the delta gets too big, we'll
+      // be ready for it, instead of waiting around for the signal buffer
+      // to fill with bad temps
+      var delta = null, deltaOverride = null;
+      if(this.position.y < Archonia.Engine.game.centerY) {
+        delta = t.bottom - this.genome.optimalTemp;
+        deltaOverride = this.tempSignalScaleHi;
+      } else {
+        delta = t.top - this.genome.optimalTemp;
+        deltaOverride = this.tempSignalScaleLo;
+      }
+      
+      var h = this.weighTempAgainstHunger(delta);
+      if(h === 0) { this.temps.store(deltaOverride); }
+      else { this.temps.store(delta); }
+
+      var weWereEncysted = this.encysted;
+      
+      // We might have overridden the signal strength above, if we
+      // determined that hunger is more important than a sunburn
+      var s = this.temps.getSignalStrength();
+      if(Math.abs(s) > this.genome.encystThreshold) { this.encysted = true; }
+      else if(Math.abs(s) < this.genome.unencystThreshold) { this.encysted = false; }
+    
+      if(this.encysted) {
+
+        if(!weWereEncysted) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
+
+      } else if(weWereEncysted) {
+
+        console.log("unencyst", s.toFixed(4)); this.archon.unencyst();
+        
+        // Tell move function to set a new move target
+        this.previousMoveTarget.set(0);
+      }
+    }
+
+    return this.encysted;
+  },
+  
+  getCardinalTemps: function() {
+    // Get hot temps from my bottom and cold temps from my
+    // top. This is because if we're at the top of the world,
+    // the temp reading comes from out of bounds and it's
+    // cold. We get trapped at the top waiting for it to
+    // warm up, even in the heat of the day. Getting the low
+    // temp from my top is just for aesthetic symmetry
+    return {
+      top: Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position)),
+      bottom: Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position))
+    };
   },
   
   launch: function(genome, legs, position) {
@@ -204,25 +204,6 @@ Archonia.Form.Head.prototype = {
     }
     
     this.trail.store(p);
-  },
-  
-  getCardinalTemps: function() {
-    return {
-      top: Archonia.Cosmos.Sun.getTemperature(relativePositions[0].plus(this.position)),
-      bottom: Archonia.Cosmos.Sun.getTemperature(relativePositions[4].plus(this.position))
-    };
-  },
-  
-  weighTempAgainstHunger: function(tempDelta) {
-    if(tempDelta === null) {
-      return 0;
-    } else if (Math.abs(tempDelta) * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
-      // If my genes tell me my current hunger level is higher than
-      // my need for good weather, then get out there and find some 
-      return 0;
-    } else {
-      return Math.sign(tempDelta);
-    }
   },
   
   moveForTemperature: function() {
@@ -302,7 +283,19 @@ Archonia.Form.Head.prototype = {
       this.currentFoodTarget.set(foodTarget);
     }
     
-  }
+  },
+  
+  weighTempAgainstHunger: function(tempDelta) {
+    if(tempDelta === null) {
+      return 0;
+    } else if (Math.abs(tempDelta) * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
+      // If my genes tell me my current hunger level is higher than
+      // my need for good weather, then get out there and find some 
+      return 0;
+    } else {
+      return Math.sign(tempDelta);
+    }
+  },
 };
 
 })(Archonia);
