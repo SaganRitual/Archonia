@@ -35,6 +35,7 @@ Archonia.Form.Legs.prototype = {
   },
   
   reflect: function(vertical) {
+    this.running = true;
     var fromZero = Archonia.Axioms.robalizeAngle(this.velocity.getAngleFrom(0));
     var theta = null;
     
@@ -97,6 +98,8 @@ Archonia.Form.Legs.prototype = {
     this.running = true;
     this.targetVelocity.set(v);
   },
+  
+  stop: function() { this.running = false; this.velocity.set(0); },
 
   tick: function(frameCount) {
     this.frameCount = frameCount;

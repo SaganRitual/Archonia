@@ -97,8 +97,19 @@ Archonia.Form.Goo.prototype = {
 
   eat: function(food) {
     if(this.archon.encysted) { return; }
-
-    var benefit = food.calories;
+    
+    var benefit = null;
+    
+    if(food instanceof Archonia.Form.Archon) {
+      benefit = Math.min(
+        Archonia.Axioms.caloriesPerSecondFromPredation / 60,
+        food.goo.adultCalorieBudget + food.goo.embryoCalorieBudget + food.goo.larvalCalorieBudget
+      );
+      
+      food.goo.debit(benefit);
+    } else {
+      benefit = food.calories;
+    }
 
     benefit = this.applyBenefit('adultCalorieBudget', benefit, this.genome.embryoThreshold);
     

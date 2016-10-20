@@ -132,6 +132,30 @@ Archonia.Form.Head.prototype = {
     return this.encysted;
   },
   
+  evade: function(dangerousArchonsById) {
+    var stillSensingThese = [], newlySensed = [], i = null;
+    
+    for(i = 0; i < dangerousArchonsById.length; i++) {
+      var id = dangerousArchonsById[i];
+      if(this.knownArchons.indexOf(id) < 0) {
+        newlySensed.push(id);
+      } else {
+        stillSensingThese.push(id);
+      }
+    }
+    
+    this.knownArchons = stillSensingThese.concat(newlySensed);
+    
+    for(i = 0; i < this.knownArchons.length; i++) {
+      var d = Archonia.Cosmos.Dronery.getArchonPosition(this.knownArchons[i]);
+      var a = this.position.getAngleTo(d);
+      var p = Archonia.Form.XY.fromPolar(25, a);
+      Archonia.Essence.Dbitmap.rLine(this.position, p, 'red');
+    }
+    
+    return newlySensed.length === 0;
+  },
+  
   getCardinalTemps: function() {
     // Get hot temps from my bottom and cold temps from my
     // top. This is because if we're at the top of the world,
@@ -188,6 +212,10 @@ Archonia.Form.Head.prototype = {
     this.legs = legs;
     this.position = position;
     this.firstTickAfterLaunch = true;
+    this.knownArchons = [];
+    this.headedForPrey = false;
+    this.diningOnPrey = false;
+    this.currentPrey = null;
 
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
     
@@ -198,6 +226,29 @@ Archonia.Form.Head.prototype = {
       Math.floor(this.genome.tempSignalBufferSize), this.genome.tempSignalDecayRate,
       this.tempSignalScaleLo, this.tempSignalScaleHi
     );
+  },
+  
+  prey: function(tastyArchonId) {
+    var a = Archonia.Cosmos.Dronery.getArchonById(tastyArchonId);
+    Archonia.Essence.Dbitmap.aLine(this.position, a.position, 'red');
+    
+    if(tastyArchonId !== this.currentPrey) {
+      this.diningOnPrey = false; this.headedForPrey = false; this.currentPrey = tastyArchonId;
+    }
+    
+    if(!this.diningOnPrey) {
+      if(Archonia.Engine.game.physics.arcade.overlap(
+        this.archon.sprite, a.sprite, null, null, this)) {
+        this.legs.stop();
+        this.archon.goo.eat(a);
+        this.diningOnPrey = true;
+      } else {
+        if(!this.headedForPrey) {
+          this.headedForPrey = true;
+          this.legs.setTargetPosition(a.position, 0, 0);
+        }
+      }
+    }
   },
   
   seekFood: function(restart) {
@@ -238,9 +289,7 @@ Archonia.Form.Head.prototype = {
     this.trail.store(p);
   },
   
-  tick: function(frameCount, foodTarget) {
-    this.frameCount = frameCount;
-    
+  standardMove: function(foodTarget) {
     var weWereEncysted = this.encysted;
     var foodIsInSight = !foodTarget.equals(0);
     var weWereEating = !this.currentFoodTarget.equals(0);
@@ -276,9 +325,19 @@ Archonia.Form.Head.prototype = {
     // that there is no food in sight but had not let the
     // seeker reset the trail
     if(!foodIsInSight) { this.drawFoodSearchMemory(); }
+
+  },
+  
+  tick: function(frameCount, foodTarget, dangerousArchons, tastyArchonId) {
+    this.frameCount = frameCount;
+    
+    if(tastyArchonId === null) {
+      this.standardMove(foodTarget);
+    } else {
+      this.prey(tastyArchonId);
+    }
     
     this.firstTickAfterLaunch = false;
-
   },
   
   weighEncystmentAgainstHunger: function(tempDelta) {

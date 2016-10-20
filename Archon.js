@@ -144,6 +144,9 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.injuryFactor = 0;
   this.encysted = false;
   this.whenToUnencyst = 0;
+  this.currentPrey = null;
+  this.currentPreyStillThere = false;
+  this.newPrey = null;
   
   this.flashes = {
     birth: { on: 0xFFFFFF, off: 0 },
@@ -179,6 +182,22 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.head.launch(this.genome, this.legs, this.position);
 
   this.sprite.revive(); this.button.revive(); this.sensor.revive();
+};
+
+Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
+  if(this.archoniaUniqueObjectId === theOtherGuy.archon.archoniaUniqueObjectId) { return; }
+  if(this.position.getDistanceTo(theOtherGuy) > this.sensorRadius) { return; }
+  if(!theOtherGuy.archon.head.encysted) { return; }
+  
+  // We're already working on one meal; stick with it until we're done
+  if(theOtherGuy.archon.archoniaUniqueObjectId === this.currentPrey) {
+    this.currentPreyStillThere = true;
+    this.newPrey = null;
+  }
+  
+  if(this.newPrey === null && !this.currentPreyStillThere) {
+    this.newPrey = theOtherGuy.archon.archoniaUniqueObjectId;
+  }
 };
 
 Archonia.Form.Archon.prototype.senseManna = function(manna) {
@@ -280,8 +299,12 @@ Archonia.Form.Archon.prototype.tick = function() {
     this.goo.tick(this.frameCount);
     this.legs.tick(this.frameCount);
   }
-
-  this.head.tick(this.frameCount, this.currentFoodTarget);
+  
+  if(!this.currentPreyStillThere) { this.currentPrey = this.newPrey; }
+  
+  this.head.tick(this.frameCount, this.currentFoodTarget, null, this.currentPrey);
+  
+  this.currentPreyStillThere = false; this.newPrey = null;
 };
 
 Archonia.Form.Archon.prototype.unencyst = function() { this.encysted = false; };

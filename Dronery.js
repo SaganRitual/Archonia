@@ -72,6 +72,28 @@ Archonia.Cosmos.Dronery = {
   },
   
   eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill(); },
+  
+  getArchonById: function(archoniaUniqueObjectId) {
+    var a = null;
+    
+    spritePools.phaserons.forEachAlive(function(phaseron) {
+      if(phaseron.archon.archoniaUniqueObjectId === archoniaUniqueObjectId) {
+        a = phaseron.archon;
+      }
+    });
+    
+    return a;
+  },
+  
+  getArchonPosition: function(archoniaUniqueObjectId) {
+    var a = Archonia.Cosmos.Dronery.getArchonById(archoniaUniqueObjectId);
+    var p = null;
+    
+    // Check for null in case he has died or something
+    if(a !== null) { p = Archonia.Form.XY(a.phaseron.position); }
+
+    return p;
+  },
 
   render: function() {
   	var showDebugOutlines = false;
@@ -87,6 +109,9 @@ Archonia.Cosmos.Dronery = {
   	}
   },
   
+  senseArchon: function(sensor, theOtherGuy) {
+    if(sensor.archon.launched) { sensor.archon.senseArchon(theOtherGuy); } },
+  
   senseManna: function(sensor, manna) { sensor.archon.senseManna(manna); },
 
   tick: function() {
@@ -100,6 +125,11 @@ Archonia.Cosmos.Dronery = {
     Archonia.Engine.game.physics.arcade.overlap(
       spritePools.phaserons, Archonia.Cosmos.MannaGenerator.spriteGroup,
       Archonia.Cosmos.Dronery.eat
+    );
+
+    Archonia.Engine.game.physics.arcade.overlap(
+      spritePools.sensors, spritePools.sensors,
+      Archonia.Cosmos.Dronery.senseArchon
     );
     
   	spritePools.phaserons.forEachAlive(function(a) {
