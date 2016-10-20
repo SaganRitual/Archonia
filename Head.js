@@ -34,7 +34,7 @@ Archonia.Form.Head = function(archon) {
   this.archon = archon;
   this.whenToIssueNextMoveOrder = 0;
   
-  this.previousMoveTarget = Archonia.Form.XY();
+  this.foodSearchAnchor = Archonia.Form.XY();
   this.currentFoodTarget =  Archonia.Form.XY();
   
   this.trail = new Archonia.Form.Cbuffer(8);
@@ -43,17 +43,6 @@ Archonia.Form.Head = function(archon) {
 };
 
 Archonia.Form.Head.prototype = {
-  
-  clearFoodGrab: function() {
-    if(this.foodGrab) {
-      // Wait a bit before starting the search again; a bit of
-      // drifting in the general area of the food we just
-      // ate might get us closer to more
-      this.legs.drift();
-      this.foodGrab = false;
-      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
-    }
-  },
   
   doWeRemember: function(p) {
     var weRememberIt = false;
@@ -100,48 +89,44 @@ Archonia.Form.Head.prototype = {
 
   encystIf: function() {
     
-    if(this.frameCount > this.whenToIssueNextMoveOrder) {
-      var t = this.getCardinalTemps();
+    var t = this.getCardinalTemps();
 
-      // Further down, we check whether our hunger should override our
-      // temp considerations. If it does, we still want to store a
-      // temp that indicates whether we're too hot or too cold. The
-      // override lets us store a temp that's at the limit of our
-      // tolerance. That way, if the delta gets too big, we'll
-      // be ready for it, instead of waiting around for the signal buffer
-      // to fill with bad temps
-      var delta = null, deltaOverride = null;
-      if(this.position.y < Archonia.Engine.game.centerY) {
-        delta = t.bottom - this.genome.optimalTemp;
-        deltaOverride = this.tempSignalScaleHi;
-      } else {
-        delta = t.top - this.genome.optimalTemp;
-        deltaOverride = this.tempSignalScaleLo;
-      }
-      
-      var h = this.weighEncystmentAgainstHunger(delta);
-      if(h === 0) { this.temps.store(deltaOverride); }
-      else { this.temps.store(delta); }
-
-      var weWereEncysted = this.encysted;
-      
-      // We might have overridden the signal strength above, if we
-      // determined that hunger is more important than a sunburn
-      var s = this.temps.getSignalStrength();
-      if(Math.abs(s) > this.genome.encystThreshold) { this.encysted = true; }
-      else if(Math.abs(s) < this.genome.unencystThreshold) { this.encysted = false; }
+    // Further down, we check whether our hunger should override our
+    // temp considerations. If it does, we still want to store a
+    // temp that indicates whether we're too hot or too cold. The
+    // override lets us store a temp that's at the limit of our
+    // tolerance. That way, if the delta gets too big, we'll
+    // be ready for it, instead of waiting around for the signal buffer
+    // to fill with bad temps
+    var delta = null, deltaOverride = null;
+    if(this.position.y < Archonia.Engine.game.centerY) {
+      delta = t.bottom - this.genome.optimalTemp;
+      deltaOverride = this.tempSignalScaleHi;
+    } else {
+      delta = t.top - this.genome.optimalTemp;
+      deltaOverride = this.tempSignalScaleLo;
+    }
     
-      if(this.encysted) {
+    var h = this.weighEncystmentAgainstHunger(delta);
+    if(h === 0) { this.temps.store(deltaOverride); }
+    else { this.temps.store(delta); }
 
-        if(!weWereEncysted) { console.log(this.archon.archoniaUniqueObjectId, "encyst", s.toFixed(4)); this.archon.encyst(); }
+    var weWereEncysted = this.encysted;
+    
+    // We might have overridden the signal strength above, if we
+    // determined that hunger is more important than a sunburn
+    var s = this.temps.getSignalStrength();
+    if(Math.abs(s) > this.genome.encystThreshold) { this.encysted = true; }
+    else if(Math.abs(s) < this.genome.unencystThreshold) { this.encysted = false; }
+  
+    if(this.encysted) {
 
-      } else if(weWereEncysted) {
+      if(!weWereEncysted) { console.log(this.archon.archoniaUniqueObjectId, "encyst", s.toFixed(4)); this.archon.encyst(); }
 
-        console.log(this.archon.archoniaUniqueObjectId, "unencyst", s.toFixed(4)); this.archon.unencyst();
-        
-        // Tell move function to set a new move target
-        this.previousMoveTarget.set(0);
-      }
+    } else if(weWereEncysted) {
+
+      console.log(this.archon.archoniaUniqueObjectId, "unencyst", s.toFixed(4)); this.archon.unencyst();
+
     }
 
     return this.encysted;
@@ -202,6 +187,7 @@ Archonia.Form.Head.prototype = {
     this.genome = genome;
     this.legs = legs;
     this.position = position;
+    this.firstTickAfterLaunch = true;
 
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
     
@@ -214,15 +200,15 @@ Archonia.Form.Head.prototype = {
     );
   },
   
-  move: function() {
+  seekFood: function(restart) {
     var bestChoices = [], h = null, i = null, p = null, q = Archonia.Form.XY();
     
-    if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
+    if(restart || this.firstTickAfterLaunch) { this.trail.reset(); this.foodSearchAnchor.set(this.position); }
     
     h = this.getSunburnPlan();
     
     for(i = 0; i < 8; i++) {
-      p = relativePositions[i].plus(this.previousMoveTarget);
+      p = relativePositions[i].plus(this.foodSearchAnchor);
       
       if(p.isInBounds()) {
         // If we can't find an old spot that we've forgotten,
@@ -235,61 +221,53 @@ Archonia.Form.Head.prototype = {
     
     if(bestChoices.length > 0) {
       i = Archonia.Axioms.integerInRange(0, bestChoices.length);
-      p = relativePositions[bestChoices[i]].plus(this.previousMoveTarget);
+      p = relativePositions[bestChoices[i]].plus(this.foodSearchAnchor);
     } else {
       p.set(q); // Couldn't find an optimal target, just take a random one
     }
-  
-    this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
   
     // This is where we're aiming; remember it so when we come back
     // into the move function, we can calculate our next move based on
     // where we intended to be, rather than where the legs might have put
     // us -- the legs don't typically get us to the specific target
-    this.previousMoveTarget.set(p);
+    this.foodSearchAnchor.set(p);
   
     this.legs.setTargetPosition(p);
     
     this.trail.store(p);
   },
   
-  setFoodGrab: function() {
-    if(!this.foodGrab) {
-      if(!this.trail.isEmpty()) { this.trail.reset(); }
-      this.previousMoveTarget.reset();
-      this.foodGrab = true;
-    }
-  },
-  
   tick: function(frameCount, foodTarget) {
     this.frameCount = frameCount;
     
-    this.drawMemory();
+    var weWereEncysted = this.encysted;
     
-    var encysted = this.encystIf();
-    
-    if(!encysted) {
-      if(foodTarget.equals(0)) {
-        this.clearFoodGrab();
-      
-        if(this.frameCount > this.whenToIssueNextMoveOrder) { this.move(); } 
-      } else {
-        var drawDebugLines = false;
-        if(drawDebugLines) {
-          Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
-        }
-      
-        this.setFoodGrab();
-
-        if(!this.currentFoodTarget.equals(foodTarget)) {
-          this.currentFoodTarget.set(foodTarget);
-          this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
-        }
+    if(!weWereEncysted) {
+      if(!this.currentFoodTarget.equals(foodTarget)) {
+        this.currentFoodTarget.set(foodTarget);
+        this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
       }
-    
-      this.currentFoodTarget.set(foodTarget);
+
+      var drawDebugLines = false;
+      if(drawDebugLines) {
+        Archonia.Essence.Dbitmap.aLine(this.position, foodTarget, 'red');
+      }
     }
     
+    if(this.frameCount > this.whenToIssueNextMoveOrder) {
+      var encysted = this.encystIf();
+      
+      if(!encysted && foodTarget.equals(0)) {
+        var restartFoodSearch = weWereEncysted;
+        this.seekFood(restartFoodSearch);
+        this.drawMemory();
+      }
+
+      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+    }
+    
+    this.firstTickAfterLaunch = false;
+
   },
   
   weighEncystmentAgainstHunger: function(tempDelta) {
