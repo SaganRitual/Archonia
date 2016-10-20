@@ -87,14 +87,14 @@ Archonia.Cosmos.Dronery = {
   	}
   },
   
-  sense: function(sensor, manna) { sensor.archon.sense(manna); },
+  senseManna: function(sensor, manna) { sensor.archon.senseManna(manna); },
 
   tick: function() {
     Archonia.Essence.Dbitmap.bm.clear();
 
     Archonia.Engine.game.physics.arcade.overlap(
       spritePools.sensors, Archonia.Cosmos.MannaGenerator.spriteGroup,
-      Archonia.Cosmos.Dronery.sense
+      Archonia.Cosmos.Dronery.senseManna
     );
 
     Archonia.Engine.game.physics.arcade.overlap(

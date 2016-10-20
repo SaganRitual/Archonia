@@ -135,7 +135,7 @@ describe('Genomer', function() {
     });
   });
 
-  describe('Sense genes', function() {
+  describe('senseManna genes', function() {
     it('Base class newGene() is pure virtual', function() {
       var ng = function() { var n = new Archonia.Form.SenseGene(); n.newGene(); };
       chai.expect(ng).to.throw(Error, 'SenseGene.newGene() is pure virtual');

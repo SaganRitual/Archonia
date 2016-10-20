@@ -181,7 +181,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.sprite.revive(); this.button.revive(); this.sensor.revive();
 };
 
-Archonia.Form.Archon.prototype.sense = function(manna) {
+Archonia.Form.Archon.prototype.senseManna = function(manna) {
   if(this.position.getDistanceTo(manna) < this.sensorRadius) {
     
     if(this.currentFoodTarget.equals(manna)) {
