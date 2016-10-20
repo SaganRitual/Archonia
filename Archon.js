@@ -1,7 +1,7 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global Phaser */
+/* global Phaser, tinycolor */
 
 "use strict";
 
@@ -150,6 +150,21 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     this.position.set(myParentArchon.position);
    // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
   }
+  
+  console.log("Birth", this.archoniaUniqueObjectId);
+  for(var i in this.genome.core) {
+    if(i === "color") {
+      var c = this.genome.color;
+      var s = c.toString(16);
+      var z = ("000000").substr(0, 6 - s.length);
+      var o = "#" + z + s;
+      var t = tinycolor(o);
+      console.log(t.toHslString());
+    } else {
+      console.log(i, this.genome[i]);
+    }
+  }
+  console.log('****************************');
 
   this.firstLaunch = false;
   this.launched = true;
