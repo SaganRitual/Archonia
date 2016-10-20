@@ -63,7 +63,7 @@ Archonia.Form.Head.prototype = {
         if(p.equals(value)) { weRememberIt = true; return false; }
       });
     }
-    
+
     return weRememberIt;
   },
   
@@ -235,7 +235,7 @@ Archonia.Form.Head.prototype = {
     
     if(bestChoices.length > 0) {
       i = Archonia.Axioms.integerInRange(0, bestChoices.length);
-      p = relativePositions[bestChoices[i]].plus(this.position);
+      p = relativePositions[bestChoices[i]].plus(this.previousMoveTarget);
     } else {
       p.set(q); // Couldn't find an optimal target, just take a random one
     }
