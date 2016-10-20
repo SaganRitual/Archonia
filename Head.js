@@ -201,7 +201,7 @@ Archonia.Form.Head.prototype = {
   },
   
   seekFood: function(restart) {
-    var bestChoices = [], h = null, i = null, p = null, q = Archonia.Form.XY();
+    var bestChoices = [], fallbacks = [], h = null, i = null, p = null;
     
     if(restart) { this.trail.reset(); this.foodSearchAnchor.set(this.position); }
     
@@ -213,7 +213,7 @@ Archonia.Form.Head.prototype = {
       if(p.isInBounds()) {
         // If we can't find an old spot that we've forgotten,
         // we'll just take one that's in bounds
-        q.set(p);
+        fallbacks.push(Archonia.Form.XY(p));
         
         if(!this.doWeRemember(p)) { populateMovementChoices(bestChoices, i, h); }
       }
@@ -223,7 +223,8 @@ Archonia.Form.Head.prototype = {
       i = Archonia.Axioms.integerInRange(0, bestChoices.length);
       p = relativePositions[bestChoices[i]].plus(this.foodSearchAnchor);
     } else {
-      p.set(q); // Couldn't find an optimal target, just take a random one
+      i = Archonia.Axioms.integerInRange(0, fallbacks.length);
+      p = fallbacks[i];
     }
   
     // This is where we're aiming; remember it so when we come back
