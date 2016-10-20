@@ -30,6 +30,23 @@ var generateArchonoidPrototype = function() {
   }
 };
 
+var geneReport = function(e, archon) {
+  console.log(e, archon.archoniaUniqueObjectId);
+  for(var i in archon.genome.core) {
+    if(i === "color") {
+      var c = archon.genome.color;
+      var s = c.toString(16);
+      var z = ("000000").substr(0, 6 - s.length);
+      var o = "#" + z + s;
+      var t = tinycolor(o);
+      console.log(t.toHslString());
+    } else {
+      console.log(i, archon.genome[i]);
+    }
+  }
+  console.log('****************************');
+};
+
 Archonia.Form.Archon = function(phaseron) {
   this.firstLaunch = true;
   this.launched = false;
@@ -45,6 +62,7 @@ Archonia.Form.Archon = function(phaseron) {
 	s.anchor.setTo(0.5, 0.5); s.alpha = 0.1; s.tint = 0x0000FF;  // s scale set in launch
 
 	p.body.collideWorldBounds = true; p.inputEnabled = true; p.input.enableDrag();
+  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); });
   
   this.activatePhysicsBodies();
   
@@ -151,20 +169,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
    // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
   }
   
-  console.log("Birth", this.archoniaUniqueObjectId);
-  for(var i in this.genome.core) {
-    if(i === "color") {
-      var c = this.genome.color;
-      var s = c.toString(16);
-      var z = ("000000").substr(0, 6 - s.length);
-      var o = "#" + z + s;
-      var t = tinycolor(o);
-      console.log(t.toHslString());
-    } else {
-      console.log(i, this.genome[i]);
-    }
-  }
-  console.log('****************************');
+  geneReport("Birth", this);
 
   this.firstLaunch = false;
   this.launched = true;

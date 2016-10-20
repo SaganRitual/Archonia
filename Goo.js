@@ -91,7 +91,7 @@ Archonia.Form.Goo.prototype = {
   },
   
   die: function() {
-    console.log('die');
+    console.log(this.archon.archoniaUniqueObjectId, 'died');
     this.archon.die();
   },
 
