@@ -17,6 +17,8 @@ if(typeof window === "undefined") {
 }
 
 (function(Archonia) {
+  
+  var frameCount = 0;
 
   Archonia.Engine = {
     mouseUp: true,
@@ -72,10 +74,10 @@ if(typeof window === "undefined") {
     },
     
     update: function() {
-      Archonia.Engine.frameCount++;
+      frameCount++;
       
-      Archonia.Cosmos.MannaGenerator.tick(Archonia.Engine.frameCount);
-      Archonia.Cosmos.Dronery.tick(Archonia.Engine.frameCount);
+      Archonia.Cosmos.MannaGenerator.tick(frameCount);
+      Archonia.Cosmos.Dronery.tick(frameCount);
     }
     
   };
