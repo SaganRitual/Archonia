@@ -56,16 +56,16 @@ Archonia.Form.Head.prototype = {
     return weRememberIt;
   },
   
-  drawMemory: function() {
+  drawFoodSearchMemory: function() {
     var drawDebugLines = false;
     
     if(drawDebugLines) {
       var p1 = Archonia.Form.XY(), p2 = Archonia.Form.XY();
     
       if(!this.trail.isEmpty()) {
-        var hue = 0;
+        var hue = 0, lightness = 50;
         this.trail.forEach(function(ix, value) {
-          var color = 'hsl(' + hue + ', 100%, 50%)';
+          var color = 'hsl(' + hue + ', 100%, ' + lightness + '%)';
           
           p1.set(value.plus(-squareSize / 2, -squareSize / 2));
           p2.set(value.plus(squareSize / 2, -squareSize / 2));
@@ -80,7 +80,7 @@ Archonia.Form.Head.prototype = {
           p2.set(value.plus(squareSize / 2, -squareSize / 2));
           Archonia.Essence.Dbitmap.aLine(p1, p2, color);
           
-          hue += 30;
+          hue += 30; lightness -= 5;
         });
       }
     }
@@ -203,7 +203,7 @@ Archonia.Form.Head.prototype = {
   seekFood: function(restart) {
     var bestChoices = [], h = null, i = null, p = null, q = Archonia.Form.XY();
     
-    if(restart || this.firstTickAfterLaunch) { this.trail.reset(); this.foodSearchAnchor.set(this.position); }
+    if(restart) { this.trail.reset(); this.foodSearchAnchor.set(this.position); }
     
     h = this.getSunburnPlan();
     
@@ -241,8 +241,12 @@ Archonia.Form.Head.prototype = {
     this.frameCount = frameCount;
     
     var weWereEncysted = this.encysted;
+    var foodIsInSight = !foodTarget.equals(0);
+    var weWereEating = !this.currentFoodTarget.equals(0);
+
+    if(!foodIsInSight) { this.currentFoodTarget.set(0); }
     
-    if(!weWereEncysted) {
+    if(!this.encysted && foodIsInSight) {
       if(!this.currentFoodTarget.equals(foodTarget)) {
         this.currentFoodTarget.set(foodTarget);
         this.legs.setTargetPosition(this.currentFoodTarget, 0, 0);
@@ -254,17 +258,23 @@ Archonia.Form.Head.prototype = {
       }
     }
     
-    if(this.frameCount > this.whenToIssueNextMoveOrder) {
+    if((weWereEating && !foodIsInSight) || this.frameCount > this.whenToIssueNextMoveOrder) {
       var encysted = this.encystIf();
       
-      if(!encysted && foodTarget.equals(0)) {
-        var restartFoodSearch = weWereEncysted;
+      if(!encysted && !foodIsInSight) {
+        var restartFoodSearch = weWereEncysted || weWereEating || this.firstTickAfterLaunch;
         this.seekFood(restartFoodSearch);
-        this.drawMemory();
       }
 
       this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
     }
+
+    // Do this at the end, after the food search has had a
+    // chance to reset its trail, so I don't see a flicker --
+    // I think, at least, that I'd see a flicker if we saw
+    // that there is no food in sight but had not let the
+    // seeker reset the trail
+    if(!foodIsInSight) { this.drawFoodSearchMemory(); }
     
     this.firstTickAfterLaunch = false;
 
