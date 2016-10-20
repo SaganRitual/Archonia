@@ -14,6 +14,22 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     Archonia.Form.XY(-squareSize, 0), Archonia.Form.XY(-squareSize, -squareSize)
   ];
 
+  var populateMovementChoices = function(theArray, ix, direction) {
+    if(
+      (direction < 0 && relativePositions[ix].y < 0) ||
+      (direction > 0 && relativePositions[ix].y > 0)) {
+        for(var i = 0; i < Math.abs(direction); i++) { theArray.push(ix); }
+    } else if(Math.abs(direction) !== 3) {
+      // If we're not at maximum risk, allow for some
+      // possibility of going the wrong vertical direction,
+      // and of course, allow horizontal movement to
+      // have more weight than the wrong vertical direction
+      theArray.push(ix);
+
+      if(relativePositions[ix].y === 0) { theArray.push(ix); }
+    }
+  };
+
 Archonia.Form.Head = function(archon) {
   this.archon = archon;
   this.whenToIssueNextMoveOrder = 0;
@@ -103,7 +119,7 @@ Archonia.Form.Head.prototype = {
         deltaOverride = this.tempSignalScaleLo;
       }
       
-      var h = this.weighTempAgainstHunger(delta);
+      var h = this.weighEncystmentAgainstHunger(delta);
       if(h === 0) { this.temps.store(deltaOverride); }
       else { this.temps.store(delta); }
 
@@ -117,11 +133,11 @@ Archonia.Form.Head.prototype = {
     
       if(this.encysted) {
 
-        if(!weWereEncysted) { console.log("encyst", s.toFixed(4)); this.archon.encyst(); }
+        if(!weWereEncysted) { console.log(this.archon.archoniaUniqueObjectId, "encyst", s.toFixed(4)); this.archon.encyst(); }
 
       } else if(weWereEncysted) {
 
-        console.log("unencyst", s.toFixed(4)); this.archon.unencyst();
+        console.log(this.archon.archoniaUniqueObjectId, "unencyst", s.toFixed(4)); this.archon.unencyst();
         
         // Tell move function to set a new move target
         this.previousMoveTarget.set(0);
@@ -144,70 +160,8 @@ Archonia.Form.Head.prototype = {
     };
   },
   
-  launch: function(genome, legs, position) {
-    this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
-
-    this.genome = genome;
-    this.legs = legs;
-    this.position = position;
-
-    this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
-    
-    this.tempSignalScaleLo = this.genome.optimalTempLo - this.genome.tempRadius;
-    this.tempSignalScaleHi = this.genome.optimalTempHi + this.genome.tempRadius;
-
-    this.temps = new Archonia.Form.SignalSmoother(
-      this.genome.tempSignalBufferSize, this.genome.tempSignalDecayRate,
-      this.tempSignalScaleLo, this.tempSignalScaleHi
-    );
-  },
-  
-  move: function() {
-    var bestChoices = [], i = null, p = null, q = Archonia.Form.XY();
-    
-    if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
-    
-    p = this.moveForTemperature();
-    
-    if(p === null) {
-
-      // We're within normal temp range; choose a random direction
-      
-      for(i = 0; i < 8; i++) {
-        p = relativePositions[i].plus(this.previousMoveTarget);
-        
-        // If we can't find an old spot that we've forgotten,
-        // we'll just take one that's in bounds
-        if(p.isInBounds()) {
-          q.set(p);
-          
-          if(!this.doWeRemember(p)) { bestChoices.push(p); }
-        }
-      }
-      
-      if(bestChoices.length > 0) {
-        i = Archonia.Axioms.integerInRange(0, bestChoices.length);
-        p = bestChoices[i];
-      } else {
-        p.set(q); // Couldn't find an optimal target, just take a random one
-      }
-    
-      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
-    
-      // This is where we're aiming; remember it so when we come back
-      // into the move function, we can calculate our next move based on
-      // where we intended to be, rather than where the legs might have put
-      // us -- the legs don't typically get us to the specific target
-      this.previousMoveTarget.set(p);
-    
-      this.legs.setTargetPosition(p);
-    }
-    
-    this.trail.store(p);
-  },
-  
-  moveForTemperature: function() {
-    var tooHot = false, tooCold = false, moveChoices = [], i = null, p = null, delta = null;
+  getSunburnPlan: function() {
+    var tooHot = false, tooCold = false, delta = null;
   
     var t = this.getCardinalTemps();
   
@@ -223,27 +177,80 @@ Archonia.Form.Head.prototype = {
     if(tooHot) { delta = t.bottom - this.genome.optimalTemp; }
     else if(tooCold) { delta = t.top - this.genome.optimalTemp; }
     
-    var h = this.weighTempAgainstHunger(delta);
-    if(h !== 0) {
-
-      if(h > 0) {
-        moveChoices.push(3); moveChoices.push(4); moveChoices.push(5);
-      } else if(tooCold) {
-        moveChoices.push(0); moveChoices.push(1); moveChoices.push(7);
-      }
-      
-      // Some duplicated code here; clean it up at some point; see move()
-
-      i = Archonia.Axioms.integerInRange(0, moveChoices.length);
-      p = relativePositions[moveChoices[i]].plus(this.position);
+    return this.getSunburnRisk(delta);
+  },
   
-      this.legs.setTargetPosition(p);
+  getSunburnRisk: function(tempDelta) {
+    // M = 1 means we're within optimal limits
+    // M = 2 means we're outside optimal limits
+    // M = 3 means we've pegged the signal processor
+    var magnitude = null;
+    if(tempDelta < this.tempSignalScaleLo || tempDelta > this.tempSignalScaleHi) { magnitude = 3; }
+    else if(tempDelta < this.genome.optimalTempLo || tempDelta > this.genome.optimalTempHi) { magnitude = 2; }
+    else { magnitude = 1; }
+    
+    return Math.sign(tempDelta) * magnitude;
+  },
+  
+  hungryEnoughForSunburn: function(tempDelta) {
+    return Math.abs(tempDelta) * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI();
+  },
+  
+  launch: function(genome, legs, position) {
+    this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
 
-      this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+    this.genome = genome;
+    this.legs = legs;
+    this.position = position;
+
+    this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
+    
+    this.tempSignalScaleLo = this.genome.optimalTempLo - this.genome.tempRadius;
+    this.tempSignalScaleHi = this.genome.optimalTempHi + this.genome.tempRadius;
+
+    this.temps = new Archonia.Form.SignalSmoother(
+      Math.floor(this.genome.tempSignalBufferSize), this.genome.tempSignalDecayRate,
+      this.tempSignalScaleLo, this.tempSignalScaleHi
+    );
+  },
+  
+  move: function() {
+    var bestChoices = [], h = null, i = null, p = null, q = Archonia.Form.XY();
+    
+    if(this.previousMoveTarget.equals(0)) { this.previousMoveTarget.set(this.position); }
+    
+    h = this.getSunburnPlan();
+    
+    for(i = 0; i < 8; i++) {
+      p = relativePositions[i].plus(this.previousMoveTarget);
+      
+      if(p.isInBounds()) {
+        // If we can't find an old spot that we've forgotten,
+        // we'll just take one that's in bounds
+        q.set(p);
+        
+        if(!this.doWeRemember(p)) { populateMovementChoices(bestChoices, i, h); }
+      }
     }
     
-    return p;
+    if(bestChoices.length > 0) {
+      i = Archonia.Axioms.integerInRange(0, bestChoices.length);
+      p = relativePositions[bestChoices[i]].plus(this.position);
+    } else {
+      p.set(q); // Couldn't find an optimal target, just take a random one
+    }
+  
+    this.whenToIssueNextMoveOrder = this.frameCount + this.howLongBetweenMoves;
+  
+    // This is where we're aiming; remember it so when we come back
+    // into the move function, we can calculate our next move based on
+    // where we intended to be, rather than where the legs might have put
+    // us -- the legs don't typically get us to the specific target
+    this.previousMoveTarget.set(p);
+  
+    this.legs.setTargetPosition(p);
     
+    this.trail.store(p);
   },
   
   setFoodGrab: function() {
@@ -285,17 +292,17 @@ Archonia.Form.Head.prototype = {
     
   },
   
-  weighTempAgainstHunger: function(tempDelta) {
+  weighEncystmentAgainstHunger: function(tempDelta) {
     if(tempDelta === null) {
       return 0;
-    } else if (Math.abs(tempDelta) * this.genome.tempToleranceFactor < this.archon.goo.howHungryAmI()) {
+    } else if(this.hungryEnoughForSunburn(tempDelta)) {
       // If my genes tell me my current hunger level is higher than
       // my need for good weather, then get out there and find some 
       return 0;
     } else {
       return Math.sign(tempDelta);
     }
-  },
+  }
 };
 
 })(Archonia);
