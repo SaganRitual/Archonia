@@ -35,6 +35,7 @@ if(typeof window === "undefined") {
       Archonia.Essence.Dbitmap = Archonia.Essence.BitmapFactory.makeBitmap('debug');
 
       Archonia.Cosmos.Sun.ignite();
+      Archonia.Cosmos.MannaGenerator.initialize();
       Archonia.Cosmos.MannaGenerator.start();
       
       Archonia.Cosmos.Dronery.start();

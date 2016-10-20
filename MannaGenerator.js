@@ -24,8 +24,10 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
+  var started = false;
+  
   var MG = Archonia.Cosmos.MannaGenerator = {
-    start: function() {
+    initialize: function() {
       var morselScale = 0.05;
     
       MG.howManyMorsels = 500;
@@ -100,11 +102,13 @@ if(typeof window === "undefined") {
       }
     },
     
+    start: function() { started = true; },
+    
     takethAway: function() {
       for(var i = 0; i < 10; i++) {
         var thisParticle = MG.spriteGroup.getRandom();
         if(thisParticle.alive) {
-          var r = Archonia.Axioms.integerInRange(0, MG.bellCurve.length);
+          var r = Archonia.Axioms.integerInRange(0, MG.bellCurve.length - 1);
           var p = MG.bellCurve[r] / MG.bellCurveHeight;
     
           if(Archonia.Axioms.realInRange(0, 1) < p) {
@@ -115,6 +119,8 @@ if(typeof window === "undefined") {
     },
     
     render: function() {
+      if(!started) { return; }
+
     	var showDebugOutlines = false;
 
     	if(showDebugOutlines) {
@@ -126,6 +132,8 @@ if(typeof window === "undefined") {
     },
     
     tick: function(/*frameCount*/) {
+      if(!started) { return; }
+
       MG.giveth();
       MG.takethAway();
     }
