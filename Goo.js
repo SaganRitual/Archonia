@@ -184,7 +184,7 @@ Archonia.Form.Goo.prototype = {
   setButtonColor: function(temp) {
   	temp = Archonia.Axioms.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
 
-  	var hue = Archonia.Essence.buttonHueRange.convertPoint(temp, this.optimalTempRange);
+  	var hue = Archonia.Essence.hueRange.convertPoint(temp, this.optimalTempRange);
   	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
   	var rgb = Archonia.Form.tinycolor(hsl).toHex();
   	var tint = parseInt(rgb, 16);

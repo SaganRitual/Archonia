@@ -43,11 +43,11 @@ if(typeof window === "undefined") {
       var rgb = {};
       Archonia.Cosmos.Sea.bm.getPixelRGB(where.x, where.y, rgb, true);
 
-      var lumaComponent = Archonia.Essence.temperatureRange.convertPoint(rgb.l, Archonia.Essence.worldColorRange);
+      var lumaComponent = Archonia.Essence.worldTemperatureRange.convertPoint(rgb.l, Archonia.Essence.worldColorRange);
 
-      var darknessComponent = Archonia.Essence.temperatureRange.convertPoint(Archonia.Cosmos.Sun.darkness.alpha, Archonia.Essence.darknessRange);
+      var darknessComponent = Archonia.Essence.worldTemperatureRange.convertPoint(Archonia.Cosmos.Sun.darkness.alpha, Archonia.Essence.darknessRange);
 
-      var yAxisComponent = Archonia.Essence.temperatureRange.convertPoint(where.y, Archonia.Essence.yAxisRange);
+      var yAxisComponent = Archonia.Essence.worldTemperatureRange.convertPoint(where.y, Archonia.Essence.yAxisRange);
 
       // Give luma and sun most of the weight. The y-axis thing is there
       // just to help them not get stuck in the luma dead zone(s)

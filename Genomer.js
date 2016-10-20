@@ -85,13 +85,7 @@ Archonia.Form.ScalarGene.prototype.inherit = function(parentGene) {
   this.value = this.mutateScalar(parentGene.value);
 };
 
-Archonia.Form.ColorGene = function(gene, tempRange) {
-  this.color = Archonia.Form.tinycolor(gene);
-
-  this.tempRangeGene = new Archonia.Form.ScalarGene(tempRange);
-
-  Archonia.Form.Gene.call(this);
-};
+Archonia.Form.ColorGene = function(gene) { this.color = Archonia.Form.tinycolor(gene); Archonia.Form.Gene.call(this); };
 
 Archonia.Form.ColorGene.prototype = Object.create(Archonia.Form.Gene.prototype);
 Archonia.Form.ColorGene.prototype.constructor = Archonia.Form.ColorGene;
@@ -100,8 +94,6 @@ Archonia.Form.ColorGene.prototype.newGene = function() { return new Archonia.For
 Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
   
-  this.tempRangeGene.inherit(parentGene.tempRangeGene);
-
   var color = Archonia.Form.tinycolor(parentGene.color);
 
   var hsl = color.toHsl();
@@ -109,7 +101,6 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
   var s = this.mutateScalar(hsl.s, 0.25); // limit the amount of color change between
   var L = this.mutateScalar(hsl.l, 0.25); // generations. I like to see some signs of inheritance
   
-
   if(h < 0) { h += 360; } h %= 360; // Treat the hue like the wheel it is
   if(s < 0) { s += 1; s *= 100; s %= 100; s /= 100; }
   if(L < 0) { L += 1; L *= 100; L %= 100; L /= 100; }
@@ -119,15 +110,20 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
 };
 
 Archonia.Form.ColorGene.prototype.getColorAsDecimal = function() { return parseInt(this.color.toHex(), 16); };
-Archonia.Form.ColorGene.prototype.getTempRange = function() { return this.tempRangeGene.value; };
-Archonia.Form.ColorGene.prototype.getTempRadius = function() { return this.tempRangeGene.value / 2; };
-Archonia.Form.ColorGene.prototype.getOptimalHiTemp = function() { return this.getOptimalTemp() + this.tempRangeGene.value / 2; };
-Archonia.Form.ColorGene.prototype.getOptimalLoTemp = function() { return this.getOptimalTemp() - this.tempRangeGene.value / 2; };
+Archonia.Form.ColorGene.prototype.getTempRadius = function() { return this.getTempRange() / 2; };
+Archonia.Form.ColorGene.prototype.getoptimalTempHi = function() { return this.getOptimalTemp() + this.getTempRange() / 2; };
+Archonia.Form.ColorGene.prototype.getoptimalTempLo = function() { return this.getOptimalTemp() - this.getTempRange() / 2; };
 
 Archonia.Form.ColorGene.prototype.getOptimalTemp = function() {
   var L = this.color.toHsl().l;
-  var t = Archonia.Essence.temperatureRange.convertPoint(L, Archonia.Essence.oneToZeroRange);
+  var t = Archonia.Essence.worldTemperatureRange.convertPoint(L, Archonia.Essence.oneToZeroRange);
   return t;
+};
+
+Archonia.Form.ColorGene.prototype.getTempRange = function() {
+  var h = this.color.toHsl().h;
+  var r = Archonia.Essence.archonTolerableTempRange.convertPoint(h, Archonia.Essence.hueRange);
+  return r;
 };
 
 Archonia.Form.SenseGene = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
@@ -203,9 +199,7 @@ Archonia.Form.Genome.prototype = {
 };
 
 var primordialGenome = { core: {
-  color:                     new Archonia.Form.ColorGene(
-    Archonia.Form.tinycolor('hsl(180, 100%, 50%)'), Archonia.Axioms.standardArchonTempRange
-  ),
+  color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)')),
 
   hungerToleranceFactor:     new Archonia.Form.ScalarGene(0.75),
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),
@@ -270,13 +264,13 @@ Archonia.Cosmos.Genomer = {
       
       case 'optimalTempHi':
         Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getOptimalHiTemp();  } }
+          { get: function () { return this.core.color.getoptimalTempHi();  } }
         );
         break;
       
       case 'optimalTempLo':
         Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getOptimalLoTemp(); } }
+          { get: function () { return this.core.color.getoptimalTempLo(); } }
         );
         break;
       
