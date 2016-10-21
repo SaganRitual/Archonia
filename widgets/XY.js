@@ -59,6 +59,8 @@ Archonia.Form.XY.prototype = {
   
   reset: function() { this.set(0, 0); },
   
+  setPolar: function(r, theta) { this.x = r * Math.cos(theta); this.y = r * Math.sin(theta); return this; },
+  
   scalarDivide: function(scalar) { rp(scalar); this.x /= scalar; this.y /= scalar; },
   
   scalarMultiply: function(scalar) { rp(scalar); this.x *= scalar; this.y *= scalar; },
