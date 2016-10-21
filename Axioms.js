@@ -8,13 +8,14 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 50;
+  Archonia.Axioms.archonCount = 50;  // must be <= archon pool size
+  Archonia.Axioms.archonPoolSize = 500;
   Archonia.Axioms.archoniaGooDiameter = 100;
   Archonia.Axioms.archoniaGooRadius = 50;
   Archonia.Axioms.babyFatAtBirth = 100;
   Archonia.Axioms.babyFatDensity = 1000;
-  Archonia.Axioms.caloriesPerManna = 2.5;
-  Archonia.Axioms.caloriesPerSecondFromPredation = 5;
+  Archonia.Axioms.caloriesPerManna = 5;
+  Archonia.Axioms.caloriesPerSecondFromPredation = Archonia.Axioms.caloriesPerManna * 15;
   Archonia.Axioms.costFactorForGivingBirth = 2;
   Archonia.Axioms.costFactorForBeingBorn = 1;
   Archonia.Axioms.dailyBirthCounter = 0;
@@ -27,14 +28,16 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.gameHeight = 600;
   Archonia.Axioms.gameWidth = 600;
   Archonia.Axioms.gameRadius = Archonia.Axioms.gameWidth / 2;
-  Archonia.Axioms.goddamnedBorder = 5;
+  Archonia.Axioms.goddamnedBorder = 10;
   Archonia.Axioms.goddamnedTop = Archonia.Axioms.goddamnedBorder;
   Archonia.Axioms.goddamnedRight = Archonia.Axioms.gameWidth - Archonia.Axioms.goddamnedBorder;
   Archonia.Axioms.goddamnedBottom = Archonia.Axioms.gameHeight - Archonia.Axioms.goddamnedBorder;
   Archonia.Axioms.goddamnedLeft = Archonia.Axioms.goddamnedBorder;
+  Archonia.Axioms.howManyMannaMorsels = 500;  // must be <= manna pool size
   Archonia.Axioms.howManyPointsForNonSpatialInputs = 1;
   Archonia.Axioms.howManyPointsForSpatialInputs = 12;
   Archonia.Axioms.howManyPointsForTemperatureInputs = 2;
+  Archonia.Axioms.mannaPoolSize = 500;
   Archonia.Axioms.maxAcceleration = 15;
   Archonia.Axioms.maxMagnitudeA = 15;
   Archonia.Axioms.maxMagnitudeV = 75;
