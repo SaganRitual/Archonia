@@ -169,10 +169,12 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     //Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
   } else {
     this.position.set(myParentArchon.position);
+    this.velocity.set(myParentArchon.velocity);
    // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
   }
   
-  geneReport("Birth", this);
+  //geneReport("Birth", this);
+  console.log("Born", this.archoniaUniqueObjectId);
 
   this.firstLaunch = false;
   this.launched = true;
@@ -186,7 +188,6 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
 
 Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
   if(this.archoniaUniqueObjectId === theOtherGuy.archon.archoniaUniqueObjectId) { return; }
-  if(this.position.getDistanceTo(theOtherGuy) > this.sensorRadius) { return; }
   if(!theOtherGuy.archon.head.encysted) { return; }
   
   // We're already working on one meal; stick with it until we're done
