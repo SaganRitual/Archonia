@@ -30,7 +30,6 @@ if(typeof window === "undefined") {
     initialize: function() {
       var morselScale = 0.05;
     
-      MG.howManyMorsels = 500;
       MG.howManyMorselsLaunched = 0;
       MG.morselIndex = null;
     
@@ -41,11 +40,6 @@ if(typeof window === "undefined") {
       if(MG.bellCurve.length % 2 === 1) { MG.bellCurve.push(0); }
       MG.bellCurveRadius = MG.bellCurve.length / 2;
     
-      MG.randomPoint = new Archonia.Form.RandomXY();
-      MG.randomPoint.setMin(0, 0);
-      MG.randomPoint.setMax(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
-      MG.optimalTemp = 500;
-    
       // We make the A.game scale larger than the radius so the manna will go off
       // the screen when the temps are extreme in either direction
       MG.tempScale = new Archonia.Form.Range(-1000, 1000);
@@ -54,7 +48,7 @@ if(typeof window === "undefined") {
     
       MG.spriteGroup = Archonia.Engine.game.add.group();
       MG.spriteGroup.enableBody = true;
-      MG.spriteGroup.createMultiple(MG.howManyMorsels, 'particles', 0, false);
+      MG.spriteGroup.createMultiple(Archonia.Axioms.howManyMannaMorsels, 'particles', 0, false);
       Archonia.Engine.game.physics.enable(MG.spriteGroup, Phaser.Physics.ARCADE);
 
       MG.spriteGroup.forEach(function(m) {
@@ -65,6 +59,7 @@ if(typeof window === "undefined") {
         m.anchor.setTo(0.5, 0.5);
         m.scale.setTo(morselScale, morselScale);
         m.alpha = 1;
+        m.body.syncBounds = true;
         m.body.setSize(m.width, m.height);
         m.body.bounce.setTo(0, 0);
         m.body.collideWorldBounds = true;
@@ -77,9 +72,12 @@ if(typeof window === "undefined") {
       var temp = Archonia.Cosmos.Sun.getTemperature(Archonia.Essence.gameCenter);
       
       for(var i = 0; i < 10; i++) {
-        MG.randomPoint.random();
+        var rp = new Archonia.Form.RandomXY();
+        rp.setMin(0, 0);
+        rp.setMax(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
+        rp.random();
         
-        var scaledY = MG.arrayScale.convertPoint(MG.randomPoint.point.y, MG.gameScale);
+        var scaledY = MG.arrayScale.convertPoint(rp.point.y, MG.gameScale);
         var p = MG.bellCurve[Math.floor(scaledY)] / MG.bellCurveHeight;
         
         if(Archonia.Axioms.realInRange(0, 1) < p) {
@@ -89,11 +87,14 @@ if(typeof window === "undefined") {
           if(thisParticle === null) {
             break;
           } else {
-            MG.randomPoint.point.y += MG.gameScale.convertPoint(temp, MG.tempScale);
+            rp.point.y += MG.gameScale.convertPoint(temp, MG.tempScale);
+            rp.point.floor();
           
-            if(MG.randomPoint.point.y > 0 && MG.randomPoint.point.y < Archonia.Axioms.gameHeight) {
+            if(rp.point.isInBounds()) {
               thisParticle.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
-              thisParticle.position.setTo(MG.randomPoint.point.x, MG.randomPoint.point.y);
+              thisParticle.body.position.setTo(rp.point.x, rp.point.y);
+              thisParticle.position.setTo(rp.point.x, rp.point.y);
+              thisParticle.reset(rp.point.x, rp.point.y);
               thisParticle.revive();
             }
           }
@@ -108,7 +109,7 @@ if(typeof window === "undefined") {
       for(var i = 0; i < 10; i++) {
         var thisParticle = MG.spriteGroup.getRandom();
         if(thisParticle.alive) {
-          var r = Archonia.Axioms.integerInRange(0, MG.bellCurve.length - 1);
+          var r = Archonia.Axioms.integerInRange(0, MG.bellCurve.length);
           var p = MG.bellCurve[r] / MG.bellCurveHeight;
     
           if(Archonia.Axioms.realInRange(0, 1) < p) {
@@ -124,16 +125,17 @@ if(typeof window === "undefined") {
     	var showDebugOutlines = false;
 
     	if(showDebugOutlines) {
-    		MG.spritePool.forEachAlive(function(a) {
-    	    MG.game.debug.body(a, 'yellow', false);
-    			MG.game.debug.spriteBounds(a, 'blue', false);
+    		MG.spriteGroup.forEachAlive(function(a) {
+    	    Archonia.Engine.game.debug.body(a, 'yellow', false);
+    			Archonia.Engine.game.debug.spriteBounds(a, 'blue', false);
     		}, this);
     	}
     },
     
-    tick: function(/*frameCount*/) {
+    tick: function(frameCount) {
       if(!started) { return; }
-
+      
+      MG.frameCount = frameCount;
       MG.giveth();
       MG.takethAway();
     }
