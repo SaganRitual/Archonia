@@ -174,7 +174,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     //Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
   } else {
     this.position.set(myParentArchon.position);
-    this.velocity.set(myParentArchon.velocity);
+    this.velocity.set(myParentArchon.velocity).timesScalar(-1);
     this.myParentArchonId = myParentArchon.archoniaUniqueObjectId;
    // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
   }
@@ -198,7 +198,7 @@ Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
   
   var m = this.goo.getMass(), n = theOtherGuy.archon.goo.getMass();
 
-  if(theOtherGuy.archon.head.encysted || m / n > 1.5) {
+  if(theOtherGuy.archon.head.encysted || m / n > this.genome.predationRatio) {
   
     // We're already working on one meal; stick with it until we're done
     if(theOtherGuy.archon.archoniaUniqueObjectId === this.currentPrey) {
@@ -210,7 +210,7 @@ Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
       this.newPrey = theOtherGuy.archon.archoniaUniqueObjectId;
     }
 
-  } else if(n / m > 1.5 && !theOtherGuy.archon.head.encysted) {
+  } else if(n / m > theOtherGuy.archon.genome.predationRatio && !theOtherGuy.archon.head.encysted) {
   
     // We're already working on one meal; stick with it until we're done
     if(theOtherGuy.archon.archoniaUniqueObjectId === this.currentPredator) {
