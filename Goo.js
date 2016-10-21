@@ -89,7 +89,6 @@ Archonia.Form.Goo.prototype = {
   },
   
   die: function() {
-    console.log(this.archon.archoniaUniqueObjectId, 'died');
     this.archon.die();
   },
 
@@ -136,7 +135,7 @@ Archonia.Form.Goo.prototype = {
   },
   
   getMotionCost: function() {
-    return this.getMass() * (this.genome.maxMVelocity / 8) + (this.genome.maxMAcceleration / 6);
+    return this.getMass() * (this.genome.maxMVelocity / 4) + (this.genome.maxMAcceleration / 3);
   },
   
   getSensorCost: function() {
@@ -158,11 +157,11 @@ Archonia.Form.Goo.prototype = {
 
     var r = null;
     if(this.genome.tempRange > Archonia.Axioms.standardArchonTempRange) {
-      r = 5 * Archonia.Axioms.standardArchonTempRange / this.genome.tempRange;
+      r = 10 * Archonia.Axioms.standardArchonTempRange / this.genome.tempRange;
     } else if(this.genome.tempRange < Archonia.Axioms.standardArchonTempRange) {
-      r = 5 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
+      r = 10 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
     } else {
-      r = 5;
+      r = 10;
     }
 
     return p + r;

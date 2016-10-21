@@ -8,13 +8,13 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 50;  // must be <= archon pool size
+  Archonia.Axioms.archonCount = 100;  // must be <= archon pool size
   Archonia.Axioms.archonPoolSize = 500;
   Archonia.Axioms.archoniaGooDiameter = 100;
   Archonia.Axioms.archoniaGooRadius = 50;
   Archonia.Axioms.babyFatAtBirth = 100;
   Archonia.Axioms.babyFatDensity = 1000;
-  Archonia.Axioms.caloriesPerManna = 5;
+  Archonia.Axioms.caloriesPerManna = 8;
   Archonia.Axioms.calorieLossRatioForPredation = 2;
   Archonia.Axioms.costFactorForGivingBirth = 2;
   Archonia.Axioms.costFactorForBeingBorn = 1;
