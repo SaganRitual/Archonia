@@ -213,6 +213,8 @@ var primordialGenome = { core: {
   offspringMassLarvalCalories: new Archonia.Form.ScalarGene(100),
   offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
 
+  calorieGainToAttemptFromPredation: new Archonia.Form.ScalarGene(10 * Archonia.Axioms.caloriesPerManna),
+
   // dummy entries so the getters will work
   optimalTemp: null,
   optimalTempHi: null,

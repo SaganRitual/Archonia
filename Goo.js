@@ -99,12 +99,16 @@ Archonia.Form.Goo.prototype = {
     var benefit = null;
     
     if(food instanceof Archonia.Form.Archon) {
+      var whatIWillTryToTake = this.genome.calorieGainToAttemptFromPredation / 60;
+      
       benefit = Math.min(
-        Archonia.Axioms.caloriesPerSecondFromPredation / 60,
+        whatIWillTryToTake,
         food.goo.adultCalorieBudget + food.goo.embryoCalorieBudget + food.goo.larvalCalorieBudget
       );
       
-      food.goo.debit(benefit);
+      // Prey loses a lot more from predation than the predator gains
+      var whatPreyWillLose = whatIWillTryToTake * Archonia.Axioms.calorieLossRatioForPredation;
+      food.goo.debit(whatPreyWillLose);
       
     } else {
       benefit = food.calories;
