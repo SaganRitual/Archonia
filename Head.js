@@ -118,39 +118,33 @@ Archonia.Form.Head.prototype = {
   
     if(this.encysted) {
 
-      if(!weWereEncysted) { console.log(this.archon.archoniaUniqueObjectId, "encyst", s.toFixed(4)); this.archon.encyst(); }
+      if(!weWereEncysted) { this.archon.encyst(); }
 
     } else if(weWereEncysted) {
 
-      console.log(this.archon.archoniaUniqueObjectId, "unencyst", s.toFixed(4)); this.archon.unencyst();
+      this.archon.unencyst();
 
     }
 
     return this.encysted;
   },
   
-  evade: function(dangerousArchonsById) {
-    var stillSensingThese = [], newlySensed = [], i = null;
+  flee: function(dangerousArchonId) {
+    var p = Archonia.Cosmos.Dronery.getArchonById(dangerousArchonId);
+    var b = this.position.getAngleFrom(p.position);
+    var d = Archonia.Form.XY().setPolar(25, b);
     
-    for(i = 0; i < dangerousArchonsById.length; i++) {
-      var id = dangerousArchonsById[i];
-      if(this.knownArchons.indexOf(id) < 0) {
-        newlySensed.push(id);
-      } else {
-        stillSensingThese.push(id);
-      }
+    var drawDebugLines = false;
+    if(drawDebugLines) { Archonia.Essence.Dbitmap.rLine(this.position, d, 'yellow'); }
+    
+    this.headedFromPredator = true;
+    this.legs.setTargetPosition(d.plus(this.position), 0, 0);
+
+    if(Archonia.Engine.game.physics.arcade.overlap(
+      this.archon.sprite, p.sprite, null, null, this)) {
+        this.legs.stop(); // He caught me; I'm dead
+        this.archon.deadPrey = true;
     }
-    
-    this.knownArchons = stillSensingThese.concat(newlySensed);
-    
-    for(i = 0; i < this.knownArchons.length; i++) {
-      var d = Archonia.Cosmos.Dronery.getArchonPosition(this.knownArchons[i]);
-      var a = this.position.getAngleTo(d);
-      var p = Archonia.Form.XY.fromPolar(25, a);
-      Archonia.Essence.Dbitmap.rLine(this.position, p, 'red');
-    }
-    
-    return newlySensed.length === 0;
   },
   
   getCardinalTemps: function() {
@@ -211,8 +205,10 @@ Archonia.Form.Head.prototype = {
     this.firstTickAfterLaunch = true;
     this.knownArchons = [];
     this.headedForPrey = false;
+    this.headedFromPredator = false;
     this.diningOnPrey = false;
     this.currentPrey = null;
+    this.currentPredator = null;
     
     this.whenToIssueNextMoveOrder = 0;
   
@@ -339,11 +335,13 @@ Archonia.Form.Head.prototype = {
 
   },
   
-  tick: function(frameCount, foodTarget, dangerousArchons, tastyArchonId) {
+  tick: function(frameCount, foodTarget, dangerousArchonId, tastyArchonId) {
     this.frameCount = frameCount;
     
-    if(tastyArchonId === null) {
+    if(dangerousArchonId === null && tastyArchonId === null) {
       this.standardMove(foodTarget);
+    } else if(dangerousArchonId !== null) {
+      this.flee(dangerousArchonId);
     } else {
       this.prey(tastyArchonId);
     }
