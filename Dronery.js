@@ -37,7 +37,7 @@ if(typeof window === "undefined") {
   	var setupPool = function(whichPool) {
   		spritePools[whichPool] = Archonia.Engine.game.add.group();
   	  spritePools[whichPool].enableBody = true;
-  	  spritePools[whichPool].createMultiple(500, Archonia.Engine.game.cache.getBitmapData('archoniaGoo'), 0, false);
+  	  spritePools[whichPool].createMultiple(Archonia.Axioms.archonPoolSize, Archonia.Engine.game.cache.getBitmapData('archoniaGoo'), 0, false);
   	  Archonia.Engine.game.physics.enable(spritePools[whichPool], Phaser.Physics.ARCADE);
   	};
 
@@ -71,7 +71,7 @@ Archonia.Cosmos.Dronery = {
     phaseron.archon.launch(parentArchon);
   },
   
-  eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill(); },
+  eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill();},
   
   getArchonById: function(archoniaUniqueObjectId) {
     var a = null;
@@ -109,12 +109,12 @@ Archonia.Cosmos.Dronery = {
   	}
   },
   
-  senseArchon: function(sensor, theOtherGuy) {
-    if(sensor.archon.launched) { sensor.archon.senseArchon(theOtherGuy); } },
-  
+  senseArchon: function(sensor, theOtherGuy) { sensor.archon.senseArchon(theOtherGuy); },
   senseManna: function(sensor, manna) { sensor.archon.senseManna(manna); },
 
-  tick: function() {
+  tick: function(frameCount) {
+    Archonia.Cosmos.Dronery.frameCount = frameCount;
+    
     Archonia.Essence.Dbitmap.bm.clear();
 
     Archonia.Engine.game.physics.arcade.overlap(

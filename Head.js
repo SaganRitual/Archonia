@@ -32,14 +32,11 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 Archonia.Form.Head = function(archon) {
   this.archon = archon;
-  this.whenToIssueNextMoveOrder = 0;
   
   this.foodSearchAnchor = Archonia.Form.XY();
   this.currentFoodTarget =  Archonia.Form.XY();
   
   this.trail = new Archonia.Form.Cbuffer(8);
-
-  this.encysted = false;
 };
 
 Archonia.Form.Head.prototype = {
@@ -216,6 +213,15 @@ Archonia.Form.Head.prototype = {
     this.headedForPrey = false;
     this.diningOnPrey = false;
     this.currentPrey = null;
+    
+    this.whenToIssueNextMoveOrder = 0;
+  
+    this.foodSearchAnchor.reset();
+    this.currentFoodTarget.reset();
+  
+    this.trail.reset();
+
+    this.encysted = false;
 
     this.howLongBetweenMoves = 2 * this.genome.maxMVelocity;
     
@@ -230,22 +236,27 @@ Archonia.Form.Head.prototype = {
   
   prey: function(tastyArchonId) {
     var a = Archonia.Cosmos.Dronery.getArchonById(tastyArchonId);
-    Archonia.Essence.Dbitmap.aLine(this.position, a.position, 'red');
     
-    if(tastyArchonId !== this.currentPrey) {
+    var drawDebugLines = false;
+    if(a !== null && drawDebugLines) { Archonia.Essence.Dbitmap.aLine(this.position, a.position, 'red'); }
+    
+    if(a === null || tastyArchonId !== this.currentPrey) {
       this.diningOnPrey = false; this.headedForPrey = false; this.currentPrey = tastyArchonId;
     }
     
-    if(!this.diningOnPrey) {
-      if(Archonia.Engine.game.physics.arcade.overlap(
-        this.archon.sprite, a.sprite, null, null, this)) {
-        this.legs.stop();
+    if(a !== null) {  // They often die while being eaten
+      if(this.diningOnPrey) {
         this.archon.goo.eat(a);
-        this.diningOnPrey = true;
       } else {
-        if(!this.headedForPrey) {
-          this.headedForPrey = true;
-          this.legs.setTargetPosition(a.position, 0, 0);
+        if(Archonia.Engine.game.physics.arcade.overlap(
+          this.archon.sprite, a.sprite, null, null, this)) {
+          this.legs.stop();
+          this.diningOnPrey = true;
+        } else {
+          if(!this.headedForPrey) {
+            this.headedForPrey = true;
+            this.legs.setTargetPosition(a.position, 0, 0);
+          }
         }
       }
     }
