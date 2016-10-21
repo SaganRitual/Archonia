@@ -43,7 +43,7 @@ Archonia.Form.Gene.prototype = {
     var range = this.changeRange;
   
     // Hopefull make creation a bit more interesting
-    if(Archonia.Cosmos.momentOfCreation) { probability *= 5; range *= 5; }
+    if(Archonia.Cosmos.momentOfCreation) { probability *= 10; range *= 10; }
 
     // Just to make it interesting, every once in a while, a big change
     var i = null;
@@ -214,6 +214,7 @@ var primordialGenome = { core: {
   offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
 
   calorieGainToAttemptFromPredation: new Archonia.Form.ScalarGene(10 * Archonia.Axioms.caloriesPerManna),
+  predationRatio:                    new Archonia.Form.ScalarGene(1.5),
 
   // dummy entries so the getters will work
   optimalTemp: null,

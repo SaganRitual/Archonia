@@ -40,7 +40,10 @@ if(typeof window === "undefined") {
       Archonia.Cosmos.MannaGenerator.initialize();
       Archonia.Cosmos.MannaGenerator.start();
       
+      // Produce a lot of genetic variation in the first generation
+      Archonia.Cosmos.momentOfCreation = true;
       Archonia.Cosmos.Dronery.start();
+      Archonia.Cosmos.momentOfCreation = false;
     },
 
     handleClick: function(/*pointer*/) {
