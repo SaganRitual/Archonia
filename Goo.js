@@ -53,8 +53,6 @@ Archonia.Form.Goo.prototype = {
   
   breed: function() {
     
-    console.log('breed', this.getMass().toFixed(4));
-
     var remainingReproductionCost = (
       this.genome.offspringMassAdultCalories + this.genome.offspringMassLarvalCalories
     ) * Archonia.Axioms.reproductionCostFactor;
@@ -107,6 +105,7 @@ Archonia.Form.Goo.prototype = {
       );
       
       food.goo.debit(benefit);
+      
     } else {
       benefit = food.calories;
     }
