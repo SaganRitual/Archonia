@@ -165,20 +165,6 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
 	this.sensor.body.setSize(this.sensorRadius, this.sensorRadius);
 	this.sensor.body.setCircle(this.sensorRadius);
 
-  if(myParentArchon === undefined) {
-    this.position.set(
-      Archonia.Axioms.integerInRange(20, Archonia.Engine.game.width - 20),
-      Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20)
-    );
-    this.myParentArchonId = 0;
-    //Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
-  } else {
-    this.position.set(myParentArchon.position);
-    this.velocity.set(myParentArchon.velocity).timesScalar(-1);
-    this.myParentArchonId = myParentArchon.archoniaUniqueObjectId;
-   // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
-  }
-
   this.firstLaunch = false;
   this.launched = true;
   
@@ -186,7 +172,29 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.goo.launch(this.genome);
   this.head.launch(this.genome, this.legs, this.position);
 
-  this.sprite.revive(); this.button.revive(); this.sensor.revive();
+  // Have to use reset instead of revive(); otherwise, everyone gets a
+  // false positive on detecting another archon, and they all run away,
+  // usually toward zero (that bit I'm not clear on, but it bothers me
+  // much more for them to get a giant false positive at the beginning
+  // of life)
+  var x = null, y = null;
+  
+  if(myParentArchon === undefined) {
+    x = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.width - 20);
+    y = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20);
+
+    this.myParentArchonId = 0;
+    //Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
+  } else {
+    x = myParentArchon.position.x; y = myParentArchon.position.y;
+
+    this.position.set(myParentArchon.position);
+    this.velocity.set(myParentArchon.velocity).timesScalar(-1);
+    this.myParentArchonId = myParentArchon.archoniaUniqueObjectId;
+   // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
+  }
+
+  this.sprite.reset(x, y, 1); this.button.reset(0, 0, 1); this.sensor.reset(x, y, 1);
 };
 
 Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
@@ -195,6 +203,11 @@ Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
   if(this.archoniaUniqueObjectId === theOtherGuy.archon.archoniaUniqueObjectId) { return; }
   if(this.archoniaUniqueObjectId === theOtherGuy.archon.myParentArchonId) { return; }
   if(this.myParentArchonId === theOtherGuy.archon.archoniaUniqueObjectId) { return; }
+
+  var drawDebugLines = false;
+  if(drawDebugLines === true) {
+    Archonia.Essence.Dbitmap.aLine(this.position, theOtherGuy, 'blue');
+  }
   
   var m = this.goo.getMass(), n = theOtherGuy.archon.goo.getMass();
 
