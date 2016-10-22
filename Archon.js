@@ -211,7 +211,7 @@ Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
 
   var drawDebugLines = false;
   if(drawDebugLines === true) {
-    Archonia.Essence.Dbitmap.aLine(this.position, theOtherGuy, 'blue');
+    Archonia.Essence.Dbitmap.aLine(this.position, theOtherGuy.archon, 'blue');
   }
   
   var m = this.goo.getMass(), n = theOtherGuy.archon.goo.getMass();

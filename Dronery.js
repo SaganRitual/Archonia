@@ -130,7 +130,7 @@ Archonia.Cosmos.Dronery = {
     );
 
     Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.sensors, spritePools.sensors,
+      spritePools.sensors, spritePools.phaserons,
       Archonia.Cosmos.Dronery.senseArchon
     );
     
