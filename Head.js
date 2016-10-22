@@ -14,20 +14,39 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     Archonia.Form.XY(-squareSize, 0), Archonia.Form.XY(-squareSize, -squareSize)
   ];
 
-  var populateMovementChoices = function(theArray, ix, direction) {
-    if(
-      (direction < 0 && relativePositions[ix].y < 0) ||
-      (direction > 0 && relativePositions[ix].y > 0)) {
-        for(var i = 0; i < Math.abs(direction); i++) { theArray.push(ix); }
-    } else if(Math.abs(direction) !== 3) {
-      // If we're not at maximum risk, allow for some
-      // possibility of going the wrong vertical direction,
-      // and of course, allow horizontal movement to
-      // have more weight than the wrong vertical direction
-      theArray.push(ix);
-
-      if(relativePositions[ix].y === 0) { theArray.push(ix); }
+  var populateMovementChoices = function(direction) {
+    var chooseFrom = null;
+    
+    switch(direction) {
+      case 3: chooseFrom = this.tempToleranceCurve3up; ix = 4; break;
+      case 2: chooseFrom = this.tempToleranceCurve2up; ix = 4; break;
+      case 1: chooseFrom = this.tempToleranceCurve1up; ix = 4; break;
+      case 0: break;
+      case -1: chooseFrom = this.tempToleranceCurve1down; ix = 0; break;
+      case -2: chooseFrom = this.tempToleranceCurve3down; ix = 0; break;
+      case -3: chooseFrom = this.tempToleranceCurve3down; ix = 0; break;
     }
+    
+    var i = null, p = null, ix = 0, theArray = [];
+
+    for(i = 0; i < 8; i++) {
+      if(chooseFrom === null) {
+        theArray.push(ix);
+      } else {
+        p = Archonia.Axioms.integerInRange(0, 76);
+      
+        if(p < chooseFrom[i]) { theArray.push(ix); }
+      }
+      
+      ix = (ix + 1) % 8;
+    }
+    
+    // Our probabilistic attempts produced no results; send a
+    // full array back so the food search can just choose from
+    // any of the possible directions
+    if(theArray.length === 0) { for(i = 0; i < 8; i++) { theArray.push(i); } }
+    
+    return theArray;
   };
 
 Archonia.Form.Head = function(archon) {
@@ -171,11 +190,11 @@ Archonia.Form.Head.prototype = {
     // cold. We get trapped at the top waiting for it to
     // warm up, even in the heat of the day. Getting the low
     // temp from my top is just for aesthetic symmetry
-    tooHot = t.bottom > this.genome.optimalTempHi;
-    tooCold = t.top < this.genome.optimalTempLo;
+    tooHot = t.bottom > this.genome.optimalTemp;
+    tooCold = t.top < this.genome.optimalTemp;
     
     if(tooHot) { delta = t.bottom - this.genome.optimalTemp; }
-    else if(tooCold) { delta = t.top - this.genome.optimalTemp; }
+    else { delta = t.top - this.genome.optimalTemp; }
     
     return this.getSunburnRisk(delta);
   },
@@ -228,6 +247,76 @@ Archonia.Form.Head.prototype = {
       Math.floor(this.genome.tempSignalBufferSize), this.genome.tempSignalDecayRate,
       this.tempSignalScaleLo, this.tempSignalScaleHi
     );
+    
+    // What we're doing here: creating a bell curve to weight the choice
+    // the archon will make about whether to go outside its temperature
+    // comfort zone. We generate a curve with the specified width, then
+    // find the middle 7 entries in the array. We then use the values of
+    // those entries to generate another array with subscripts into the
+    // relativePositions array.
+    //
+    // Example:
+    // 
+    // Bell curve looks like 1, 2, 3, 4, 3, 2, 1
+    // (and we add one at the beginning that's equal to the one already
+    // at the beginning)
+    //
+    // We generate an array like this for the top direction, which means
+    // we want to avoid the bottom, at index 4 in the relative positions
+    // array:
+    // [ 4, 5, 6, 6, 7, 7, 7, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3 ]
+    // so we'll be most likely to choose direction 0 when we take a
+    // random index into the above array
+    // 
+    // Similarly, like this for the bottom direction, which means we want
+    // to avoid the top, which starts at index 0 in the relative positions
+    // array:
+    // [ 0, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7 ]
+    //
+    // Note that in both cases, we're using the value at the beginning of
+    // the bell curve as the value for the direction that points directly
+    // opposite the direction we want to go
+    var setupTempToleranceCurve = function(curveName, width) {
+      if(width < 1 || width > 10) { throw new Archonia.Essence.BirthDefect("Temp tolerance curve out of bounds"); }
+      var stopBelow = 0.01, height = 0.75, xOffset = 0;
+      
+      this[curveName + "up"] = new Array(8);
+      this[curveName + "down"] = new Array(8);
+      
+      for(var i = width; i < 10; i += 0.01) {
+        
+        var curve = Archonia.Axioms.generateBellCurve(stopBelow, height, xOffset, width);
+
+        var middle = Math.floor(curve.length / 2);
+  
+        // We need a curve that gives us > 0 at the ends
+        if(curve[middle - 3].toFixed(2) > 0) {
+          var ixUp = 0, ixDown = 4;
+
+          for(var j = middle - 3; j <= middle + 3; j++) {
+            // ixUp === 0 also means ixDown === 4
+            if(ixUp === 0) {
+              this[curveName + "up"][ixUp] = Math.floor(curve[j] * 100);
+              this[curveName + "down"][ixDown] = Math.floor(curve[j] * 100);
+            }
+            
+            ixUp = (ixUp + 1) % 8; ixDown = (ixDown + 1) % 8;
+  
+            this[curveName + "up"][ixUp] = Math.floor(curve[j] * 100);
+            this[curveName + "down"][ixDown] = Math.floor(curve[j] * 100);
+          }
+          
+          break;
+        }
+      }
+    };
+    
+    // Genes decide how important it is to go outside your temperature
+    // comfort zone, the idea being that it might be useful to do so
+    // in order to look for food
+    setupTempToleranceCurve.call(this, 'tempToleranceCurve1', this.genome.tempTolerance1CurveWidth);
+    setupTempToleranceCurve.call(this, 'tempToleranceCurve2', this.genome.tempTolerance2CurveWidth);
+    setupTempToleranceCurve.call(this, 'tempToleranceCurve3', this.genome.tempTolerance3CurveWidth);
   },
   
   prey: function(tastyArchonId) {
@@ -259,27 +348,32 @@ Archonia.Form.Head.prototype = {
   },
   
   seekFood: function(restart) {
-    var bestChoices = [], fallbacks = [], h = null, i = null, p = null;
+    var bestChoices = [], acceptableChoices = [], fallbacks = [], h = null, i = null, p = null;
     
     if(restart) { this.trail.reset(); this.foodSearchAnchor.set(this.position); }
     
     h = this.getSunburnPlan();
+    bestChoices = populateMovementChoices.call(this, h);
     
     for(i = 0; i < 8; i++) {
-      p = relativePositions[i].plus(this.foodSearchAnchor);
+      if(i < bestChoices.length) {
+        p = relativePositions[bestChoices[i]].plus(this.foodSearchAnchor);
       
-      if(p.isInBounds()) {
-        // If we can't find an old spot that we've forgotten,
-        // we'll just take one that's in bounds
-        fallbacks.push(i);
-        
-        if(!this.doWeRemember(p)) { populateMovementChoices(bestChoices, i, h); }
+        if(p.isInBounds()) {
+          if(!this.doWeRemember(p)) { acceptableChoices.push(bestChoices[i]); }
+        }
       }
+      
+      // If we can't find an old spot that we've forgotten, or the
+      // sunburn check has returned nothing useful, we'll just take any
+      // position that's in bounds
+      p = relativePositions[i].plus(this.foodSearchAnchor);
+      if(p.isInBounds()) { fallbacks.push(i); }
     }
     
-    if(bestChoices.length > 0) {
-      i = Archonia.Axioms.integerInRange(0, bestChoices.length);
-      p = relativePositions[bestChoices[i]].plus(this.foodSearchAnchor);
+    if(acceptableChoices.length > 0) {
+      i = Archonia.Axioms.integerInRange(0, acceptableChoices.length);
+      p = relativePositions[acceptableChoices[i]].plus(this.foodSearchAnchor);
     } else {
       i = Archonia.Axioms.integerInRange(0, fallbacks.length);
       p = relativePositions[fallbacks[i]].plus(this.foodSearchAnchor);

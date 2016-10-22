@@ -215,7 +215,15 @@ var primordialGenome = { core: {
   maxMVelocity:              new Archonia.Form.ScalarGene(30),
   sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),
   targetChangeDelay:         new Archonia.Form.ScalarGene(5),
-  tempToleranceFactor:       new Archonia.Form.ScalarGene(1),
+  
+  // These control how willing the archon is to go outside
+  // his temp comfort zone relative to food and food searching;
+  // #1 is for temperatures within his optimal tolerance zone (opt + range radius)
+  // #2 is for temps between his optimal and his extreme (opt + range diameter)
+  // #3 is for temps beyond his extreme (beyond the diameter)
+  tempTolerance1CurveWidth:    new Archonia.Form.ScalarGene(1.5),
+  tempTolerance2CurveWidth:    new Archonia.Form.ScalarGene(1.5),
+  tempTolerance3CurveWidth:    new Archonia.Form.ScalarGene(1.5),
   
   birthMassAdultCalories:      new Archonia.Form.ScalarGene(100),
   birthMassLarvalCalories:     new Archonia.Form.ScalarGene(100),
