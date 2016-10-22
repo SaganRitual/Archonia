@@ -1,6 +1,8 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
+/* global tinycolor */
+
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
@@ -95,18 +97,25 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
   
   var color = Archonia.Form.tinycolor(parentGene.color);
-
   var hsl = color.toHsl();
-  var h = this.mutateScalar(hsl.h, 90);   // Make the domain sizes artificially small to
-  var s = this.mutateScalar(hsl.s, 0.25); // limit the amount of color change between
-  var L = this.mutateScalar(hsl.l, 0.25); // generations. I like to see some signs of inheritance
   
-  if(h < 0) { h += 360; } h %= 360; // Treat the hue like the wheel it is
-  if(s < 0) { s += 1; s *= 100; s %= 100; s /= 100; }
-  if(L < 0) { L += 1; L *= 100; L %= 100; L /= 100; }
+  // Because tinycolor stores them 0 - 1 but hsl string wants 0 - 100%
+  hsl.s *= 100; hsl.l *= 100;
   
-  hsl = 'hsl(' + h + ', ' + (s.toFixed(2) * 100) + '%, ' + (L.toFixed(2) * 100) + '%)';
+  var h = this.mutateScalar(hsl.h, 90); // Make the domain sizes artificially small to
+  var s = this.mutateScalar(hsl.s, 25); // limit the amount of color change between
+  var L = this.mutateScalar(hsl.l, 25); // generations. I like to see some signs of inheritance
+  
+  // In case tinycolor doesn't like long strings of decimals
+  h = h.toFixed(); s = s.toFixed(); L = L.toFixed();
+  
+  hsl = 'hsl(' + h + ', ' + s + '%, ' + L + '%)';
   this.color = Archonia.Form.tinycolor(hsl);
+
+  var r = this.getTempRange();
+  if(r < 0 || r > Archonia.Axioms.temperatureHi || s < 0 || s > 100 || L < 0 || L > 100) {
+    throw new Archonia.Essence.BirthDefect("Bad color gene: " + hsl);
+  }
 };
 
 Archonia.Form.ColorGene.prototype.getColorAsDecimal = function() { return parseInt(this.color.toHex(), 16); };
@@ -199,7 +208,7 @@ Archonia.Form.Genome.prototype = {
 };
 
 var primordialGenome = { core: {
-  color:                     new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 100%, 50%)')),
+  color:                     new Archonia.Form.ColorGene(tinycolor('hsl(180, 100%, 50%)')),
 
   hungerToleranceFactor:     new Archonia.Form.ScalarGene(0.75),
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),

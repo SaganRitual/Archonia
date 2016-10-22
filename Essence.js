@@ -1,6 +1,8 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
+/* global proto */
+
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
@@ -23,6 +25,15 @@ if(typeof window === "undefined") {
   Archonia.Essence.yAxisRange = new Archonia.Form.Range(Archonia.Axioms.gameHeight, 0);
   Archonia.Essence.zeroToOneRange = new Archonia.Form.Range(0, 1);
   Archonia.Essence.centeredZeroRange = new Archonia.Form.Range(-1, 1);
+  
+  Archonia.Essence.BirthDefect = proto(Error, function(superclass) {
+    this.name = 'BirthDefect';
+    this.init = function(msg, properties) {
+      superclass.call(this, msg);
+      for(var n in properties) { this[n] = properties[n]; }
+    };
+  });
+
 })(Archonia);
 
 if(typeof window === "undefined") {

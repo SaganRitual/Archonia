@@ -70,7 +70,7 @@ Archonia.Cosmos.Dronery = {
   
     // Birth defects do happen
     try { phaseron.archon.launch(parentArchon); }
-    catch(e) { console.log("stillborn"); phaseron.archon.die(); }
+    catch(e) { console.log("Birth defect: " + e.message); phaseron.archon.die(); }
   },
   
   eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill();},
