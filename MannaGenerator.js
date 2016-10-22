@@ -60,11 +60,12 @@ Archonia.Cosmos.MannaGenerator.prototype = {
       m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
       m.anchor.setTo(0.5, 0.5);
       m.alpha = 1;
+      m.scale.setTo(this.morselScale, this.morselScale);
       m.body.syncBounds = true;
       m.body.setSize(m.width, m.height);
       m.body.bounce.setTo(0, 0);
       m.body.collideWorldBounds = true;
-      m.tint = 0x5C008E;
+      m.tint = 0;
     }, this);
   },
 
@@ -94,10 +95,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
           if(rp.point.isInBounds()) {
             thisParticle.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
             thisParticle.calories = Archonia.Axioms.caloriesPerManna;
-            thisParticle.scale.setTo(this.morselScale, this.morselScale);
-            thisParticle.body.position.setTo(rp.point.x, rp.point.y);
-            thisParticle.position.setTo(rp.point.x, rp.point.y);
-            thisParticle.reset(rp.point.x, rp.point.y);
+            thisParticle.reset(rp.point.x, rp.point.y, 1);
           }
         }
         
