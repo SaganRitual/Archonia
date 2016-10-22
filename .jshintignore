@@ -1,3 +1,5 @@
 widgets/tinycolor.js
 test/*
 test/support/*
+_deps.js
+deps.js
