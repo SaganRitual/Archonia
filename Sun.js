@@ -22,15 +22,27 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
+  var tempSwingRange = new Archonia.Form.Range(0, 500);
+  var skyHueSwingRange = new Archonia.Form.Range(0, 180);
+  
   Archonia.Cosmos.Year = {
     seasonalSkyHue: 0,
     
     setSeason: function() {
-      var s = "hsl(" + Math.floor(Archonia.Cosmos.Year.seasonalSkyHue) +  ", 100%, 50%)";
+      var k = Math.floor(Archonia.Cosmos.Year.seasonalSkyHue);
+      var s = "hsl(" + k +  ", 100%, 50%)";
       var t = tinycolor(s);
       var h = t.toHex(false);
       
       Archonia.Cosmos.Year.season.tint = parseInt(h, 16);
+      
+      var n = null, p = null, q = null, r = null;
+      
+      n = Math.abs(k - 180);
+      r = tempSwingRange.convertPoint(n, skyHueSwingRange);
+      p = Archonia.Axioms.temperatureLo + r;
+      q = Archonia.Axioms.temperatureHi - r;
+      Archonia.Essence.worldTemperatureRange.set(p, q);
     },
     
     start: function() {
@@ -39,7 +51,8 @@ if(typeof window === "undefined") {
       Archonia.Cosmos.Year.seasonalSkyHue = Archonia.Axioms.integerInRange(0, 360);
       
       Archonia.Cosmos.Year.season = Archonia.Engine.game.add.sprite(
-        Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y, Archonia.Engine.game.cache.getBitmapData('archoniaSeasons')
+        Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y,
+        Archonia.Engine.game.cache.getBitmapData('archoniaSeasons')
       );
       
       Archonia.Cosmos.Year.season.scale.setTo(1, 1);  // could make this bitmap smaller; come back to it
