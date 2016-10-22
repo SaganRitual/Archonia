@@ -32,6 +32,11 @@ var generateArchonoidPrototype = function() {
 
 var geneReport = function(e, archon) {
   console.log(e, archon.archoniaUniqueObjectId);
+  console.log(
+    "Mass:", archon.goo.getMass().toFixed(2),
+    "Temp:", Archonia.Cosmos.Sun.getTemperature(archon.position).toFixed()
+  );
+  
   for(var i in archon.genome.core) {
     if(i === "color") {
       var c = archon.genome.color;
@@ -62,7 +67,7 @@ Archonia.Form.Archon = function(phaseron) {
 	s.anchor.setTo(0.5, 0.5); s.alpha = 0.1; s.tint = 0x0000FF;  // s scale set in launch
 
 	p.body.collideWorldBounds = true; p.inputEnabled = true; p.input.enableDrag();
-  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); });
+  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); } );
   
   this.activatePhysicsBodies();
   
