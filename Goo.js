@@ -141,11 +141,9 @@ Archonia.Form.Goo.prototype = {
   getSensorCost: function() {
     // No cost for a standard sensor
     if(this.genome.sensorScale > Archonia.Axioms.standardSensorScale) {
-      return 20 * Archonia.Axioms.standardSensorScale / this.genome.sensorScale;
-    } else if(this.genome.sensorScale < Archonia.Axioms.standardSensorScale) {
-      return 10 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale;
+      return 50 * Archonia.Axioms.standardSensorScale / this.genome.sensorScale;
     } else {
-      return 10;
+      return 10 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale;
     }
   },
 
