@@ -23,10 +23,10 @@ if(typeof window === "undefined") {
 (function(Archonia) {
   
   Archonia.Cosmos.Year = {
-    month: 0,
+    seasonalSkyHue: 0,
     
     setSeason: function() {
-      var s = "hsl(" + Math.floor(Archonia.Cosmos.Year.month) +  ", 100%, 50%)";
+      var s = "hsl(" + Math.floor(Archonia.Cosmos.Year.seasonalSkyHue) +  ", 100%, 50%)";
       var t = tinycolor(s);
       var h = t.toHex(false);
       
@@ -34,6 +34,10 @@ if(typeof window === "undefined") {
     },
     
     start: function() {
+      // Start the year in some random month, just for fun --
+      // because the rest of this project is so serious
+      Archonia.Cosmos.Year.seasonalSkyHue = Archonia.Axioms.integerInRange(0, 360);
+      
       Archonia.Cosmos.Year.season = Archonia.Engine.game.add.sprite(
         Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y, Archonia.Engine.game.cache.getBitmapData('archoniaSeasons')
       );
@@ -129,10 +133,11 @@ if(typeof window === "undefined") {
 
       Archonia.Cosmos.Sun.darknessTween.onLoop.add(function() {
         Archonia.Cosmos.Sun.halfDayNumber++;
+
         if(Archonia.Cosmos.Sun.halfDayNumber % 2 === 0) {
-          Archonia.Cosmos.Year.month += 360 / Archonia.Axioms.daysPerYear;
-          if(Archonia.Cosmos.Year.month > 360) { Archonia.Cosmos.Year.month = 0; }
-          console.log('month', Archonia.Cosmos.Year.month, 'day', Archonia.Cosmos.Sun.halfDayNumber / 2);
+          Archonia.Cosmos.Year.seasonalSkyHue += 360 / Archonia.Axioms.daysPerYear;
+          
+          if(Archonia.Cosmos.Year.seasonalSkyHue > 360) { Archonia.Cosmos.Year.seasonalSkyHue = 0; }
         }
       });
     }
