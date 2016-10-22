@@ -7,7 +7,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Cosmos.MannaGenerator = require('./MannaGenerator.js');
+  Archonia.Cosmos.skinnyManna = require('./MannaGenerator.js');
   Archonia.Cosmos.Sun = require('./Sun.js');
   Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
   Archonia.Cosmos.Dronery = require('./Dronery.js');
@@ -39,8 +39,10 @@ if(typeof window === "undefined") {
 
       Archonia.Cosmos.Sun.ignite();
       Archonia.Cosmos.Year.start();
-      Archonia.Cosmos.MannaGenerator.initialize();
-      Archonia.Cosmos.MannaGenerator.start();
+      
+      Archonia.Cosmos.skinnyManna = new Archonia.Cosmos.MannaGenerator();
+      Archonia.Cosmos.skinnyManna.initialize();
+      Archonia.Cosmos.skinnyManna.start();
       
       // Produce a lot of genetic variation in the first generation
       Archonia.Cosmos.momentOfCreation = true;
@@ -62,10 +64,11 @@ if(typeof window === "undefined") {
 
     preload: function() {
       Archonia.Engine.game.load.image('particles', 'assets/sprites/pangball.png');
+      Archonia.Engine.game.load.image('fatManna', 'assets/particlestorm/particles/glass.png');
     },
     
     render: function() {
-      Archonia.Cosmos.MannaGenerator.render();
+      Archonia.Cosmos.skinnyManna.render();
       Archonia.Cosmos.Dronery.render();
     },
     
@@ -81,7 +84,7 @@ if(typeof window === "undefined") {
     update: function() {
       frameCount++;
       
-      Archonia.Cosmos.MannaGenerator.tick(frameCount);
+      Archonia.Cosmos.skinnyManna.tick(frameCount);
       Archonia.Cosmos.Dronery.tick(frameCount);
       Archonia.Cosmos.Year.tick();
     }

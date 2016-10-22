@@ -120,12 +120,12 @@ Archonia.Cosmos.Dronery = {
     Archonia.Essence.Dbitmap.bm.clear();
 
     Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.sensors, Archonia.Cosmos.MannaGenerator.spriteGroup,
+      spritePools.sensors, Archonia.Cosmos.skinnyManna.mannaGroup,
       Archonia.Cosmos.Dronery.senseManna
     );
 
     Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.phaserons, Archonia.Cosmos.MannaGenerator.spriteGroup,
+      spritePools.phaserons, Archonia.Cosmos.skinnyManna.mannaGroup,
       Archonia.Cosmos.Dronery.eat
     );
 

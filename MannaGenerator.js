@@ -24,16 +24,51 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
-  var arrayScale = null;
-  var bellCurve = null;
-  var bellCurveHeight = 5;
-  var bellCurveRadius = null;
-  var gameScale = null;
-  var morselScale = 0.05;
-  var started = false;
-  var tempScale = null;
+Archonia.Cosmos.MannaGenerator = function() {
+  this.arrayScale = null;
+  this.bellCurve = null;
+  this.bellCurveHeight = 5;
+  this.bellCurveRadius = null;
+  this.gameScale = null;
+  this.morselScale = 0.05;
+  this.started = false;
+  this.tempScale = null;
+  this.frameCount = null;
+};
 
-  var giveth = function() {
+Archonia.Cosmos.MannaGenerator.prototype = {
+
+  initialize: function() {
+  
+    var stopBelow = 0.01, xOffset = 0, width = 2;
+    this.bellCurve = Archonia.Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
+    if(this.bellCurve.length % 2 === 1) { this.bellCurve.push(0); }
+    this.bellCurveRadius = this.bellCurve.length / 2;
+  
+    // We make the A.game scale larger than the radius so the manna will go off
+    // the screen when the temps are extreme in either direction
+    this.tempScale = new Archonia.Form.Range(-1000, 1000);
+    this.gameScale = new Archonia.Form.Range(-Archonia.Axioms.gameRadius, Archonia.Axioms.gameRadius);
+    this.arrayScale = new Archonia.Form.Range(-this.bellCurveRadius, this.bellCurveRadius);
+  
+    this.mannaGroup = Archonia.Engine.game.add.group();
+    this.mannaGroup.enableBody = true;
+    this.mannaGroup.createMultiple(Archonia.Axioms.howManyMannaMorsels, 'particles', 0, false);
+    Archonia.Engine.game.physics.enable(this.mannaGroup, Phaser.Physics.ARCADE);
+
+    this.mannaGroup.forEach(function(m) {
+      m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+      m.anchor.setTo(0.5, 0.5);
+      m.alpha = 1;
+      m.body.syncBounds = true;
+      m.body.setSize(m.width, m.height);
+      m.body.bounce.setTo(0, 0);
+      m.body.collideWorldBounds = true;
+      m.tint = 0x5C008E;
+    }, this);
+  },
+
+  giveth: function() {
     var thisParticle = null;
     var temp = Archonia.Cosmos.Sun.getTemperature(Archonia.Essence.gameCenter);
     
@@ -43,107 +78,72 @@ if(typeof window === "undefined") {
       rp.setMax(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
       rp.random();
       
-      var scaledY = arrayScale.convertPoint(rp.point.y, gameScale);
-      var p = bellCurve[Math.floor(scaledY)] / bellCurveHeight;
+      var scaledY = this.arrayScale.convertPoint(rp.point.y, this.gameScale);
+      var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
       
-      if(Archonia.Axioms.realInRange(0, 1) < p) {
+      if(Archonia.Axioms.realInRange(0, this.bellCurveHeight) < p) {
 
-        thisParticle = Archonia.Cosmos.MannaGenerator.spriteGroup.getFirstDead();
+        thisParticle = this.mannaGroup.getFirstDead();
         
         if(thisParticle === null) {
           break;
         } else {
-          rp.point.y += gameScale.convertPoint(temp, tempScale);
+          rp.point.y += this.gameScale.convertPoint(temp, this.tempScale);
           rp.point.floor();
         
           if(rp.point.isInBounds()) {
             thisParticle.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+            thisParticle.calories = Archonia.Axioms.caloriesPerManna;
+            thisParticle.scale.setTo(this.morselScale, this.morselScale);
             thisParticle.body.position.setTo(rp.point.x, rp.point.y);
             thisParticle.position.setTo(rp.point.x, rp.point.y);
             thisParticle.reset(rp.point.x, rp.point.y);
-            thisParticle.revive();
           }
         }
         
       }
     }
-  };
+  },
   
-  var takethAway = function() {
+  render: function() {
+    if(!this.started) { return; }
+
+  	var showDebugOutlines = false;
+
+  	if(showDebugOutlines) {
+  		this.mannaGroup.forEachAlive(function(a) {
+  	    Archonia.Engine.game.debug.body(a, 'yellow', false);
+  			Archonia.Engine.game.debug.spriteBounds(a, 'blue', false);
+  		}, this);
+  	}
+  },
+    
+  start: function() { this.started = true; },
+  
+  takethAway: function() {
     for(var i = 0; i < 10; i++) {
-      var thisParticle = Archonia.Cosmos.MannaGenerator.spriteGroup.getRandom();
+      var thisParticle = this.mannaGroup.getRandom();
+      
       if(thisParticle.alive) {
-        var r = Archonia.Axioms.integerInRange(0, bellCurve.length);
-        var p = bellCurve[r] / bellCurveHeight;
-  
-        if(Archonia.Axioms.realInRange(0, 1) < p) {
+        var r = Archonia.Axioms.integerInRange(0, this.bellCurve.length);
+        var p = this.bellCurve[r] / this.bellCurveHeight;
+
+        if(Archonia.Axioms.realInRange(0, this.bellCurveHeight) < p) {
           thisParticle.kill();
         }
       }
     }
-  };
-  
-  Archonia.Cosmos.MannaGenerator = {
-    frameCount: null,
-
-    initialize: function() {
+  },
     
-      var stopBelow = 0.01, xOffset = 0, width = 2;
-      bellCurve = Archonia.Axioms.generateBellCurve(stopBelow, bellCurveHeight, xOffset, width);
-      if(bellCurve.length % 2 === 1) { bellCurve.push(0); }
-      bellCurveRadius = bellCurve.length / 2;
+  tick: function(frameCount) {
+    if(!this.started) { return; }
     
-      // We make the A.game scale larger than the radius so the manna will go off
-      // the screen when the temps are extreme in either direction
-      tempScale = new Archonia.Form.Range(-1000, 1000);
-      gameScale = new Archonia.Form.Range(-Archonia.Axioms.gameRadius, Archonia.Axioms.gameRadius);
-      arrayScale = new Archonia.Form.Range(-bellCurveRadius, bellCurveRadius);
+    this.frameCount = frameCount;
+    this.giveth();
+    this.takethAway();
+  }
     
-      Archonia.Cosmos.MannaGenerator.spriteGroup = Archonia.Engine.game.add.group();
-      Archonia.Cosmos.MannaGenerator.spriteGroup.enableBody = true;
-      Archonia.Cosmos.MannaGenerator.spriteGroup.createMultiple(Archonia.Axioms.howManyMannaMorsels, 'particles', 0, false);
-      Archonia.Engine.game.physics.enable(Archonia.Cosmos.MannaGenerator.spriteGroup, Phaser.Physics.ARCADE);
-
-      Archonia.Cosmos.MannaGenerator.spriteGroup.forEach(function(m) {
-        m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
-        m.calories = Archonia.Axioms.caloriesPerManna;
-        m.previousEmit = 0;
-        m.birthday = 0;
-        m.anchor.setTo(0.5, 0.5);
-        m.scale.setTo(morselScale, morselScale);
-        m.alpha = 1;
-        m.body.syncBounds = true;
-        m.body.setSize(m.width, m.height);
-        m.body.bounce.setTo(0, 0);
-        m.body.collideWorldBounds = true;
-        m.tint = 0x5C008E;
-      }, this);
-    },
-    
-    start: function() { started = true; },
-    
-    render: function() {
-      if(!started) { return; }
-
-    	var showDebugOutlines = false;
-
-    	if(showDebugOutlines) {
-    		Archonia.Cosmos.MannaGenerator.spriteGroup.forEachAlive(function(a) {
-    	    Archonia.Engine.game.debug.body(a, 'yellow', false);
-    			Archonia.Engine.game.debug.spriteBounds(a, 'blue', false);
-    		}, this);
-    	}
-    },
-    
-    tick: function(frameCount) {
-      if(!started) { return; }
-      
-      Archonia.Cosmos.MannaGenerator.frameCount = frameCount;
-      giveth();
-      takethAway();
-    }
-    
-  };
+};
   
 })(Archonia);
 
