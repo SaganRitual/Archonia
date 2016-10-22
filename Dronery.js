@@ -68,7 +68,9 @@ Archonia.Cosmos.Dronery = {
       phaseron.archon = new Archonia.Form.Archon(phaseron);
     }
   
-    phaseron.archon.launch(parentArchon);
+    // Birth defects do happen
+    try { phaseron.archon.launch(parentArchon); }
+    catch(e) { console.log("stillborn"); phaseron.archon.die(); }
   },
   
   eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill();},
