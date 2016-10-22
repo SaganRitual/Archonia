@@ -271,7 +271,7 @@ Archonia.Form.Head.prototype = {
       if(p.isInBounds()) {
         // If we can't find an old spot that we've forgotten,
         // we'll just take one that's in bounds
-        fallbacks.push(Archonia.Form.XY(p));
+        fallbacks.push(i);
         
         if(!this.doWeRemember(p)) { populateMovementChoices(bestChoices, i, h); }
       }
@@ -282,7 +282,7 @@ Archonia.Form.Head.prototype = {
       p = relativePositions[bestChoices[i]].plus(this.foodSearchAnchor);
     } else {
       i = Archonia.Axioms.integerInRange(0, fallbacks.length);
-      p = fallbacks[i];
+      p = relativePositions[fallbacks[i]].plus(this.foodSearchAnchor);
     }
   
     // This is where we're aiming; remember it so when we come back
