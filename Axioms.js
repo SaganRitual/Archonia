@@ -23,6 +23,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.darknessAlphaHi = 0.3;
   Archonia.Axioms.darknessAlphaLo = 0.0;
   Archonia.Axioms.dayLength = 60 * 1000;  // In ms, not ticks
+  Archonia.Axioms.daysPerYear = 10;
   Archonia.Axioms.embryoFatDensity = 1000;
   Archonia.Axioms.frameCount = 0;
   Archonia.Axioms.gameHeight = 600;

@@ -61,6 +61,26 @@ if(typeof window === "undefined") {
       return new Archonia.Essence.Bitmap(bm);
     },
   
+    archoniaSeasons: function() {
+      var bm = Archonia.Engine.game.add.bitmapData(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
+      var cx = bm.context;
+
+      var g = cx.createLinearGradient(Archonia.Axioms.gameRadius, 0, Archonia.Axioms.gameRadius, Archonia.Axioms.gameHeight);
+
+      g.addColorStop(0.00, 'hsla(202, 100%, 50%, 0.8)');
+      g.addColorStop(0.10, 'hsla(202, 100%, 50%, 0.5)');
+      g.addColorStop(0.20, 'hsla(202, 100%, 50%, 0.0)');
+      g.addColorStop(0.90, 'hsla(218, 100%, 50%, 0.0)');
+      g.addColorStop(1.00, 'hsla(218, 100%, 50%, 0.0)');
+
+      cx.fillStyle = g;
+      cx.fillRect(0, 0, Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
+
+      Archonia.Engine.game.cache.addBitmapData('archoniaSeasons', bm);
+    
+      return new Archonia.Essence.Bitmap(bm);
+    },
+  
     archoniaGoo: function() {
       var bm = Archonia.Engine.game.add.bitmapData(Archonia.Axioms.archoniaGooDiameter, Archonia.Axioms.archoniaGooDiameter);
       var cx = bm.context;

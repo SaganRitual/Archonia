@@ -1,6 +1,8 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
+/* global tinycolor */
+
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
@@ -15,17 +17,45 @@ if(typeof window === "undefined") {
   Archonia.Form.Range = require('./widgets/Range.js');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
 
-  Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
+  Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
 }
 
 (function(Archonia) {
+  
+  Archonia.Cosmos.Year = {
+    month: 0,
+    
+    setSeason: function() {
+      var s = "hsl(" + Math.floor(Archonia.Cosmos.Year.month) +  ", 100%, 50%)";
+      var t = tinycolor(s);
+      var h = t.toHex(false);
+      
+      Archonia.Cosmos.Year.season.tint = parseInt(h, 16);
+    },
+    
+    start: function() {
+      Archonia.Cosmos.Year.season = Archonia.Engine.game.add.sprite(
+        Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y, Archonia.Engine.game.cache.getBitmapData('archoniaSeasons')
+      );
+      
+      Archonia.Cosmos.Year.season.scale.setTo(1, 1);  // could make this bitmap smaller; come back to it
+      Archonia.Cosmos.Year.season.anchor.setTo(0.5, 0.5);
+      Archonia.Cosmos.Year.season.alpha = 0;
+      Archonia.Cosmos.Year.season.visible = true;
+
+      Archonia.Cosmos.Sun.dailyarknessTween = Archonia.Engine.game.add.tween(Archonia.Cosmos.Year.season).to(
+        {alpha: 1}, Archonia.Axioms.dayLength, Archonia.Cosmos.Sun.easingFunction, true, 0, -1, true
+      );
+    },
+    
+    tick: function() { Archonia.Cosmos.Year.setSeason(); }
+  };
   
   Archonia.Cosmos.Sun = {
     darkness: null,
     darknessTween: null,
     dayNumber: null,
     easingFunction: Phaser.Easing.Quartic.InOut,
-    sunGoo: null,
   
     getStrength: function() {
       // We have to clamp it because the actual sprite alpha can go slightly
@@ -89,13 +119,22 @@ if(typeof window === "undefined") {
         {alpha: Archonia.Axioms.darknessAlphaLo}, Archonia.Axioms.dayLength, Archonia.Cosmos.Sun.easingFunction, true, 0, -1, true
       );
   
-      Archonia.Cosmos.Sun.dayNumber = 1;
+      Archonia.Cosmos.Sun.halfDayNumber = 0;  // Creation happens at midnight
 
       Archonia.Essence.worldColorRange = Archonia.Cosmos.Sun.getWorldColorRange();
       
       /*Archonia.Cosmos.Sun.darknessTween.onLoop.add(function() {
         Archonia.Axioms.archonia.archons.dailyReport(this.Archonia.Cosmos.Sun.dayNumber++);
       }, this);*/
+
+      Archonia.Cosmos.Sun.darknessTween.onLoop.add(function() {
+        Archonia.Cosmos.Sun.halfDayNumber++;
+        if(Archonia.Cosmos.Sun.halfDayNumber % 2 === 0) {
+          Archonia.Cosmos.Year.month += 360 / Archonia.Axioms.daysPerYear;
+          if(Archonia.Cosmos.Year.month > 360) { Archonia.Cosmos.Year.month = 0; }
+          console.log('month', Archonia.Cosmos.Year.month, 'day', Archonia.Cosmos.Sun.halfDayNumber / 2);
+        }
+      });
     }
   };
 })(Archonia);

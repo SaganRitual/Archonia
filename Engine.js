@@ -33,10 +33,12 @@ if(typeof window === "undefined") {
       Archonia.Engine.game.input.onDown.add(Archonia.Engine.onMouseDown, Archonia.Engine);
 
       Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
+      Archonia.Cosmos.Seasons = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSeasons');
       Archonia.Essence.Goo = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
       Archonia.Essence.Dbitmap = Archonia.Essence.BitmapFactory.makeBitmap('debug');
 
       Archonia.Cosmos.Sun.ignite();
+      Archonia.Cosmos.Year.start();
       Archonia.Cosmos.MannaGenerator.initialize();
       Archonia.Cosmos.MannaGenerator.start();
       
@@ -81,6 +83,7 @@ if(typeof window === "undefined") {
       
       Archonia.Cosmos.MannaGenerator.tick(frameCount);
       Archonia.Cosmos.Dronery.tick(frameCount);
+      Archonia.Cosmos.Year.tick();
     }
     
   };
