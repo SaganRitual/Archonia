@@ -135,55 +135,6 @@ Archonia.Form.ColorGene.prototype.getTempRange = function() {
   return r;
 };
 
-Archonia.Form.SenseGene = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
-  this.multiplier = multiplier;
-  this.decayRate = decayRate;
-  this.valuesRangeLo = valuesRangeLo;
-  this.valuesRangeHi = valuesRangeHi;
-  
-  this.isSenseGene = true;
-  
-  Archonia.Form.Gene.call(this);
-};
-
-Archonia.Form.SenseGene.prototype = Object.create(Archonia.Form.Gene.prototype);
-Archonia.Form.SenseGene.prototype.constructor = Archonia.Form.SenseGene;
-Archonia.Form.SenseGene.prototype.newGene = function() { throw new Error("SenseGene.newGene() is pure virtual"); };
-Archonia.Form.SenseGene.prototype.inherit = function(parentGene) {
-  this.mutateMutatability(parentGene);
-
-  this.multiplier = this.mutateScalar(parentGene.multiplier);
-  this.decayRate = this.mutateScalar(parentGene.decayRate);
-  this.valuesRangeLo = this.mutateScalar(parentGene.valuesRangeLo);
-  this.valuesRangeHi = this.mutateScalar(parentGene.valuesRangeHi);
-};
-
-Archonia.Form.SenseGeneFixed = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
-  Archonia.Form.SenseGene.call(this, multiplier, decayRate, valuesRangeLo, valuesRangeHi);
-};
-
-Archonia.Form.SenseGeneFixed.prototype = Object.create(Archonia.Form.SenseGene.prototype);
-Archonia.Form.SenseGeneFixed.prototype.constructor = Archonia.Form.SenseGeneFixed;
-Archonia.Form.SenseGeneFixed.prototype.newGene = function() { return new Archonia.Form.SenseGeneFixed(); };
-
-Archonia.Form.SenseGeneFixed.prototype.inherit = function(parentGene) {
-  Archonia.Form.SenseGene.prototype.inherit.call(this, parentGene);
-};
-
-Archonia.Form.SenseGeneVariable = function(multiplier, decayRate, valuesRangeLo, valuesRangeHi) {
-  Archonia.Form.SenseGene.call(this, multiplier, decayRate, valuesRangeLo, valuesRangeHi);
-};
-
-Archonia.Form.SenseGeneVariable.prototype = Object.create(Archonia.Form.SenseGene.prototype);
-Archonia.Form.SenseGeneVariable.prototype.constructor = Archonia.Form.SenseGeneVariable;
-Archonia.Form.SenseGeneVariable.prototype.newGene = function() { return new Archonia.Form.SenseGeneVariable(); };
-
-Archonia.Form.SenseGeneVariable.prototype.inherit = function(parentGene) {
-  Archonia.Form.SenseGene.prototype.inherit.call(this, parentGene);
-  this.valuesRangeLo = this.mutateScalar(parentGene.valuesRangeLo);
-  this.valuesRangeHi = this.mutateScalar(parentGene.valuesRangeHi);
-};
-
 Archonia.Form.Genome = function(archon, parentGenome) {
   this.archon = archon;
   this.core = {};
@@ -215,7 +166,6 @@ var primordialGenome = { core: {
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),
   maxMVelocity:              new Archonia.Form.ScalarGene(30),
   sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),
-  targetChangeDelay:         new Archonia.Form.ScalarGene(5),
   
   // These control how willing the archon is to go outside
   // his temp comfort zone relative to food and food searching;
@@ -319,11 +269,7 @@ Archonia.Cosmos.Genomer = {
             return {
               get: function() { 
                 if(this.core.hasOwnProperty(propertyName)) {
-                  if(this.core[propertyName].isSenseGene) {
-                    return this.core[propertyName];
-                  } else {
-                    return this.core[propertyName].value;
-                  }
+                  return this.core[propertyName].value;
                 } else {
                   throw new Error("No such property '" + propertyName + "' in genome");
                 }
@@ -331,11 +277,7 @@ Archonia.Cosmos.Genomer = {
             
               set: function(value) {
                 if(this.core.hasOwnProperty(propertyName)) {
-                  if(this.core[propertyName].isSenseGene) {
-                    throw new Error("SenseGene is not scalar; can't be set");
-                  } else {
-                    this.core[propertyName].value = value; return true;
-                  }
+                  this.core[propertyName].value = value; return true;
                 } else {
                   throw new Error("No such property '" + propertyName + "' in genome");
                 }
@@ -356,9 +298,6 @@ if(typeof window === "undefined") {
     Genomer: Archonia.Cosmos.Genomer,
     Gene: Archonia.Form.Gene,
     ScalarGene: Archonia.Form.ScalarGene,
-    ColorGene: Archonia.Form.ColorGene,
-    SenseGene: Archonia.Form.SenseGene,
-    SenseGeneFixed: Archonia.Form.SenseGeneFixed,
-    SenseGeneVariable: Archonia.Form.SenseGeneVariable
+    ColorGene: Archonia.Form.ColorGene
   };
 }
