@@ -150,19 +150,24 @@ Archonia.Form.Head.prototype = {
   
   flee: function(dangerousArchonId) {
     var p = Archonia.Cosmos.Dronery.getArchonById(dangerousArchonId);
-    var b = this.position.getAngleFrom(p.position);
-    var d = Archonia.Form.XY().setPolar(25, b);
     
-    var drawDebugLines = false;
-    if(drawDebugLines) { Archonia.Essence.Dbitmap.rLine(this.position, d, 'yellow'); }
+    // It's possible that the guy chasing us has already
+    // died by the time we got here
+    if(p !== null) {
+      var b = this.position.getAngleFrom(p.position);
+      var d = Archonia.Form.XY().setPolar(25, b);
     
-    this.headedFromPredator = true;
-    this.legs.setTargetPosition(d.plus(this.position), 0, 0);
+      var drawDebugLines = false;
+      if(drawDebugLines) { Archonia.Essence.Dbitmap.rLine(this.position, d, 'yellow'); }
+    
+      this.headedFromPredator = true;
+      this.legs.setTargetPosition(d.plus(this.position), 0, 0);
 
-    if(Archonia.Engine.game.physics.arcade.overlap(
-      this.archon.sprite, p.sprite, null, null, this)) {
-        this.legs.stop(); // He caught me; I'm dead
-        this.archon.beingEaten = true;
+      if(Archonia.Engine.game.physics.arcade.overlap(
+        this.archon.sprite, p.sprite, null, null, this)) {
+          this.legs.stop(); // He caught me; I'm dead
+          this.archon.beingEaten = true;
+      }
     }
   },
   
