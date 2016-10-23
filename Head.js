@@ -165,7 +165,7 @@ Archonia.Form.Head.prototype = {
 
       if(Archonia.Engine.game.physics.arcade.overlap(
         this.archon.sprite, p.sprite, null, null, this)) {
-          this.legs.stop(); // He caught me; I'm dead
+          this.legs.stop(); // He caught me; I'm immobilized
           this.archon.beingEaten = true;
       }
     }

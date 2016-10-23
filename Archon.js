@@ -52,7 +52,7 @@ var geneReport = function(e, archon) {
   console.log('****************************');
 };
 
-var birthTweenComplete = function(archon) {
+var colorTweenComplete = function(archon) {
   archon.sprite.tint = archon.genome.color;
 };
 
@@ -64,6 +64,19 @@ var setHueForTween = function(hue) {
   this.sprite.archoniaHue = hue;
   
   var hsl = "hsl(" + this.sprite.archoniaHue + ", 100%, 50%)";
+  var t = tinycolor(hsl);
+
+  this.sprite.tint = parseInt(t.toHex(), 16); 
+};
+
+var getLumaForTween = function() {
+  return this.sprite.archoniaLuma;
+};
+
+var setLumaForTween = function(luma) {
+  this.sprite.archoniaLuma = luma;
+  
+  var hsl = "hsl(0, 0%, " + (this.sprite.archoniaLuma * 100).toFixed() + "%)";
   var t = tinycolor(hsl);
 
   this.sprite.tint = parseInt(t.toHex(), 16); 
@@ -95,6 +108,13 @@ Archonia.Form.Archon = function(phaseron) {
       return getHueForTween.call(this); },
     set: function archoniaHue(v) {
       setHueForTween.call(this, v); }
+  });
+
+  Object.defineProperty(this, 'archoniaLuma', {
+    get: function archoniaLuma() {
+      return getLumaForTween.call(this); },
+    set: function archoniaLuma(v) {
+      setLumaForTween.call(this, v); }
   });
   
   this.foundCurrentFoodTarget = false;
@@ -176,6 +196,12 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.newPredator = null;
   this.beingEaten = false;
 
+  // Because the tween can still be running while this
+  // dead archon waits around in the dronery to be revived
+  if(this.beingEatenTween !== null && this.beingEatenTween !== undefined) { this.beingEatenTween.stop(); }
+
+  this.beingEatenTween = null;
+
   this.sensor.scale.setTo(this.genome.sensorScale, this.genome.sensorScale);  
   
   this.sensorWidth = this.sensor.width;
@@ -223,7 +249,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     this.birthTween = Archonia.Engine.game.add.tween(this).
       to({ archoniaHue: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
     
-    this.birthTween.onComplete.add(birthTweenComplete);
+    this.birthTween.onComplete.add(colorTweenComplete);
   }
 
   this.sprite.reset(x, y, 1); this.button.reset(0, 0, 1); this.sensor.reset(x, y, 1);
@@ -342,6 +368,21 @@ Archonia.Form.Archon.prototype.tick = function() {
   
   if(!this.encysted) {
     this.legs.tick(this.frameCount);
+  }
+  
+  if(this.beingEaten) {
+    if(this.beingEatenTween === null) {
+      this.archoniaLuma = 0;
+  
+      this.beingEatenTween = Archonia.Engine.game.add.tween(this).
+        to({ archoniaLuma: 1 }, 0.01 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+      }
+  } else {
+    if(this.beingEatenTween !== null) {
+      this.beingEatenTween.stop();
+      colorTweenComplete(this);
+      this.beingEatenTween = null;
+    }
   }
   
   if(!this.currentPreyStillThere) { this.currentPrey = this.newPrey; }
