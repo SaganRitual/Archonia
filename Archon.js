@@ -52,6 +52,11 @@ var geneReport = function(e, archon) {
   console.log('****************************');
 };
 
+var birthTweenComplete = function(phaseron) {
+  phaseron.tint = phaseron.archon.genome.color;
+  phaseron.alpha = 1;
+};
+
 Archonia.Form.Archon = function(phaseron) {
   this.firstLaunch = true;
   this.launched = false;
@@ -81,6 +86,11 @@ Archonia.Form.Archon = function(phaseron) {
   this.velocity = new Archonia.Form.Archonoid(p.body.velocity);
   
   Archonia.Cosmos.Genomer.genomifyMe(this); // No inheritance here; just getting a skeleton genome
+  
+  this.birthTween = Archonia.Engine.game.add.tween(this.sprite).
+    to({ alpha: 0 }, 0.1 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 3, true);
+    
+  this.birthTween.onComplete.add(birthTweenComplete);
 
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs();
@@ -283,12 +293,6 @@ Archonia.Form.Archon.prototype.tick = function() {
   if(!this.launched) { return; }
   
   this.frameCount++;
-  
-  if(this.beingEaten) {
-    this.sprite.tint = 0;
-  } else {
-    this.sprite.tint = this.genome.color;
-  }
   
   // If I've been injured so badly (or was born with a serious defect),
   // then everyone can see me as injured. This doesn't matter unless
