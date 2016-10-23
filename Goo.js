@@ -135,7 +135,7 @@ Archonia.Form.Goo.prototype = {
   },
   
   getMotionCost: function() {
-    return this.getMass() * (this.genome.maxMVelocity / 8) + (this.genome.maxMAcceleration / 6);
+    return this.getMass() * (this.genome.maxMVelocity / 10) + (this.genome.maxMAcceleration / 3);
   },
   
   getSensorCost: function() { return 15 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale; },
@@ -144,14 +144,9 @@ Archonia.Form.Goo.prototype = {
     var t = Archonia.Cosmos.Sun.getTemperature(this.archon.position);
     var d = Math.abs(t - this.genome.optimalTemp);
     var s = this.getMass();
-    var p = Math.log((d || 1) + 1) * Math.log(s + 1);
+    var p = 2 * Math.log((d || 1) + 1) * Math.log(s + 1);
 
-    var r = null;
-    if(this.genome.tempRange > Archonia.Axioms.standardArchonTempRange) {
-      r = 8 * Archonia.Axioms.standardArchonTempRange / this.genome.tempRange;
-    } else {
-      r = 8 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
-    }
+    var r = 5 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
 
     return p + r;
   },
