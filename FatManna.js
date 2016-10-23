@@ -15,7 +15,7 @@ Archonia.Cosmos.FatManna = function() {
   this.bellCurveHeight = 5;
   this.bellCurveRadius = null;
   this.gameScale = null;
-  this.morselScale = 0.14;
+  this.morselScale = 0.15;
   this.started = false;
   this.tempScale = null;
   this.frameCount = null;
@@ -59,7 +59,7 @@ Archonia.Cosmos.FatManna.prototype = {
     if(this.randomPoint.point.isInBounds()) {
       var temp = Archonia.Cosmos.Sun.getTemperature(this.randomPoint.point);
 
-      if(temp < -500 || temp > 500) {
+      if(temp < -200 || temp > 200) {
   
         thisParticle = this.mannaGroup.getFirstDead();
   
@@ -89,7 +89,7 @@ Archonia.Cosmos.FatManna.prototype = {
   takethAway: function() {
     this.mannaGroup.forEachAlive(function(a) {
       var t = Archonia.Cosmos.Sun.getTemperature(a.position);
-      if(t > -500 && t < 500) { a.kill(); }
+      if(t > -200 && t < 200) { a.kill(); }
     });
   },
     
