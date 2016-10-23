@@ -138,12 +138,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   
   this.myParentArchon = myParentArchon;
   this.frameCount = Archonia.Axioms.integerInRange(0, 60);
-  this.whichFlash = 'birth';
-  this.flashDuration = 0.5 * 60;
-  this.flashInterval = 5;
-  this.flashExpiration = this.frameCount + this.flashDuration; // Flash birth for five seconds
   this.howManyChildren = 0;
-  this.flashDirection = -1;
   this.isDisabled = false;
   this.isDefending = false;
   this.injuryFactor = 0;
@@ -155,12 +150,7 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.currentPredator = null;
   this.currentPredatorStillThere = false;
   this.newPredator = null;
-  this.deadPrey = false;
-  
-  this.flashes = {
-    birth: { on: 0xFFFFFF, off: 0 },
-    defending: { on: 0xFF0000, off: 0x0000FF }
-  };
+  this.beingEaten = false;
 
   this.sensor.scale.setTo(this.genome.sensorScale, this.genome.sensorScale);  
   
@@ -294,28 +284,7 @@ Archonia.Form.Archon.prototype.tick = function() {
   
   this.frameCount++;
   
-  if(this.isDefending) {
-    this.flashExpiration = this.frameCount + this.flashDuration;
-    this.whichFlash = 'defending';
-    this.isDefending = false;
-    this.flashDirection = 1;
-  }
-  
-  if((this.flashExpiration - this.frameCount) % this.flashInterval === 0) {
-    this.flashDirection *= -1;
-  }
-  
-  if(this.frameCount > this.flashExpiration) {
-    this.flashDirection = 0;
-  }
-  
-  if(this.flashDirection === 1) {
-    this.sprite.tint = this.flashes[this.whichFlash].on;
-  } else if(this.flashDirection === -1) {
-    this.sprite.tint = this.flashes[this.whichFlash].off;
-  } else if(this.encysted) {
-    this.sprite.tint = 0xFF0000;
-  } else if(this.deadPrey) {
+  if(this.beingEaten) {
     this.sprite.tint = 0;
   } else {
     this.sprite.tint = this.genome.color;
@@ -346,7 +315,7 @@ Archonia.Form.Archon.prototype.tick = function() {
   
   if(!this.currentPreyStillThere) { this.currentPrey = this.newPrey; }
   if(!this.currentPredatorStillThere) { this.currentPredator = this.newPredator; }
-  if(this.currentPredator === null && this.newPredator === null) { this.deadPrey = false; }
+  if(this.currentPredator === null && this.newPredator === null) { this.beingEaten = false; }
   
   this.goo.tick(this.frameCount);
   this.head.tick(this.frameCount, this.currentFoodTarget, this.currentPredator, this.currentPrey);
