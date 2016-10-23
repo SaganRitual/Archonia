@@ -341,7 +341,6 @@ Archonia.Form.Archon.prototype.tick = function() {
   this.newFoodTarget.set(0);
   
   if(!this.encysted) {
-    this.goo.tick(this.frameCount);
     this.legs.tick(this.frameCount);
   }
   
@@ -349,6 +348,7 @@ Archonia.Form.Archon.prototype.tick = function() {
   if(!this.currentPredatorStillThere) { this.currentPredator = this.newPredator; }
   if(this.currentPredator === null && this.newPredator === null) { this.deadPrey = false; }
   
+  this.goo.tick(this.frameCount);
   this.head.tick(this.frameCount, this.currentFoodTarget, this.currentPredator, this.currentPrey);
   
   this.currentPreyStillThere = false; this.newPrey = null;
