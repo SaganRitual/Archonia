@@ -138,7 +138,7 @@ Archonia.Form.Goo.prototype = {
     return this.getMass() * (this.genome.maxMVelocity / 8) + (this.genome.maxMAcceleration / 6);
   },
   
-  getSensorCost: function() { return 10 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale; },
+  getSensorCost: function() { return 15 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale; },
 
   getTempCost: function() {
     var t = Archonia.Cosmos.Sun.getTemperature(this.archon.position);
