@@ -40,9 +40,15 @@ if(typeof window === "undefined") {
       Archonia.Cosmos.Sun.ignite();
       Archonia.Cosmos.Year.start();
       
+      Archonia.Cosmos.allTheManna = [];
+      
       Archonia.Cosmos.skinnyManna = new Archonia.Cosmos.MannaGenerator();
-      Archonia.Cosmos.skinnyManna.initialize();
+      Archonia.Cosmos.skinnyManna.initialize(Archonia.Cosmos.allTheManna);
       Archonia.Cosmos.skinnyManna.start();
+
+      Archonia.Cosmos.fatManna = new Archonia.Cosmos.FatManna();
+      Archonia.Cosmos.fatManna.initialize(Archonia.Cosmos.allTheManna);
+      Archonia.Cosmos.fatManna.start();
       
       // Produce a lot of genetic variation in the first generation
       Archonia.Cosmos.momentOfCreation = true;
@@ -64,11 +70,12 @@ if(typeof window === "undefined") {
 
     preload: function() {
       Archonia.Engine.game.load.image('particles', 'assets/sprites/pangball.png');
-      Archonia.Engine.game.load.image('fatManna', 'assets/particlestorm/particles/glass.png');
+      Archonia.Engine.game.load.image('fatManna', 'assets/sprites/orb-green.png');
     },
     
     render: function() {
       Archonia.Cosmos.skinnyManna.render();
+      Archonia.Cosmos.fatManna.render();
       Archonia.Cosmos.Dronery.render();
     },
     
@@ -84,6 +91,7 @@ if(typeof window === "undefined") {
     update: function() {
       frameCount++;
       
+      Archonia.Cosmos.fatManna.tick(frameCount);
       Archonia.Cosmos.skinnyManna.tick(frameCount);
       Archonia.Cosmos.Dronery.tick(frameCount);
       Archonia.Cosmos.Year.tick();

@@ -38,7 +38,7 @@ Archonia.Cosmos.MannaGenerator = function() {
 
 Archonia.Cosmos.MannaGenerator.prototype = {
 
-  initialize: function() {
+  initialize: function(allTheManna) {
   
     var stopBelow = 0.01, xOffset = 0, width = 2;
     this.bellCurve = Archonia.Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
@@ -57,7 +57,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
     Archonia.Engine.game.physics.enable(this.mannaGroup, Phaser.Physics.ARCADE);
 
     this.mannaGroup.forEach(function(m) {
-      m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+      m.calories = Archonia.Axioms.caloriesPerManna;
       m.anchor.setTo(0.5, 0.5);
       m.alpha = 1;
       m.scale.setTo(this.morselScale, this.morselScale);
@@ -66,6 +66,8 @@ Archonia.Cosmos.MannaGenerator.prototype = {
       m.body.bounce.setTo(0, 0);
       m.body.collideWorldBounds = true;
       m.tint = 0;
+      
+      allTheManna.push(m);
     }, this);
   },
 
@@ -94,7 +96,6 @@ Archonia.Cosmos.MannaGenerator.prototype = {
         
           if(rp.point.isInBounds()) {
             thisParticle.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
-            thisParticle.calories = Archonia.Axioms.caloriesPerManna;
             thisParticle.reset(rp.point.x, rp.point.y, 1);
           }
         }

@@ -73,7 +73,12 @@ Archonia.Cosmos.Dronery = {
     catch(e) { console.log("Birth defect: " + e.message); phaseron.archon.die(); }
   },
   
-  eat: function(phaseron, manna) { phaseron.archon.eat(manna); manna.kill();},
+  // Weird; the order is reversed when I pass the manna as my own
+  // array into the overlap function
+  eat: function(phaseron, manna) {
+    phaseron.archon.eat(manna);
+    manna.kill();
+  },
   
   getArchonById: function(archoniaUniqueObjectId) {
     var a = null;
@@ -126,6 +131,16 @@ Archonia.Cosmos.Dronery = {
 
     Archonia.Engine.game.physics.arcade.overlap(
       spritePools.phaserons, Archonia.Cosmos.skinnyManna.mannaGroup,
+      Archonia.Cosmos.Dronery.eat
+    );
+
+    Archonia.Engine.game.physics.arcade.overlap(
+      spritePools.sensors, Archonia.Cosmos.fatManna.mannaGroup,
+      Archonia.Cosmos.Dronery.senseManna
+    );
+
+    Archonia.Engine.game.physics.arcade.overlap(
+      spritePools.phaserons, Archonia.Cosmos.fatManna.mannaGroup,
       Archonia.Cosmos.Dronery.eat
     );
 
