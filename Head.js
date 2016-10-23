@@ -160,7 +160,6 @@ Archonia.Form.Head.prototype = {
       var drawDebugLines = false;
       if(drawDebugLines) { Archonia.Essence.Dbitmap.rLine(this.position, d, 'yellow'); }
     
-      this.headedFromPredator = true;
       this.legs.setTargetPosition(d.plus(this.position), 0, 0);
 
       if(Archonia.Engine.game.physics.arcade.overlap(
@@ -229,7 +228,6 @@ Archonia.Form.Head.prototype = {
     this.firstTickAfterLaunch = true;
     this.knownArchons = [];
     this.headedForPrey = false;
-    this.headedFromPredator = false;
     this.diningOnPrey = false;
     this.currentPrey = null;
     this.currentPredator = null;

@@ -51,6 +51,23 @@ Archonia.Form.Goo.prototype = {
     return cost;
   },
   
+  bePoisoned: function(poisoner) {
+    // This function is the reciprocal of the eat function. Should clean up so
+    // we don't have two functions doing basically the same thing
+    var myTotalCalories = (
+      this.adultCalorieBudget + this.embryoCalorieBudget + this.larvalCalorieBudget
+    ) / 60;
+    
+    var whatIWillLose = myTotalCalories * poisoner.genome.toxinStrength / this.genome.toxinResistance;
+    this.debit(whatIWillLose);
+    
+    // There is a cost for secreting poison, of course
+    var whatHeWillLose = whatIWillLose * 0.1;
+    poisoner.goo.debit(whatHeWillLose);
+    
+    this.archon.beingPoisoned = true;
+  },
+  
   breed: function() {
     
     var remainingReproductionCost = (
@@ -93,27 +110,27 @@ Archonia.Form.Goo.prototype = {
   },
 
   eat: function(food) {
-    if(this.archon.encysted) { return; }
+    if(this.archon.encysted) { return; }  // You don't gain anything while encysted
     
-    var benefit = null;
+    var benefit = 0;
     
     if(food instanceof Archonia.Form.Archon) {
-      var whatIWillTryToTake = this.genome.calorieGainToAttemptFromPredation / 60;
       
-      benefit = Math.min(
-        whatIWillTryToTake,
-        food.goo.adultCalorieBudget + food.goo.embryoCalorieBudget + food.goo.larvalCalorieBudget
-      );
-      
-      // Prey loses a lot more from predation than the predator gains
-      var whatPreyWillLose = whatIWillTryToTake * Archonia.Axioms.calorieLossRatioForPredation;
-      food.goo.debit(whatPreyWillLose);
-      
+      if(this.genome.toxinResistance >= food.genome.toxinStrength) {
+        benefit = this.eatArchon(food);
+      } else {
+        this.bePoisoned(food);
+      }
+
     } else {
       benefit = food.calories;
     }
 
-    benefit = this.applyBenefit('adultCalorieBudget', benefit, this.genome.embryoThreshold);
+    if(benefit > 0) {
+      benefit = this.applyBenefit('adultCalorieBudget', benefit, this.genome.embryoThreshold);
+    } else {
+      this.debit(benefit);
+    }
     
     if(benefit > 0) {
       benefit = this.applyBenefit('embryoCalorieBudget', benefit, Number.MAX_VALUE);
@@ -124,6 +141,18 @@ Archonia.Form.Goo.prototype = {
     }
     
     this.setSize();  
+  },
+  
+  eatArchon: function(dinner) {
+    var dinnerTotalCalories = (
+      dinner.goo.adultCalorieBudget + dinner.goo.embryoCalorieBudget + dinner.goo.larvalCalorieBudget
+    ) / 60;
+    
+    // Prey loses a lot more from predation than the predator gains
+    var whatPreyWillLose = dinnerTotalCalories * Archonia.Axioms.calorieLossRatioForPredation;
+    dinner.goo.debit(whatPreyWillLose);
+    
+    return dinnerTotalCalories;
   },
   
   getMass: function() {

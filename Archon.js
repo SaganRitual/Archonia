@@ -76,7 +76,10 @@ var getLumaForTween = function() {
 var setLumaForTween = function(luma) {
   this.sprite.archoniaLuma = luma;
   
-  var hsl = "hsl(0, 0%, " + (this.sprite.archoniaLuma * 100).toFixed() + "%)";
+  var hsl = "hsl(" + this.sprite.archoniaHue +
+              ", " + (this.sprite.archoniaSaturation * 100).toFixed() +
+              "%, " + (this.sprite.archoniaLuma * 100).toFixed() + "%)";
+              
   var t = tinycolor(hsl);
 
   this.sprite.tint = parseInt(t.toHex(), 16); 
@@ -194,6 +197,9 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   this.currentPredator = null;
   this.currentPredatorStillThere = false;
   this.newPredator = null;
+  this.poisoning = false;
+
+  // Clean this up -- two flags, two tweens, treated the same way, duplicated code
   this.beingEaten = false;
 
   // Because the tween can still be running while this
@@ -201,6 +207,14 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
   if(this.beingEatenTween !== null && this.beingEatenTween !== undefined) { this.beingEatenTween.stop(); }
 
   this.beingEatenTween = null;
+
+  this.beingPoisoned = false;
+
+  // Because the tween can still be running while this
+  // dead archon waits around in the dronery to be revived
+  if(this.beingPoisonedTween !== null && this.beingPoisonedTween !== undefined) { this.beingPoisonedTween.stop(); }
+
+  this.beingPoisonedTween = null;
 
   this.sensor.scale.setTo(this.genome.sensorScale, this.genome.sensorScale);  
   
@@ -370,12 +384,34 @@ Archonia.Form.Archon.prototype.tick = function() {
     this.legs.tick(this.frameCount);
   }
   
+  if(this.beingPoisoned || this.poisoning) { this.beingEaten = false; }
+
+  if(this.beingPoisoned) {
+
+    if(this.beingPoisonedTween === null) {
+      this.archoniaHue = 0; // Red
+      this.sprite.archoniaSaturation = 1; // (sprite because I don't have archon sat set up yet)
+      this.archoniaLuma = 0;
+      
+      this.beingPoisonedTween = Archonia.Engine.game.add.tween(this).
+        to({ archoniaLuma: 1 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+      }
+  } else {
+    if(this.beingPoisonedTween !== null) {
+      this.beingPoisonedTween.stop();
+      colorTweenComplete(this);
+      this.beingPoisonedTween = null;
+    }
+  }
+  
   if(this.beingEaten) {
     if(this.beingEatenTween === null) {
+      this.archoniaHue = 0;               // Red, but the saturation will make it black
+      this.sprite.archoniaSaturation = 0; // (sprite because I don't have archon sat set up yet)
       this.archoniaLuma = 0;
   
       this.beingEatenTween = Archonia.Engine.game.add.tween(this).
-        to({ archoniaLuma: 1 }, 0.01 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+        to({ archoniaLuma: 1 }, 0.25 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
       }
   } else {
     if(this.beingEatenTween !== null) {
@@ -388,6 +424,9 @@ Archonia.Form.Archon.prototype.tick = function() {
   if(!this.currentPreyStillThere) { this.currentPrey = this.newPrey; }
   if(!this.currentPredatorStillThere) { this.currentPredator = this.newPredator; }
   if(this.currentPredator === null && this.newPredator === null) { this.beingEaten = false; }
+  
+  this.beingPoisoned = false; // goo will turn these back on if necessary
+  this.poisoning = false;
   
   this.goo.tick(this.frameCount);
   this.head.tick(this.frameCount, this.currentFoodTarget, this.currentPredator, this.currentPrey);

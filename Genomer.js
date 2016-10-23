@@ -191,6 +191,8 @@ var primordialGenome = { core: {
   tempRange: null,
   tempRadius: null,
   
+  toxinStrength:               new Archonia.Form.ScalarGene(1),
+  toxinResistance:             new Archonia.Form.ScalarGene(1),
   reproductionThreshold:       new Archonia.Form.ScalarGene(500),
   embryoThreshold:             new Archonia.Form.ScalarGene(200),
   encystThreshold:             new Archonia.Form.ScalarGene(0.85),
