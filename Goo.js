@@ -148,9 +148,9 @@ Archonia.Form.Goo.prototype = {
 
     var r = null;
     if(this.genome.tempRange > Archonia.Axioms.standardArchonTempRange) {
-      r = 5 * Archonia.Axioms.standardArchonTempRange / this.genome.tempRange;
+      r = 8 * Archonia.Axioms.standardArchonTempRange / this.genome.tempRange;
     } else {
-      r = 5 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
+      r = 8 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
     }
 
     return p + r;
