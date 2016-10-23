@@ -52,9 +52,21 @@ var geneReport = function(e, archon) {
   console.log('****************************');
 };
 
-var birthTweenComplete = function(phaseron) {
-  phaseron.tint = phaseron.archon.genome.color;
-  phaseron.alpha = 1;
+var birthTweenComplete = function(archon) {
+  archon.sprite.tint = archon.genome.color;
+};
+
+var getHueForTween = function() {
+  return this.sprite.archoniaHue;
+};
+
+var setHueForTween = function(hue) {
+  this.sprite.archoniaHue = hue;
+  
+  var hsl = "hsl(" + this.sprite.archoniaHue + ", 100%, 50%)";
+  var t = tinycolor(hsl);
+
+  this.sprite.tint = parseInt(t.toHex(), 16); 
 };
 
 Archonia.Form.Archon = function(phaseron) {
@@ -67,7 +79,7 @@ Archonia.Form.Archon = function(phaseron) {
   
   var p = phaseron, b = p.button, s = p.sensor;
 
-	p.anchor.setTo(0.5, 0.5); p.alpha = 1.0; p.tint = 0x00FF00; p.scale.setTo(0.07, 0.07);
+	p.anchor.setTo(0.5, 0.5); p.alpha = 1.0; p.tint = 0xFF0000; p.scale.setTo(0.07, 0.07);
 	b.anchor.setTo(0.5, 0.5);	b.alpha = 1.0; b.tint = 0;        b.scale.setTo(0.25, 0.25);
 	s.anchor.setTo(0.5, 0.5); s.alpha = 0.1; s.tint = 0x0000FF;  // s scale set in launch
 
@@ -77,6 +89,13 @@ Archonia.Form.Archon = function(phaseron) {
   this.activatePhysicsBodies();
   
   generateArchonoidPrototype(); // This happens only once
+
+  Object.defineProperty(this, 'archoniaHue', {
+    get: function archoniaHue() {
+      return getHueForTween.call(this); },
+    set: function archoniaHue(v) {
+      setHueForTween.call(this, v); }
+  });
   
   this.foundCurrentFoodTarget = false;
   this.currentFoodTarget = Archonia.Form.XY();
@@ -87,11 +106,6 @@ Archonia.Form.Archon = function(phaseron) {
   
   Archonia.Cosmos.Genomer.genomifyMe(this); // No inheritance here; just getting a skeleton genome
   
-  this.birthTween = Archonia.Engine.game.add.tween(this.sprite).
-    to({ alpha: 0 }, 0.1 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 3, true);
-    
-  this.birthTween.onComplete.add(birthTweenComplete);
-
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs();
   this.head = new Archonia.Form.Head(this);
@@ -197,6 +211,19 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     this.velocity.set(myParentArchon.velocity).timesScalar(-1);
     this.myParentArchonId = myParentArchon.archoniaUniqueObjectId;
    // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
+  }
+
+  if(Archonia.Cosmos.momentOfCreation) {
+    this.sprite.tint = this.genome.color;
+  } else {
+    // Remember: the property in the prototype is on the archon; the property
+    // here is on the sprite. The get/set for the archon refer to this value
+    this.archoniaHue = 0;
+  
+    this.birthTween = Archonia.Engine.game.add.tween(this).
+      to({ archoniaHue: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
+    
+    this.birthTween.onComplete.add(birthTweenComplete);
   }
 
   this.sprite.reset(x, y, 1); this.button.reset(0, 0, 1); this.sensor.reset(x, y, 1);
