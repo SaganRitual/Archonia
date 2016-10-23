@@ -84,7 +84,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
       var scaledY = this.arrayScale.convertPoint(rp.point.y, this.gameScale);
       var p = this.bellCurve[Math.floor(scaledY)] / this.bellCurveHeight;
       
-      if(Archonia.Axioms.realInRange(0, this.bellCurveHeight) < p) {
+      if(Archonia.Axioms.realInRange(0, 1) < p) {
 
         thisParticle = this.mannaGroup.getFirstDead();
         
@@ -127,7 +127,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
         var r = Archonia.Axioms.integerInRange(0, this.bellCurve.length);
         var p = this.bellCurve[r] / this.bellCurveHeight;
 
-        if(Archonia.Axioms.realInRange(0, this.bellCurveHeight) < p) {
+        if(Archonia.Axioms.realInRange(0, 1) < p) {
           thisParticle.kill();
         }
       }
