@@ -9,12 +9,10 @@ Archonia.Cosmos.Genomer = g.Genomer
 Archonia.Form.Gene = g.Gene
 Archonia.Form.ScalarGene = g.ScalarGene
 Archonia.Form.ColorGene = g.ColorGene
-Archonia.Form.SenseGene = g.SenseGene
-Archonia.Form.SenseGeneFixed = g.SenseGeneFixed
-Archonia.Form.SenseGeneVariable = g.SenseGeneVariable
-Archonia.Form.tinycolor = require('../widgets/tinycolor.js');
+var tinycolor = require('../TinyColor/tinycolor.js');
 
 Archonia.Axioms = require('../Axioms.js');
+Archonia.Essence = require('../Essence.js');
 
 var archon1 = {
 };
@@ -22,34 +20,27 @@ var archon1 = {
 var archon2 = {
 };
 
-var testMakeGene = function(makeGene) {
-  chai.expect(makeGene).to.not.throw();
-  
-  var multiplier = 1, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-
-  sg = makeGene();
-  chai.expect(sg).to.include({
-    multiplier: multiplier, decayRate: decayRate, valuesRangeLo: valuesRangeLo, valuesRangeHi: valuesRangeHi
-  });
-};
-
-var testInheritanceResult = function(makeGene, doResultStuff) {
-  var sg = makeGene(), tg = makeGene();
-
-  sg.inherit(tg);
-  
-  var possibleChangeRange = tg.changeRange + 30;  // Because of the twist in mutateScalar()
-  
-  chai.expect(sg.changeProbability).within(tg.changeProbability * (1 - possibleChangeRange / 100), tg.changeProbability * (1 + possibleChangeRange / 100));
-  chai.expect(sg.changeRange).within(tg.changeRange * (1 - possibleChangeRange / 100), tg.changeRange * (1 + possibleChangeRange / 100));
-
-  doResultStuff(sg);
-}
-
-describe('Genomer', function() {
-  describe('Smoke test', function() {
+describe('Genomer/Genes', function() {
+  describe('Genomer', function() {
     Archonia.Cosmos.Genomer.genomifyMe(archon1);
-    it('Should store a genome', function() { chai.expect(archon1).to.have.property('genome'); });
+    Archonia.Cosmos.Genomer.inherit(archon1);
+    it('Should store a genome', function() {
+      chai.expect(archon1).to.have.property('genome');
+      //chai.expect(archon1.genome).to.have.property('optimalTemp');
+      //chai.expect(archon1.genome).to.have.property('hungerToleranceFactor');
+    });
+    
+    it('Should do that cool thing with getters', function() {
+      chai.expect(archon1.genome.optimalTempHi).equal(200);
+    });
+    
+    it('Should throw exception for non-existent gene access', function() {
+      var thisShouldWork = function() { var g = archon1.genome.optimalTempHi; };
+      var thisShouldFail = function() { var g = archon1.genome.optimalTempHiThere; };
+
+      chai.expect(thisShouldWork).to.not.throw();
+      chai.expect(thisShouldFail).to.throw(Error, "No such property");
+    });
   });
 
   describe('ScalarGene', function() {
@@ -90,15 +81,18 @@ describe('Genomer', function() {
   });
   
   describe('ColorGene', function() {
-    var cg = new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 50%, 50%)'), 400),
-        dg = new Archonia.Form.ColorGene(Archonia.Form.tinycolor('hsl(180, 50%, 50%)'), 400);
+    var cg = new Archonia.Form.ColorGene(tinycolor('hsl(180, 100%, 50%)'), 400),
+        dg = new Archonia.Form.ColorGene(tinycolor('hsl(180, 100%, 50%)'), 400);
     
     it('Gene should construct properly', function() {
       chai.expect(cg).to.include({ changeProbability: 10, changeRange: 10 });
       chai.expect(cg).to.have.property('color');
-      chai.expect(cg.color.toRgb()).to.include({ r: 64, g: 191, b: 191 });
-      chai.expect(cg).to.have.property('tempRangeGene');
-      chai.expect(cg.tempRangeGene).to.include({value: 400, changeProbability: 10, changeRange: 10});
+      
+      var t = tinycolor('hsl(180, 100%, 50%)');
+      
+      t._tc_id = 0; cg.color._tc_id = 0;  // Because tinycolor assigns unique IDs
+      
+      chai.expect(cg.color).to.deep.equal(t);
     });
     
     it('mutateYN() Should return true or false', function() {
@@ -113,8 +107,8 @@ describe('Genomer', function() {
     
     it('tempRange, optimalHi, optimalLo', function() {
       chai.expect(cg.getOptimalTemp()).equal(0);
-      chai.expect(cg.getOptimalHiTemp()).equal(200);
-      chai.expect(cg.getOptimalLoTemp()).equal(-200);
+      chai.expect(cg.getOptimalTempHi()).equal(200);
+      chai.expect(cg.getOptimalTempLo()).equal(-200);
     }),
 
     it('Should inherit with add', function() {
@@ -125,49 +119,8 @@ describe('Genomer', function() {
       chai.expect(cg.changeProbability).within(dg.changeProbability * (1 - possibleChangeRange / 100), dg.changeProbability * (1 + possibleChangeRange / 100));
       chai.expect(cg.changeRange).within(dg.changeRange * (1 - possibleChangeRange / 100), dg.changeRange * (1 + possibleChangeRange / 100));
 
-      var t = Archonia.Form.tinycolor(cg.color).toHsl();
+      var t = tinycolor(cg.color).toHsl();
       chai.expect(t.h).within(0, 360); chai.expect(t.s).within(0, 100); chai.expect(t.l).within(0, 100);
-      
-      possibleChangeRange = dg.tempRangeGene.changeRange + 30;  // Because of the twist in mutateScalar()
-      
-      chai.expect(cg.tempRangeGene.changeProbability).within(dg.tempRangeGene.changeProbability * (1 - possibleChangeRange / 100), dg.tempRangeGene.changeProbability * (1 + possibleChangeRange / 100));
-      chai.expect(cg.tempRangeGene.changeRange).within(dg.tempRangeGene.changeRange * (1 - possibleChangeRange / 100), dg.tempRangeGene.changeRange * (1 + possibleChangeRange / 100));
-    });
-  });
-
-  describe('senseManna genes', function() {
-    it('Base class newGene() is pure virtual', function() {
-      var ng = function() { var n = new Archonia.Form.SenseGene(); n.newGene(); };
-      chai.expect(ng).to.throw(Error, 'SenseGene.newGene() is pure virtual');
-    });
-    
-    it('SenseGeneFixed', function() {
-      var makeGene = function() {
-        var multiplier = 1, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-        return new Archonia.Form.SenseGeneFixed(multiplier, decayRate, valuesRangeLo, valuesRangeHi);
-      };
-      
-      var doResultStuff = function(sg) {
-        var multiplier = 1, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-        chai.expect(sg.valuesRangeLo).equal(valuesRangeLo); chai.expect(sg.valuesRangeHi).equal(valuesRangeHi);
-      };
-
-      testMakeGene(makeGene);
-      testInheritanceResult(makeGene, doResultStuff);
-    });
-  
-    it('SenseGeneVariable', function() {
-      var makeGene = function() {
-        var multiplier = 1, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-        return new Archonia.Form.SenseGeneVariable(multiplier, decayRate, valuesRangeLo, valuesRangeHi);
-      };
-      
-      var doResultStuff = function(sg) {
-        chai.expect(typeof sg.multiplier).equal('number'); chai.expect(typeof sg.multiplier).equal('number');
-      }
-
-      testMakeGene(makeGene);
-      testInheritanceResult(makeGene, doResultStuff);
     });
   });
 });

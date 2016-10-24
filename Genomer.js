@@ -1,18 +1,18 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global tinycolor */
+/* global Proxy */
 
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
+var tinycolor = tinycolor || {};
 
 if(typeof window === "undefined") {
-  Archonia.Form.tinycolor = require('./widgets/tinycolor.js');
+  tinycolor = require('./widgets/tinycolor.js');
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
-} else{
-  Archonia.Form.tinycolor = window.tinycolor;
+  tinycolor = require('./TinyColor/tinycolor.js');
 }
 
 (function(Archonia) {
@@ -87,7 +87,7 @@ Archonia.Form.ScalarGene.prototype.inherit = function(parentGene) {
   this.value = this.mutateScalar(parentGene.value);
 };
 
-Archonia.Form.ColorGene = function(gene) { this.color = Archonia.Form.tinycolor(gene); Archonia.Form.Gene.call(this); };
+Archonia.Form.ColorGene = function(gene) { this.color = tinycolor(gene); Archonia.Form.Gene.call(this); };
 
 Archonia.Form.ColorGene.prototype = Object.create(Archonia.Form.Gene.prototype);
 Archonia.Form.ColorGene.prototype.constructor = Archonia.Form.ColorGene;
@@ -96,7 +96,7 @@ Archonia.Form.ColorGene.prototype.newGene = function() { return new Archonia.For
 Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
   
-  var color = Archonia.Form.tinycolor(parentGene.color);
+  var color = tinycolor(parentGene.color);
   var hsl = color.toHsl();
   
   // Because tinycolor stores them 0 - 1 but hsl string wants 0 - 100%
@@ -110,7 +110,7 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
   h = h.toFixed(); s = s.toFixed(); L = L.toFixed();
   
   hsl = 'hsl(' + h + ', ' + s + '%, ' + L + '%)';
-  this.color = Archonia.Form.tinycolor(hsl);
+  this.color = tinycolor(hsl);
 
   var r = this.getTempRange();
   if(r < 0 || r > Archonia.Axioms.temperatureHi || s < 0 || s > 100 || L < 0 || L > 100) {
@@ -120,8 +120,8 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
 
 Archonia.Form.ColorGene.prototype.getColorAsDecimal = function() { return parseInt(this.color.toHex(), 16); };
 Archonia.Form.ColorGene.prototype.getTempRadius = function() { return this.getTempRange() / 2; };
-Archonia.Form.ColorGene.prototype.getoptimalTempHi = function() { return this.getOptimalTemp() + this.getTempRange() / 2; };
-Archonia.Form.ColorGene.prototype.getoptimalTempLo = function() { return this.getOptimalTemp() - this.getTempRange() / 2; };
+Archonia.Form.ColorGene.prototype.getOptimalTempHi = function() { return this.getOptimalTemp() + this.getTempRange() / 2; };
+Archonia.Form.ColorGene.prototype.getOptimalTempLo = function() { return this.getOptimalTemp() - this.getTempRange() / 2; };
 
 Archonia.Form.ColorGene.prototype.getOptimalTemp = function() {
   var L = this.color.toHsl().l;
@@ -135,15 +135,37 @@ Archonia.Form.ColorGene.prototype.getTempRange = function() {
   return r;
 };
 
+Archonia.Form.GenomeProxy = {
+  get: function(target, name) {
+    switch(name) {
+      case "color":         return target.core.color.getColorAsDecimal();
+      case "optimalTempHi": return target.core.color.getOptimalTempHi();
+      case "optimalTempLo": return target.core.color.getOptimalTempLo();
+      case "optimalTemp":   return target.core.color.getOptimalTemp();
+      case "tempRange":     return target.core.color.getTempRange();
+      case "tempRadius":    return target.core.color.getTempRadius();
+      
+      case "core": return target.core;
+      
+    default:
+      // The only names in the genome itself are the core and
+      // the genome functions
+      if(name in target) { return target[name]; }
+      else if(name in target.core) { return target.core[name]; }
+      else { throw new Error("No such property '" + name + "' in genome"); }
+      break;
+    }
+  }
+};
+
 Archonia.Form.Genome = function(archon, parentGenome) {
   this.archon = archon;
-  this.core = {};
+  this.core = [];
   
   for(var i in parentGenome.core) {
-    if(parentGenome.core[i] === null) {
-      this.core[i] = null; // For dummy properties so our getters will work -- I hope!
-    } else {
-      this.core[i] = parentGenome.core[i].newGene();
+    if(parentGenome.core[i] instanceof Archonia.Form.Gene) {
+      if(parentGenome.core[i] === null) { this.core[i] = null; }
+      else { this.core[i] = parentGenome.core[i].newGene(); }
     }
   }
 };
@@ -151,9 +173,8 @@ Archonia.Form.Genome = function(archon, parentGenome) {
 Archonia.Form.Genome.prototype = {
   inherit: function(parentGenome) {
     for(var i in parentGenome.core) { 
-      if(this.core[i] !== null) {
-        this.core[i].inherit(parentGenome.core[i]);
-      }
+      if(parentGenome.core[i] === null) { this.core[i] = null; }
+      else { this.core[i].inherit(parentGenome.core[i]); }
     }
   }
 };
@@ -202,14 +223,10 @@ var primordialGenome = { core: {
   
 } };
 
-var genomePrototypeSetup = false;
-
 Archonia.Cosmos.Genomer = {
   
   genomifyMe: function(archon) {
-    if(!genomePrototypeSetup) { Archonia.Cosmos.Genomer.setupGenomePrototype(); }
-    
-    archon.genome = new Archonia.Form.Genome(archon, primordialGenome);
+    archon.genome = new Proxy(new Archonia.Form.Genome(archon, primordialGenome), Archonia.Form.GenomeProxy);
   },
   
   inherit: function(childArchon, parentArchon) {
@@ -222,73 +239,6 @@ Archonia.Cosmos.Genomer = {
     // primordial as our starting point
     if(parentArchon === undefined) { parentArchon = { genome: primordialGenome }; }
     childArchon.genome.inherit(parentArchon.genome);
-  },
-  
-  setupGenomePrototype: function() {
-    genomePrototypeSetup = true;
-    
-    for(var i in primordialGenome.core) {
-      switch(i) {
-      case 'color':
-        Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function()  { return this.core.color.getColorAsDecimal(); } }
-        );
-        break;
-      
-      case 'optimalTempHi':
-        Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getoptimalTempHi();  } }
-        );
-        break;
-      
-      case 'optimalTempLo':
-        Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getoptimalTempLo(); } }
-        );
-        break;
-      
-      case 'optimalTemp':
-        Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getOptimalTemp(); } }
-        );
-        break;
-      
-      case 'tempRange':
-        Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getTempRange(); } }
-        );
-        break;
-      
-      case 'tempRadius':
-        Object.defineProperty(Archonia.Form.Genome.prototype, i,
-          { get: function () { return this.core.color.getTempRadius(); } }
-        );
-        break;
-      
-      default:
-        Object.defineProperty(Archonia.Form.Genome.prototype, i, (
-          function(propertyName) {
-            return {
-              get: function() { 
-                if(this.core.hasOwnProperty(propertyName)) {
-                  return this.core[propertyName].value;
-                } else {
-                  throw new Error("No such property '" + propertyName + "' in genome");
-                }
-              },
-            
-              set: function(value) {
-                if(this.core.hasOwnProperty(propertyName)) {
-                  this.core[propertyName].value = value; return true;
-                } else {
-                  throw new Error("No such property '" + propertyName + "' in genome");
-                }
-              }
-            };
-          })(i));
-        break;
-      }
-    }
   }
 };
 
