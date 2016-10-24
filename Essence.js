@@ -1,16 +1,17 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global proto */
-
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
+var proto = proto || {};
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Form.Range = require('./widgets/Range.js');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
+  
+  proto = require('./proto/proto.js');
 }
 
 (function(Archonia) {
