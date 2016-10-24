@@ -48,16 +48,6 @@ describe('SignalSmoother', function() {
         chai.expect(r.getSignalStrength().toFixed(4)).equal(((valueToStore - decayRate) / depth).toFixed(4));
       });
 
-      it('#negative values not allowed on positive scale', function() {
-        var depth = 10, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
-        var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
-  
-        var valueToStore = -0.1;
-        var f = function() { r.store(valueToStore); };
-
-        chai.expect(f).to.throw(Error, 'Negative values not allowed on positive scale');
-      });
-
       it('#constant input to max', function() {
         var depth = 10, decayRate = 0.01, valuesRangeLo = 0, valuesRangeHi = 1;
         var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
@@ -146,15 +136,6 @@ describe('SignalSmoother', function() {
   });
   
   describe('#functionality -- scale -1 to 1', function() {
-    it('#scale across zero must be centered on zero', function() {
-      var depth = 10, decayRate = 0.01, valuesRangeLo = -5, valuesRangeHi = 1;
-      
-      var r = function() {
-        new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
-      };
-
-      chai.expect(r).to.throw(Error, "Scale across zero must be centered on zero")
-    });
     it('#single tick, negative store', function() {
       var depth = 10, decayRate = 0.01, valuesRangeLo = -1, valuesRangeHi = 1;
       var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
@@ -249,6 +230,23 @@ describe('SignalSmoother', function() {
 
         chai.expect(r.getSignalStrength().toFixed(6)).equal(expectedResults[i].toFixed(6));
       }
+    });
+    
+    it("#decay shouldn't cause stored values to change sign", function() {
+      var depth = 10, decayRate = 0.04, valuesRangeLo = -200, valuesRangeHi = 200, i = null;
+      var r = new SignalSmoother(depth, decayRate, valuesRangeLo, valuesRangeHi);
+      
+      for(i = 0; i < depth; i++) { r.store(-200); } // Max out negative
+      
+      for(i = 0; i < depth; i++) { r.store(0); console.log(r.getSignalStrength());}  // Settle back to center
+      
+      chai.expect(r.getSignalStrength()).to.be.at.most(0);
+
+      for(i = 0; i < depth; i++) { r.store(200); } // Max out negative
+
+      for(i = 0; i < depth; i++) { r.store(0); console.log(r.getSignalStrength());}  // Settle back to center
+
+      chai.expect(r.getSignalStrength()).to.be.at.least(0);
     });
 
     it('#various decay rates, all negative');
