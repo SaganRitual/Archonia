@@ -6,11 +6,14 @@
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
+var proto = proto || {};
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Form.Range = require('./widgets/Range.js');
   Archonia.Form.XY = require('./widgets/XY.js').XY;
+  
+  proto = require('./proto/proto.js');
 }
 
 (function(Archonia) {
