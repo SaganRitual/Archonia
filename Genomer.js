@@ -151,7 +151,7 @@ Archonia.Form.GenomeProxy = {
       // The only names in the genome itself are the core and
       // the genome functions
       if(name in target) { return target[name]; }
-      else if(name in target.core) { return target.core[name]; }
+      else if(name in target.core) { return target.core[name].value; }
       else { throw new Error("No such property '" + name + "' in genome"); }
       break;
     }

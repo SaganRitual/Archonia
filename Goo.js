@@ -4,12 +4,14 @@
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
+var tinycolor = tinycolor || {};
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
-  Archonia.Form.tinycolor = require('./widgets/tinycolor.js');
   Archonia.Form.Range = require('./widgets/Range.js');
+
+  tinycolor = require('./widgets/tinycolor.js');
 }
 
 (function(Archonia) {
@@ -212,7 +214,7 @@ Archonia.Form.Goo.prototype = {
 
   	var hue = Archonia.Essence.hueRange.convertPoint(temp, this.optimalTempRange);
   	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
-  	var rgb = Archonia.Form.tinycolor(hsl).toHex();
+  	var rgb = tinycolor(hsl).toHex();
   	var tint = parseInt(rgb, 16);
 
   	this.archon.button.tint = tint;
