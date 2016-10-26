@@ -39,7 +39,7 @@ Archonia.Form.FamilyTree.prototype = {
   },
   
   getDegreeOfRelatedness: function(lhs, rhs) {
-    var lhsAncestry  = [], rhsAncestry = [], i = null, commonAncestor = null, relatedness = null;
+    var lhsAncestry  = [], rhsAncestry = [], i = null, commonAncestor = null;
     
     for(i = lhs; i !== 'none'; i = this.everyone[i].parentId) { lhsAncestry.push(i); }
     for(i = rhs; i !== 'none'; i = this.everyone[i].parentId) { rhsAncestry.push(i); }
