@@ -116,13 +116,19 @@ Archonia.Cosmos.Dronery = {
   	}
   },
   
-  senseArchon: function(sensor, theOtherGuy) { sensor.archon.senseArchon(theOtherGuy); },
-  senseManna: function(sensor, manna) { sensor.archon.senseManna(manna); },
+  senseArchon: function(sensor, theOtherGuy) { sensor.archon.head.state.senseOtherArchon(theOtherGuy.archon); },
+  senseManna: function(sensor, manna) { sensor.archon.head.state.senseManna(manna); },
+  touch: function(phaseron, theOtherPhaseron) { phaseron.archon.head.state.touchOtherArchon(theOtherPhaseron.archon); },
 
   tick: function(frameCount) {
     Archonia.Cosmos.Dronery.frameCount = frameCount;
     
     Archonia.Essence.Dbitmap.bm.clear();
+
+    Archonia.Engine.game.physics.arcade.overlap(
+      spritePools.phaserons, spritePools.phaserons,
+      Archonia.Cosmos.Dronery.touch
+    );
 
     Archonia.Engine.game.physics.arcade.overlap(
       spritePools.sensors, Archonia.Cosmos.skinnyManna.mannaGroup,

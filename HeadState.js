@@ -7,7 +7,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 (function(Archonia) {
 
-Archonia.Form.HeadState = function(position) {
+Archonia.Form.HeadState = function(head, position) {
+  this.head = head;
   this.position = position;
   this.mannaOfInterest = Archonia.Form.XY();
   this.evade = Archonia.Form.XY();
@@ -18,24 +19,25 @@ Archonia.Form.HeadState = function(position) {
 
 Archonia.Form.HeadState.prototype = {
   getAction: function() {
-    var touchedArchonAction = this.getTouchedArchonAction();
-    if(touchedArchonAction === false) {
+    var action = false;
+    var foodSearchState = false;
+    
+    if(!action) { action = this.getTouchedArchonAction(); }
+    if(!action) { action = this.getSensedArchonAction(); }
+    if(!action) { action = this.getMannaGrabAction(); }
 
-      var sensedArchonAction = this.getSensedArchonAction();
-      if(sensedArchonAction === false) {
-
-        var mannaGrabAction = this.getMannaGrabAction();
-        if(mannaGrabAction === false) {
-          return this.getFoodSearchAction();
-        } else {
-          return mannaGrabAction;
-        }
-      } else {
-        return sensedArchonAction;
+    if(!action) {
+      action = this.getFoodSearchAction();
+      
+      if(!this.foodSearchState) { // If we weren't already searching, tell head to restart
+        action.action = "r" + action.action;
       }
-    } else {
-      return touchedArchonAction;
+      
+      foodSearchState = true;
     }
+    
+    this.foodSearchState = foodSearchState;
+    return action;
   },
   
   getFoodSearchAction: function() {
@@ -95,6 +97,22 @@ Archonia.Form.HeadState.prototype = {
   launch: function(genome) {
     this.genome = genome;
     this.reset();
+    
+    this.tempSignalScaleLo = this.genome.optimalTempLo - this.genome.tempRadius;
+    this.tempSignalScaleHi = this.genome.optimalTempHi + this.genome.tempRadius;
+
+    this.tempInput = new Archonia.Form.SignalSmoother(
+      Math.floor(this.genome.tempSignalBufferSize), this.genome.tempSignalDecayRate,
+      this.tempSignalScaleLo, this.tempSignalScaleHi
+    );
+    
+    this.hungerSignalScaleLo = this.genome.reproductionThreshold - this.genome.birthMassAdultCalories;
+    this.hungerSignalScaleHi = 0;
+
+    this.hungerInput = new Archonia.Form.SignalSmoother(
+      Math.floor(this.genome.hungerSignalBufferSize), this.genome.hungerSignalDecayRate,
+      this.hungerSignalScaleLo, this.hungerSignalScaleHi
+    );
   },
   
   reset: function() {
@@ -117,10 +135,16 @@ Archonia.Form.HeadState.prototype = {
   
   senseManna: function(manna) { this.manna.push(manna); },
   senseOtherArchon: function(otherArchon) { this.sensedArchons.push(otherArchon); },
-  setHungerSignal: function(signal) { this.hungerSignal = signal; },
-  setTempSignal: function(signal) { this.tempSignal = signal; },
+  senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
+  senseTemp: function() {
+    this.tempInput.store(Archonia.Cosmos.Sun.getTemperature(this.position) - this.genome.optimalTemp);
+  },
   
   tick: function(currentMass) {
+    this.senseTemp();   // The spatial senses are driven externally
+    this.senseHunger(); // we have to drive these ourselves
+    
+    this.updateNonSpatialSenses();
     this.updateMannaTargets();
     this.updateSensedArchonTargets(currentMass);
     this.updateTouchedArchons(currentMass);
@@ -134,7 +158,32 @@ Archonia.Form.HeadState.prototype = {
   
   touchOtherArchon: function(otherArchon) { this.touchedArchons.push(otherArchon); },
   
-  updateSensedArchonTargets: function(currentMass) {
+  updateMannaTargets: function() {
+    var closestManna = Archonia.Form.XY();
+
+    for(var i = 0; i < this.manna.length; i++) {
+      var checkManna = Archonia.Form.XY(this.manna[i]);
+      
+      if(checkManna.equals(this.mannaOfInterest)) {
+        closestManna.set(this.mannaOfInterest); // If we're already targeting, stay the course
+        break;
+      } else {
+        if(checkManna.getDistanceTo(this.position) < closestManna.getDistanceTo(this.position)) {
+          closestManna.set(checkManna);
+        }
+      }
+    }
+    
+    if(closestManna.equals(0)) { this.mannaOfInterest.reset(); }
+    else { this.mannaOfInterest.set(closestManna); }
+  },
+  
+  updateNonSpatialSenses: function() {
+    this.tempSignal = this.tempInput.getSignalStrength();
+    this.hungerSignal = this.hungerInput.getSignalStrength();
+  },
+  
+  updateSensedArchonTargets: function(myMass) {
     var closestArchon = Archonia.Form.XY();
     var action = null;
     
@@ -148,22 +197,23 @@ Archonia.Form.HeadState.prototype = {
 
     for(var i = 0; i < this.sensedArchons.length; i++) {
       var checkArchon = this.sensedArchons[i];
+      var hisMass = checkArchon.goo.getMass();
+      var hisPosition = checkArchon.position;
       
-      if((checkArchon.equals(this.evade)) ||
-          checkArchon.getMass() * this.genome.predatorFearRatio > currentMass) {
-        closestArchon.set(checkArchon);
+      if((hisPosition.equals(this.evade)) || hisMass * this.genome.predatorFearRatio > myMass) {
+        closestArchon.set(hisPosition);
         action = "evade";
         break;
       } else {
-        if(currentMass * this.genome.predationRatio > checkArchon.getMass()) {
+        if(myMass * this.genome.predationRatio > hisMass) {
           action = "pursue";
           
-          if(checkArchon.equals(this.pursue)) {
+          if(hisPosition.equals(this.pursue)) {
             closestArchon.set(this.pursue); // If we're already targeting, stay the course
             break;
           } else {
-            if(checkArchon.getDistanceTo(this.position) < closestArchon.getDistanceTo(this.position)) {
-              closestArchon.set(checkArchon);
+            if(hisPosition.getDistanceTo(this.position) < closestArchon.getDistanceTo(this.position)) {
+              closestArchon.set(hisPosition);
             }
           }
         }
@@ -181,43 +231,25 @@ Archonia.Form.HeadState.prototype = {
     }
   },
   
-  updateMannaTargets: function() {
-    var closestManna = Archonia.Form.XY();
-
-    for(var i = 0; i < this.manna.length; i++) {
-      var checkManna = this.manna[i];
-      
-      if(checkManna.equals(this.mannaOfInterest)) {
-        closestManna.set(this.mannaOfInterest); // If we're already targeting, stay the course
-        break;
-      } else {
-        if(checkManna.getDistanceTo(this.position) < closestManna.getDistanceTo(this.position)) {
-          closestManna.set(checkManna);
-        }
-      }
-    }
-    
-    if(closestManna.equals(0)) { this.mannaOfInterest.reset(); }
-    else { this.mannaOfInterest.set(closestManna); }
-  },
-  
-  updateTouchedArchons: function(currentMass) {
+  updateTouchedArchons: function(myMass) {
     var theOtherGuy = Archonia.Form.XY();
     
     for(var i = 0; i < this.touchedArchons.length; i++) {
       var checkArchon = this.touchedArchons[i];
+      var hisMass = checkArchon.goo.getMass();
+      var hisPosition = checkArchon.position;
       
-      if(checkArchon.equals(this.theOtherGuy)) {
+      if(hisPosition.equals(this.theOtherGuy)) {
         theOtherGuy.set(this.theOtherGuy);
         break;
       } else {
-        theOtherGuy.set(checkArchon);
+        theOtherGuy.set(hisPosition);
         
         var iAmThePoisoner = this.genome.toxinStrength > checkArchon.genome.toxinResistance;
         var iAmThePoisoned = checkArchon.genome.toxinStrength > this.genome.toxinResistance;
 
-        var iAmThePredator = currentMass * this.genome.predationRatio > checkArchon.getMass();
-        var iAmThePrey = checkArchon.getMass() * checkArchon.genome.predationRatio > currentMass;
+        var iAmThePredator = myMass * this.genome.predationRatio > hisMass;
+        var iAmThePrey = hisMass * checkArchon.genome.predationRatio > myMass;
 
         if(iAmThePredator) {
           if(iAmThePoisoned) { this.tweenStage = "poisoned"; }

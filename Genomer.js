@@ -182,28 +182,16 @@ Archonia.Form.Genome.prototype = {
 var primordialGenome = { core: {
   color:                     new Archonia.Form.ColorGene(tinycolor('hsl(180, 100%, 50%)')),
 
-  hungerToleranceFactor:     new Archonia.Form.ScalarGene(0.75),
-  tempToleranceFactor:       new Archonia.Form.ScalarGene(1),
   maxMAcceleration:          new Archonia.Form.ScalarGene(15),
   maxMVelocity:              new Archonia.Form.ScalarGene(30),
   sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),
-  
-  // These control how willing the archon is to go outside
-  // his temp comfort zone relative to food and food searching;
-  // #1 is for temperatures within his optimal tolerance zone (opt + range radius)
-  // #2 is for temps between his optimal and his extreme (opt + range diameter)
-  // #3 is for temps beyond his extreme (beyond the diameter)
-  tempTolerance1CurveWidth:    new Archonia.Form.ScalarGene(1.5),
-  tempTolerance2CurveWidth:    new Archonia.Form.ScalarGene(1.5),
-  tempTolerance3CurveWidth:    new Archonia.Form.ScalarGene(1.5),
   
   birthMassAdultCalories:      new Archonia.Form.ScalarGene(100),
   birthMassLarvalCalories:     new Archonia.Form.ScalarGene(100),
   offspringMassLarvalCalories: new Archonia.Form.ScalarGene(100),
   offspringMassAdultCalories:  new Archonia.Form.ScalarGene(100),
-
-  calorieGainToAttemptFromPredation: new Archonia.Form.ScalarGene(10 * Archonia.Axioms.caloriesPerManna),
-  predationRatio:                    new Archonia.Form.ScalarGene(1.5),
+  predationRatio:              new Archonia.Form.ScalarGene(1.5),
+  predatorFearRatio:           new Archonia.Form.ScalarGene(1.5),
 
   // dummy entries so the getters will work
   optimalTemp: null,
@@ -216,10 +204,19 @@ var primordialGenome = { core: {
   toxinResistance:             new Archonia.Form.ScalarGene(1),
   reproductionThreshold:       new Archonia.Form.ScalarGene(500),
   embryoThreshold:             new Archonia.Form.ScalarGene(200),
-  encystThreshold:             new Archonia.Form.ScalarGene(0.85),
   unencystThreshold:           new Archonia.Form.ScalarGene(0.50),
+
+  tempToleranceMultiplier:     new Archonia.Form.ScalarGene(1),
+  tempThresholdEncyst:         new Archonia.Form.ScalarGene(0.85),
+  tempThresholdVerticalOnly:   new Archonia.Form.ScalarGene(0.80),
+  tempThresholdHorizontalOk:   new Archonia.Form.ScalarGene(0.75),
   tempSignalBufferSize:        new Archonia.Form.ScalarGene(10),
-  tempSignalDecayRate:         new Archonia.Form.ScalarGene(0.03)
+  tempSignalDecayRate:         new Archonia.Form.ScalarGene(0.03),
+
+  hungerToleranceMultiplier:   new Archonia.Form.ScalarGene(0.75),
+  hungerSignalBufferSize:      new Archonia.Form.ScalarGene(10),
+  hungerSignalDecayRate:       new Archonia.Form.ScalarGene(0.03)
+
   
 } };
 
