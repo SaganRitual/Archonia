@@ -29,8 +29,18 @@ Archonia.Form.HeadState.prototype = {
     if(!action) {
       action = this.getFoodSearchAction();
       
-      if(!this.foodSearchState) { // If we weren't already searching, tell head to restart
+      if(this.foodSearchState) {
+        if(this.frameCount > this.whenToIssueNextFoodSearchCommand) {
+          this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
+          // from here we'll fall through and send "food search"
+        } else {
+          // If we were already searching, wait a bit before updating
+          action.action = "waitForCommand";
+        }
+      } else {
+        // If we weren't already searching, tell head to restart
         action.action = "r" + action.action;
+        this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
       }
       
       foodSearchState = true;
@@ -98,6 +108,9 @@ Archonia.Form.HeadState.prototype = {
     this.genome = genome;
     this.reset();
     
+    this.ticksBetweenFoodSearchCommands = 60;
+    this.whenToIssueNextFoodSearchCommand = 0;
+    
     this.tempSignalScaleLo = this.genome.optimalTempLo - this.genome.tempRadius;
     this.tempSignalScaleHi = this.genome.optimalTempHi + this.genome.tempRadius;
 
@@ -134,13 +147,22 @@ Archonia.Form.HeadState.prototype = {
   },
   
   senseManna: function(manna) { this.manna.push(manna); },
-  senseOtherArchon: function(otherArchon) { this.sensedArchons.push(otherArchon); },
+
+  senseOtherArchon: function(otherArchon) {
+    // Don't count myself
+    if(this.head.archon.archoniaUniqueId !== otherArchon.archoniaUniqueId) {
+      this.sensedArchons.push(otherArchon);
+    }
+  },
+
   senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
   senseTemp: function() {
     this.tempInput.store(Archonia.Cosmos.Sun.getTemperature(this.position) - this.genome.optimalTemp);
   },
   
-  tick: function(currentMass) {
+  tick: function(frameCount, currentMass) {
+    this.frameCount = frameCount;
+    
     this.senseTemp();   // The spatial senses are driven externally
     this.senseHunger(); // we have to drive these ourselves
     
