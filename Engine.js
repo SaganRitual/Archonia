@@ -50,6 +50,8 @@ if(typeof window === "undefined") {
       Archonia.Cosmos.fatManna.initialize(Archonia.Cosmos.allTheManna);
       Archonia.Cosmos.fatManna.start();
       
+      Archonia.Cosmos.familyTree = new Archonia.Cosmos.FamilyTree();
+      
       // Produce a lot of genetic variation in the first generation
       Archonia.Cosmos.momentOfCreation = true;
       Archonia.Cosmos.Dronery.start();

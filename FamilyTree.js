@@ -5,19 +5,19 @@
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
-if(module !== undefined) {
+if(typeof module !== "undefined") {
     Archonia.Essence = require('./Essence.js');
 }
 
 (function(Archonia) {
 
-Archonia.Form.FamilyTree = function() {
+Archonia.Cosmos.FamilyTree = function() {
   this.everyone = {
     'god': { parentId: 'none', myChildren: [] }
   };
 };
 
-Archonia.Form.FamilyTree.prototype = {
+Archonia.Cosmos.FamilyTree.prototype = {
   addMe: function(myId, idOfMyParent) {
     if(myId === undefined || idOfMyParent === undefined) {
         throw new Archonia.Essence.BirthDefect("IDs missing");
@@ -72,6 +72,6 @@ Archonia.Form.FamilyTree.prototype = {
   
 })(Archonia);
 
-if(module !== undefined) {
-    module.exports = Archonia.Form.FamilyTree;
+if(typeof module !== "undefined") {
+    module.exports = Archonia.Cosmos.FamilyTree;
 }

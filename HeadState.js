@@ -6,6 +6,15 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
+  
+  var tooCloselyRelated = function(me, theOtherGuy) {
+    var r = Archonia.Cosmos.familyTree.getDegreeOfRelatedness(
+      me.archoniaUniqueObjectId, theOtherGuy.archoniaUniqueObjectId
+    );
+    
+    // Self is 0, parent/child is 1, siblings are 2; everyone else is fair game
+    return r <= 2;
+  };
 
 Archonia.Form.HeadState = function(head, position) {
   this.head = head;
@@ -307,10 +316,7 @@ Archonia.Form.HeadState.prototype = {
   senseManna: function(manna) { this.manna.push(manna); },
 
   senseOtherArchon: function(otherArchon) {
-    // Don't count myself
-    if(this.head.archon.archoniaUniqueId !== otherArchon.archoniaUniqueId) {
-      this.sensedArchons.push(otherArchon);
-    }
+    if(!tooCloselyRelated(this.head.archon, otherArchon)) { this.sensedArchons.push(otherArchon); }
   },
 
   senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
@@ -334,7 +340,9 @@ Archonia.Form.HeadState.prototype = {
     this.firstTickAfterLaunch = false;
   },
   
-  touchOtherArchon: function(otherArchon) { this.touchedArchons.push(otherArchon); },
+  touchOtherArchon: function(otherArchon) {
+    if(!tooCloselyRelated(this.head.archon, otherArchon)) { this.touchedArchons.push(otherArchon); }
+  }
 };
 
 })(Archonia);

@@ -244,14 +244,15 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     y = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20);
 
     this.myParentArchonId = 0;
-    //Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, 'god');
+    Archonia.Cosmos.familyTree.addMe(this.archoniaUniqueObjectId, 'god');
   } else {
     x = myParentArchon.position.x; y = myParentArchon.position.y;
 
     this.position.set(myParentArchon.position);
     this.velocity.set(myParentArchon.velocity).timesScalar(-1);
     this.myParentArchonId = myParentArchon.archoniaUniqueObjectId;
-   // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
+    
+    Archonia.Cosmos.familyTree.addMe(this.archoniaUniqueObjectId, myParentArchon.archoniaUniqueObjectId);
   }
 
   if(Archonia.Cosmos.momentOfCreation && !this.tweenRunning) {
