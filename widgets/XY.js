@@ -96,7 +96,7 @@ Archonia.Form.XY.prototype = {
           if(isNaN(sourceOrMaybeX || !isFinite(sourceOrMaybeX))) {
             // sourceOrMaybeX appears to be a number, an x-coordinate, but
             // maybeY has nothing in it. Tell the caller we hate him
-            throw TypeError("Bad argument");
+            throw Error("Bad arguments to XY()");
           } else {
             // Single number specified, take it as the value for both
             this.x = sourceOrMaybeX;
@@ -147,18 +147,18 @@ Archonia.Form.RandomXY.prototype = {
   },
   
   setMin: function(minX, minY) {
-    if(minX === undefined || minY === undefined) { throw new Error("Bad arguments"); }
+    if(minX === undefined || minY === undefined) { throw new Error("Bad arguments to setMin()"); }
     else { this.min.set(minX, minY); }
   },
   
   setMax: function(maxX, maxY) {
-    if(maxX === undefined || maxY === undefined) { throw new Error("Bad arguments"); }
+    if(maxX === undefined || maxY === undefined) { throw new Error("Bad arguments setMax()"); }
     else { this.max.set(maxX, maxY); }
   }
 };
 
 // Although many of our functions are ok with undefined arguments, a number of them are not
-function rp(a1) { if(a1 === undefined) { throw new TypeError("Bad arguments"); } }
+function rp(a1) { if(a1 === undefined) { throw new Error("Bad arguments to rp()"); } }
 
 function getMagnitude(a1, a2) {
   var xy = Archonia.Form.XY(a1, a2);

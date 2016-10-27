@@ -100,7 +100,7 @@ if(typeof window === 'undefined') {
     },
   
     slice: function(start, howMany) {
-      if(this.elements.length === 0) { throw new ReferenceError("Bad arguments"); }
+      if(this.elements.length === 0) { throw new ReferenceError("Bad arguments to slice()"); }
       var ix = null;
       
       if(start >= 0) {
