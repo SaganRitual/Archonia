@@ -52,38 +52,22 @@ var geneReport = function(e, archon) {
   console.log('****************************');
 };
 
-var colorTweenComplete = function(archon) {
-  archon.sprite.tint = archon.genome.color;
-  archon.tweenRunning = false;
+Archonia.Form.Color = function(archon) {
+  this.h = 0;
+  this.s = 0;
+  this.L = 0;
+  this.archon = archon;
 };
 
-var getHueForTween = function() {
-  return this.sprite.archoniaHue;
-};
-
-var setHueForTween = function(hue) {
-  this.sprite.archoniaHue = hue;
+Archonia.Form.Color.prototype = {
+  getColorAsDecimal: function() {
+    var hslString = "hsl(" + this.h + ", " + this.s + "%, " + this.L + "%)";
+    return parseInt(tinycolor(hslString).toHex(), 16);
+  },
   
-  var hsl = "hsl(" + this.sprite.archoniaHue + ", 100%, 50%)";
-  var t = tinycolor(hsl);
-
-  this.sprite.tint = parseInt(t.toHex(), 16); 
-};
-
-var getLumaForTween = function() {
-  return this.sprite.archoniaLuma;
-};
-
-var setLumaForTween = function(luma) {
-  this.sprite.archoniaLuma = luma;
-  
-  var hsl = "hsl(" + this.sprite.archoniaHue +
-              ", " + (this.sprite.archoniaSaturation * 100).toFixed() +
-              "%, " + (this.sprite.archoniaLuma * 100).toFixed() + "%)";
-              
-  var t = tinycolor(hsl);
-
-  this.sprite.tint = parseInt(t.toHex(), 16); 
+  stopTween: function(_this) {
+    _this.archon.tweening = false;
+  }
 };
 
 Archonia.Form.Archon = function(phaseron) {
@@ -107,23 +91,11 @@ Archonia.Form.Archon = function(phaseron) {
   
   generateArchonoidPrototype(); // This happens only once
 
-  Object.defineProperty(this, 'archoniaHue', {
-    get: function archoniaHue() {
-      return getHueForTween.call(this); },
-    set: function archoniaHue(v) {
-      setHueForTween.call(this, v); }
-  });
-
-  Object.defineProperty(this, 'archoniaLuma', {
-    get: function archoniaLuma() {
-      return getLumaForTween.call(this); },
-    set: function archoniaLuma(v) {
-      setLumaForTween.call(this, v); }
-  });
-  
   this.foundCurrentFoodTarget = false;
   this.currentFoodTarget = Archonia.Form.XY();
   this.newFoodTarget = Archonia.Form.XY();
+  
+  this.color = new Archonia.Form.Color(this);
   
   this.position = new Archonia.Form.Archonoid(p);
   this.velocity = new Archonia.Form.Archonoid(p.body.velocity);
@@ -255,10 +227,6 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
     Archonia.Cosmos.familyTree.addMe(this.archoniaUniqueObjectId, myParentArchon.archoniaUniqueObjectId);
   }
 
-  if(Archonia.Cosmos.momentOfCreation && !this.tweenRunning) {
-    this.sprite.tint = this.genome.color;
-  }
-
   this.sprite.reset(x, y, 1); this.button.reset(0, 0, 1); this.sensor.reset(x, y, 1);
 };
 
@@ -275,57 +243,59 @@ Archonia.Form.Archon.prototype.setMVelocity = function(vector) {
 };
 
 Archonia.Form.Archon.prototype.startTween = function(which) {
-  this.tweenRunning = true;
+  this.tweening = true;
   
   switch(which) {
   case "birth":
     // Remember: the property in the prototype is on the archon; the property
     // here is on the sprite. The get/set for the archon refer to this value
-    this.archoniaHue = 0;
+    this.color.h = 0;
+    this.color.s = 100;
+    this.color.L = 50;
   
-    this.birthTween = Archonia.Engine.game.add.tween(this).
-      to({ archoniaHue: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
+    this.tween = Archonia.Engine.game.add.tween(this.color).
+      to({ h: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
     
-    this.birthTween.onComplete.add(colorTweenComplete);
+    this.tween.onComplete.add(this.color.stopTween);
     break;
     
   case "eaten":
-    this.archoniaHue = 0;               // Red, but the saturation will make it black
-    this.sprite.archoniaSaturation = 0; // (sprite because I don't have archon sat set up yet)
-    this.archoniaLuma = 0;
+    this.color.h = 0; // Red, but the saturation will make it black
+    this.color.s = 0;
+    this.color.L = 0;
 
-    this.beingEatenTween = Archonia.Engine.game.add.tween(this).
-      to({ archoniaLuma: 1 }, 0.25 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+    this.tween = Archonia.Engine.game.add.tween(this.color).
+      to({ L: 100 }, 0.25 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
 
-    this.beingEatenTween.onComplete.add(colorTweenComplete);
+    this.tween.onComplete.add(this.color.stopTween);
     break;
     
   case "poisoned":
-    this.archoniaHue = 0; // Red
-    this.sprite.archoniaSaturation = 1; // (sprite because I don't have archon sat set up yet)
-    this.archoniaLuma = 0;
+    this.color.h = 0;     // Red
+    this.color.s = 100;
+    this.color.L = 0;
     
-    this.beingPoisonedTween = Archonia.Engine.game.add.tween(this).
-      to({ archoniaLuma: 1 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+    this.tween = Archonia.Engine.game.add.tween(this.color).
+      to({ L: 100 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
 
-    this.beingPoisonedTween.onComplete.add(colorTweenComplete);
+    this.tween.onComplete.add(this.color.stopTween);
     break;
     
   case "encyst":
-    this.archoniaHue = 30;
-    this.sprite.archoniaSaturation = 0.50;
-    this.archoniaLuma = 0.75;
+    this.color.h = 30;
+    this.color.s = 50;
+    this.color.L = 75;
   
-    this.encystedTween = Archonia.Engine.game.add.tween(this).
-      to({ archoniaLuma: 1 }, 2 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+    this.tween = Archonia.Engine.game.add.tween(this.color).
+      to({ L: 100 }, 2 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
 
-    this.encystedTween.onComplete.add(colorTweenComplete);
+    this.tween.onComplete.add(this.color.stopTween);
     break;
   }
 };
 
 Archonia.Form.Archon.prototype.stopTween = function() {
-  this.tweenRunning = false;
+  this.tweening = false;
 };
 
 Archonia.Form.Archon.prototype.throttle = function(id, interval, callback, context) {
@@ -341,6 +311,8 @@ Archonia.Form.Archon.prototype.tick = function() {
 
   this.sensor.x = this.sprite.x; // So the sensor will stay attached
   this.sensor.y = this.sprite.y; // So the sensor will stay attached
+  
+  this.sprite.tint = this.tweening ? this.color.getColorAsDecimal() : this.genome.color;
   
   if(!this.encysted) {
     this.legs.tick(this.frameCount);

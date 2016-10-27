@@ -81,12 +81,18 @@ Archonia.Form.HeadState.prototype = {
           // Note: we don't say stateSet = true here; after
           // unencysting, we want one of the other states to awaken
           state.tween = "stop";
+        } else {
+          state.tween = false;
+          stateSet = true;
         }
       } else {
         if(this.encystmentState === "encyst") {
+          state.current = "encysted";
           state.tween = "encyst";
           state.action = "encyst";
           stateSet = true;
+        } else {
+          state.tween = false;
         }
       }
     }
@@ -135,6 +141,12 @@ Archonia.Form.HeadState.prototype = {
 
       state.current = "foodSearchState";
       stateSet = true;
+    }
+    
+    if(this.firstTickAfterLaunch) {
+      if(state.tween === false) { state.tween = "birth"; }
+    } else {
+      if(state.tween === "birth") { state.tween = false; }
     }
   },
   
@@ -236,7 +248,7 @@ Archonia.Form.HeadState.prototype = {
         theOtherGuy.set(this.theOtherGuy);
         break;
       } else {
-        result.newOtherGuy = true;
+        result.newOtherGuy = true; result.tween = false;
         theOtherGuy.set(hisPosition);
         
         var iAmThePoisoner = this.genome.toxinStrength > checkArchon.genome.toxinResistance;
@@ -307,10 +319,7 @@ Archonia.Form.HeadState.prototype = {
     this.touchedArchonState = {};
     this.sensedArchonState = {};
     this.mannaGrabState = {};
-    this.headState = { action: "waitForCommand", tween: false };
-    
-    this.tweenStage = "birth";
-    this.tween = false;
+    this.headState = { action: "waitForCommand", tween: "birth" };
   },
   
   senseManna: function(manna) { this.manna.push(manna); },
