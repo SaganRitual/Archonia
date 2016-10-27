@@ -204,10 +204,10 @@ var primordialGenome = { core: {
   toxinResistance:             new Archonia.Form.ScalarGene(1),
   reproductionThreshold:       new Archonia.Form.ScalarGene(500),
   embryoThreshold:             new Archonia.Form.ScalarGene(200),
-  unencystThreshold:           new Archonia.Form.ScalarGene(0.50),
 
   tempToleranceMultiplier:     new Archonia.Form.ScalarGene(1),
   tempThresholdEncyst:         new Archonia.Form.ScalarGene(0.85),
+  tempThresholdUnencyst:       new Archonia.Form.ScalarGene(0.50),
   tempThresholdVerticalOnly:   new Archonia.Form.ScalarGene(0.80),
   tempThresholdHorizontalOk:   new Archonia.Form.ScalarGene(0.75),
   tempSignalBufferSize:        new Archonia.Form.ScalarGene(10),

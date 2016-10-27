@@ -164,7 +164,7 @@ Archonia.Form.Head.prototype = {
     var urge = this.state.getAction();
     
     switch(urge.action) {
-      case "rfoodSearch": this.seekFood(urge.where, true);  break; // restart from some other state
+      case "rFoodSearch": this.seekFood(urge.where, true);  break; // restart from some other state
       case "foodSearch":  this.seekFood(urge.where, false); break; // continue ongoing search
       case "encyst":      this.archon.encyst();             break;
       case "move":        this.move(urge.where);            break;

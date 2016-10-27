@@ -19,16 +19,26 @@ Archonia.Form.HeadState = function(head, position) {
 };
 
 Archonia.Form.HeadState.prototype = {
+  computeEncystmentState: function() {
+    var result = false;
+    var tempSignal = this.tempInput.getSignalStrength();
+    
+    if(Math.abs(tempSignal) > this.genome.tempThresholdEncyst) {
+      result = "encyst";
+    } else if(Math.abs(tempSignal) < this.genome.tempThresholdUnencyst) {
+      result = "unencyst";
+    }
+    
+    this.encystmentState = result;
+  },
+  
   computeFoodSearchState: function() {
-    this.senseHunger(); this.senseTemp();
-
     var tempSignal = this.tempInput.getSignalStrength();
     var hungerSignal = this.hungerInput.getSignalStrength();
     var action = 0;
     
     if(Math.abs(tempSignal) > this.genome.tempThresholdHorizontalOk) { action++; }
     if(Math.abs(tempSignal) > this.genome.tempThresholdVerticalOnly) { action++; }
-    if(Math.abs(tempSignal) > this.genome.tempThresholdEncyst) { action++; }
     
     var netTemp = Math.abs(tempSignal) * this.genome.tempToleranceMultiplier;
     var netHunger = hungerSignal * this.genome.hungerToleranceMultiplier;
@@ -37,16 +47,15 @@ Archonia.Form.HeadState.prototype = {
     if(netTemp > netHunger) {
       switch(action) {
         case 0: if(tempSignal < 0) { result.where = "randomNoDown"; } else { result.where = "randomNoUp"; } break;
-        case 1: if(tempSignal < 0) { result.where = "randomUpOnly"; } else { result.where = "randomDownOnly"; } break;
-        case 2: { result = { action: "encyst" }; } break;
-        case 3: { result = { action: "encyst" }; } break;
+        
+        case 1:
+        case 2: if(tempSignal < 0) { result.where = "randomUpOnly"; } else { result.where = "randomDownOnly"; } break;
       }
     } else {
       switch(action) {
         case 0: result = { action: "foodSearch", where: "random" }; break;
-        case 1: result = { action: "foodSearch", where: "random" }; break;
-        case 2: if(tempSignal < 0) { result.where = "randomNoDown"; } else { result.where = "randomNoUp"; } break;
-        case 3: if(tempSignal < 0) { result.where = "randomUpOnly"; } else { result.where = "randomDownOnly"; } break;
+        case 1: if(tempSignal < 0) { result.where = "randomNoDown"; } else { result.where = "randomNoUp"; } break;
+        case 2: if(tempSignal < 0) { result.where = "randomUpOnly"; } else { result.where = "randomDownOnly"; } break;
       }
     }
     
@@ -56,6 +65,22 @@ Archonia.Form.HeadState.prototype = {
   computeHeadState: function() {
     var state = this.headState; state.action = "waitForCommand";
     var stateSet = false;
+    
+    if(!stateSet && this.encystmentState) {
+      if(state.current === "encysted") {
+        if(this.encystmentState === "unencyst") {
+          // Note: we don't say stateSet = true here; after
+          // unencysting, we want one of the other states to awaken
+          state.tween = "stop";
+        }
+      } else {
+        if(this.encystmentState === "encyst") {
+          state.tween = "encyst";
+          state.action = "encyst";
+          stateSet = true;
+        }
+      }
+    }
     
     if(!stateSet && this.touchedArchonState) {
       if(state.current !== "touchedArchonState") { state.action = "stop"; }
@@ -84,43 +109,22 @@ Archonia.Form.HeadState.prototype = {
       stateSet = true;
     }
     
-    if(!stateSet && this.foodSearchState.action === "encyst") {
-      if(state.current === "encysted") {
-        // We were already encysted
-        if(state.tween === "stop") { state.tween = "encyst"; }
-        else { state.tween = false; }
-      } else {
-        // We're just now encysting; if there are any other
-        // tweens running, we need to stop them. Otherwise,
-        // start the encystment tween
-        if(state.tween) { state.tween = "stop"; }
-        else { state.tween = "encyst"; }
-
-        state.action = "stop";
-      }
-
-      state.current = "encysted";
-      stateSet = true;
-    }
-    
-    if(!stateSet && this.foodSearchState.action === "foodSearch") {
-      if(state.current === "foodSearch") {
+    if(!stateSet && this.foodSearchState) {
+      if(state.current === "foodSearchState") {
         if(this.frameCount > this.whenToIssueNextFoodSearchCommand) {
           this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
-          state.action = "foodSearch"; state.where = this.foodSearchState.where;
+          state.action = "foodSearchState"; state.where = this.foodSearchState.where;
         } else {
           // If we were already searching, wait a bit before updating
           state.action = "waitForCommand";
         }
-        state.tween = false;
       } else {
         // If we weren't already searching, tell head to restart
-        state.action = "r" + state.action;
         this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
-        state.tween = "stop";
+        state.action = "rFoodSearch";
       }
 
-      state.current = "foodSearch";
+      state.current = "foodSearchState";
       stateSet = true;
     }
   },
@@ -289,7 +293,8 @@ Archonia.Form.HeadState.prototype = {
     this.pursue.reset();
     this.theOtherGuy.reset();
     
-    this.foodSearchState = { encysted: false };
+    this.foodSearchState = {};
+    this.encystmentState = {};
     this.touchedArchonState = {};
     this.sensedArchonState = {};
     this.mannaGrabState = {};
@@ -316,6 +321,10 @@ Archonia.Form.HeadState.prototype = {
   tick: function(frameCount, currentMass) {
     this.frameCount = frameCount;
     
+    this.senseHunger();
+    this.senseTemp();
+    
+    this.computeEncystmentState();
     this.computeFoodSearchState();
     this.computeMannaGrabState();
     this.computeSensedArchonState(currentMass);
