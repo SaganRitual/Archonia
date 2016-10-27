@@ -54,6 +54,7 @@ var geneReport = function(e, archon) {
 
 var colorTweenComplete = function(archon) {
   archon.sprite.tint = archon.genome.color;
+  archon.tweenRunning = false;
 };
 
 var getHueForTween = function() {
@@ -253,89 +254,11 @@ Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
    // Archonia.Axioms.archonia.familyTree.addMe(this.uniqueID, myParentArchon.uniqueID);
   }
 
-  if(Archonia.Cosmos.momentOfCreation) {
+  if(Archonia.Cosmos.momentOfCreation && !this.tweenRunning) {
     this.sprite.tint = this.genome.color;
-  } else {
-    // Remember: the property in the prototype is on the archon; the property
-    // here is on the sprite. The get/set for the archon refer to this value
-    this.archoniaHue = 0;
-  
-    this.birthTween = Archonia.Engine.game.add.tween(this).
-      to({ archoniaHue: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
-    
-    this.birthTween.onComplete.add(colorTweenComplete);
   }
 
   this.sprite.reset(x, y, 1); this.button.reset(0, 0, 1); this.sensor.reset(x, y, 1);
-};
-
-Archonia.Form.Archon.prototype.senseArchon = function(theOtherGuy) {
-  // Don't eat yourself, or your children, and don't be eaten
-  // by your parent
-  if(this.archoniaUniqueObjectId === theOtherGuy.archon.archoniaUniqueObjectId) { return; }
-  if(this.archoniaUniqueObjectId === theOtherGuy.archon.myParentArchonId) { return; }
-  if(this.myParentArchonId === theOtherGuy.archon.archoniaUniqueObjectId) { return; }
-
-  var drawDebugLines = false;
-  if(drawDebugLines === true) {
-    Archonia.Essence.Dbitmap.aLine(this.position, theOtherGuy.archon, 'blue');
-  }
-  
-  var m = this.goo.getMass(), n = theOtherGuy.archon.goo.getMass();
-
-  if(theOtherGuy.archon.head.encysted || m / n > this.genome.predationRatio) {
-  
-    // We're already working on one meal; stick with it until we're done
-    if(theOtherGuy.archon.archoniaUniqueObjectId === this.currentPrey) {
-      this.currentPreyStillThere = true;
-      this.newPrey = null;
-    }
-  
-    if(this.newPrey === null && !this.currentPreyStillThere) {
-      this.newPrey = theOtherGuy.archon.archoniaUniqueObjectId;
-    }
-
-  } else if(n / m > theOtherGuy.archon.genome.predationRatio && !theOtherGuy.archon.head.encysted) {
-  
-    // We're already working on one meal; stick with it until we're done
-    if(theOtherGuy.archon.archoniaUniqueObjectId === this.currentPredator) {
-      this.currentPredatorStillThere = true;
-      this.newPredator = null;
-    }
-  
-    if(this.newPredator === null && !this.currentPredatorStillThere) {
-      this.newPredator = theOtherGuy.archon.archoniaUniqueObjectId;
-    }
-
-  }
-};
-
-Archonia.Form.Archon.prototype.senseManna = function(manna) {
-  if(this.position.getDistanceTo(manna) < this.sensorRadius) {
-    
-    if(this.currentFoodTarget.equals(manna)) {
-      this.foundCurrentFoodTarget = true;
-    } else {
-      var c = this.position.getDistanceTo(this.newFoodTarget);
-      var n = this.position.getDistanceTo(manna);
-    
-      if(this.newFoodTarget.equals(0) || n < c) {
-        this.newFoodTarget.set(manna);
-      }
-    }
-    
-    var drawDebugLines = false;
-    
-    if(drawDebugLines) {
-      if(this.foundCurrentFoodTarget) {
-        Archonia.Essence.Dbitmap.aLine(this.position, this.currentFoodTarget, 'blue');
-      }
-      
-      if(!this.newFoodTarget.equals(0)) {
-        Archonia.Essence.Dbitmap.aLine(this.position, this.newFoodTarget, 'yellow');
-      }
-    }
-  }
 };
 
 Archonia.Form.Archon.prototype.setPosition = function(a1, a2) {
@@ -350,6 +273,31 @@ Archonia.Form.Archon.prototype.setMVelocity = function(vector) {
   this.velocity.set(vector);
 };
 
+Archonia.Form.Archon.prototype.startTween = function(which) {
+  this.tweenRunning = true;
+  
+  switch(which) {
+  case "birth":
+    // Remember: the property in the prototype is on the archon; the property
+    // here is on the sprite. The get/set for the archon refer to this value
+    this.archoniaHue = 0;
+  
+    this.birthTween = Archonia.Engine.game.add.tween(this).
+      to({ archoniaHue: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
+    
+    this.birthTween.onComplete.add(colorTweenComplete);
+    break;
+    
+  case "beingEaten":
+  case "beingPoisoned":
+  case "encysted":
+  }
+};
+
+Archonia.Form.Archon.prototype.stopTween = function() {
+  this.tweenRunning = false;
+};
+
 Archonia.Form.Archon.prototype.throttle = function(id, interval, callback, context) {
   if(this.uniqueID === id && this.frameCount % interval === 0) {
     callback.call(context);
@@ -360,79 +308,16 @@ Archonia.Form.Archon.prototype.tick = function() {
   if(!this.launched) { return; }
   
   this.frameCount++;
-  
-  // If I've been injured so badly (or was born with a serious defect),
-  // then everyone can see me as injured. This doesn't matter unless
-  // I'm a parasite. Normally, a parasite is immune to parasitism;
-  // other parasites will leave me alone. But when they see my
-  // injury they'll come after me
-  if(this.maxMVelocity < Archonia.Axioms.maxMagnitudeV / 5) {
-    this.isDisabled = true;
-  }
 
   this.sensor.x = this.sprite.x; // So the sensor will stay attached
   this.sensor.y = this.sprite.y; // So the sensor will stay attached
-  
-  if(!this.foundCurrentFoodTarget) {
-    this.currentFoodTarget.set(this.newFoodTarget);
-  }
-  
-  this.foundCurrentFoodTarget = false;
-  this.newFoodTarget.set(0);
   
   if(!this.encysted) {
     this.legs.tick(this.frameCount);
   }
   
-  if(this.beingPoisoned || this.poisoning) { this.beingEaten = false; }
-
-  if(this.beingPoisoned) {
-
-    if(this.beingPoisonedTween === null) {
-      this.archoniaHue = 0; // Red
-      this.sprite.archoniaSaturation = 1; // (sprite because I don't have archon sat set up yet)
-      this.archoniaLuma = 0;
-      
-      this.beingPoisonedTween = Archonia.Engine.game.add.tween(this).
-        to({ archoniaLuma: 1 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
-      }
-  } else {
-    if(this.beingPoisonedTween !== null) {
-      this.beingPoisonedTween.stop();
-      colorTweenComplete(this);
-      this.beingPoisonedTween = null;
-    }
-  }
-  
-  if(this.beingEaten) {
-    if(this.beingEatenTween === null) {
-      this.archoniaHue = 0;               // Red, but the saturation will make it black
-      this.sprite.archoniaSaturation = 0; // (sprite because I don't have archon sat set up yet)
-      this.archoniaLuma = 0;
-  
-      this.beingEatenTween = Archonia.Engine.game.add.tween(this).
-        to({ archoniaLuma: 1 }, 0.25 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
-      }
-  } else {
-    if(this.beingEatenTween !== null) {
-      this.beingEatenTween.stop();
-      colorTweenComplete(this);
-      this.beingEatenTween = null;
-    }
-  }
-  
-  if(!this.currentPreyStillThere) { this.currentPrey = this.newPrey; }
-  if(!this.currentPredatorStillThere) { this.currentPredator = this.newPredator; }
-  if(this.currentPredator === null && this.newPredator === null) { this.beingEaten = false; }
-  
-  this.beingPoisoned = false; // goo will turn these back on if necessary
-  this.poisoning = false;
-  
   this.goo.tick(this.frameCount);
   this.head.tick(this.frameCount, this.currentFoodTarget, this.currentPredator, this.currentPrey);
-  
-  this.currentPreyStillThere = false; this.newPrey = null;
-  this.currentPredatorStillThere = false; this.newPredator = null;
 };
 
 Archonia.Form.Archon.prototype.unencyst = function() { this.encysted = false; };

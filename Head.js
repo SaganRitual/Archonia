@@ -173,6 +173,11 @@ Archonia.Form.Head.prototype = {
       case "waitForCommand":                                break;
     }
     
+    var tween = this.state.getTween();
+    if(tween !== false) {
+      this.archon.startTween(tween);
+    }
+    
     this.firstTickAfterLaunch = false;
   }
 };
