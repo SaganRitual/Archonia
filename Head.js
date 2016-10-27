@@ -167,19 +167,16 @@ Archonia.Form.Head.prototype = {
       case "rfoodSearch": this.seekFood(urge.where, true);  break; // restart from some other state
       case "foodSearch":  this.seekFood(urge.where, false); break; // continue ongoing search
       case "encyst":      this.archon.encyst();             break;
-      case "unencyst":    this.archon.unencyst();           break;
       case "move":        this.move(urge.where);            break;
       case "stop":        this.legs.stop();                 break;
       case "waitForCommand":                                break;
     }
     
     var tween = this.state.getTween();
-    if(tween !== false) {
-      if(tween === "stop") {
-        this.archon.stopTween();
-      } else {
-        this.archon.startTween(tween);
-      }
+    if(tween === "stop") {
+      this.archon.stopTween();
+    } else if(tween) {
+      this.archon.startTween(tween);
     }
     
     this.firstTickAfterLaunch = false;
