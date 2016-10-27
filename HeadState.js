@@ -23,7 +23,6 @@ Archonia.Form.HeadState = function(head, position) {
   this.mannaOfInterest = Archonia.Form.XY();
   this.evade = Archonia.Form.XY();
   this.pursue = Archonia.Form.XY();
-  this.theOtherGuy = Archonia.Form.XY();
   this.reset();
 };
 
@@ -243,9 +242,10 @@ Archonia.Form.HeadState.prototype = {
       var hisMass = checkArchon.goo.getMass();
       var hisPosition = checkArchon.position;
       
-      if(hisPosition.equals(this.theOtherGuy)) {
+      if(hisPosition.equals(this.touchedArchonState.theOtherGuy)) {
         result.newOtherGuy = false;
-        theOtherGuy.set(this.theOtherGuy);
+        theOtherGuy.set(this.touchedArchonState.theOtherGuy);
+        this.head.archon.goo.eat(checkArchon);
         break;
       } else {
         result.newOtherGuy = true; result.tween = false;
@@ -312,11 +312,10 @@ Archonia.Form.HeadState.prototype = {
     this.mannaOfInterest.reset();
     this.evade.reset();
     this.pursue.reset();
-    this.theOtherGuy.reset();
     
     this.foodSearchState = {};
     this.encystmentState = {};
-    this.touchedArchonState = {};
+    this.touchedArchonState = { theOtherGuy: Archonia.Form.XY() };
     this.sensedArchonState = {};
     this.mannaGrabState = {};
     this.headState = { action: "waitForCommand", tween: "birth" };
