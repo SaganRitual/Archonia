@@ -36,6 +36,7 @@ Archonia.Cosmos.FatManna.prototype = {
 
     this.mannaGroup.forEach(function(m) {
       m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
+      m.calories = Archonia.Axioms.caloriesPerFatManna;
       m.anchor.setTo(0.5, 0.5);
       m.alpha = 1;
       m.scale.setTo(this.morselScale, this.morselScale);
@@ -44,7 +45,6 @@ Archonia.Cosmos.FatManna.prototype = {
       m.body.bounce.setTo(0, 0);
       m.body.collideWorldBounds = true;
       m.tint = 0;
-      m.calories = Archonia.Axioms.caloriesPerManna * 10;
       
       allTheManna.push(m);
     }, this);
