@@ -159,6 +159,8 @@ Archonia.Form.Head.prototype = {
   tick: function(frameCount) {
     this.frameCount = frameCount;
     
+    this.drawFoodSearchMemory();
+    
     this.state.tick(frameCount, this.archon.goo.getMass());
 
     var urge = this.state.getAction();
