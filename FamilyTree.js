@@ -20,15 +20,15 @@ Archonia.Cosmos.FamilyTree = function() {
 Archonia.Cosmos.FamilyTree.prototype = {
   addMe: function(myId, idOfMyParent) {
     if(myId === undefined || idOfMyParent === undefined) {
-        throw new Archonia.Essence.BirthDefect("IDs missing");
+        Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("IDs missing"));
     }
     
     if(!this.everyone.hasOwnProperty(idOfMyParent)) {
-      throw new Error("Parent unknown");
+      Archonia.Axioms.hurl(new Error("Parent unknown"));
     }
     
     if(this.everyone.hasOwnProperty(myId)) {
-      throw new Error("Child already in roster");
+      Archonia.Axioms.hurl(new Error("Child already in roster"));
     }
 
     // Add me to the roster of everyone who ever lived
@@ -50,7 +50,7 @@ Archonia.Cosmos.FamilyTree.prototype = {
     }
     
     if(commonAncestor === -1 || commonAncestor === null) {
-        throw new Error("Couldn't find common ancestor for " + lhs + " and " + rhs);
+        Archonia.Axioms.hurl(new Error("Couldn't find common ancestor for " + lhs + " and " + rhs));
     }
     
     return i + commonAncestor;

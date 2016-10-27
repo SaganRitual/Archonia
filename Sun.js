@@ -83,7 +83,7 @@ if(typeof window === "undefined") {
     },
     
     getTemperature: function(w, wY) {
-      if(w === undefined) { throw new Error("Bad arguments to getTemperature()"); }
+      if(w === undefined) { Archonia.Axioms.hurl(new Error("Bad arguments to getTemperature()")); }
 
       var where = Archonia.Form.XY(w, wY).floored();
 

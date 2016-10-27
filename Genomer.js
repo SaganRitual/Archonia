@@ -24,7 +24,7 @@ Archonia.Form.Gene = function() {
 };
 
 Archonia.Form.Gene.prototype = {
-  inherit: function() { throw new TypeError("Gene base class doesn't inherit"); },
+  inherit: function() { Archonia.Axioms.hurl(new Error("Gene base class doesn't inherit")); },
   
   mutateMutatability: function(parentGene) {
     // Have to assign these first, before the mutation, because the
@@ -114,7 +114,7 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
 
   var r = this.getTempRange();
   if(r < 0 || r > Archonia.Axioms.temperatureHi || s < 0 || s > 100 || L < 0 || L > 100) {
-    throw new Archonia.Essence.BirthDefect("Bad color gene: " + hsl);
+    Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("Bad color gene: " + hsl));
   }
 };
 
@@ -152,7 +152,7 @@ Archonia.Form.GenomeProxy = {
       // the genome functions
       if(name in target) { return target[name]; }
       else if(name in target.core) { return target.core[name].value; }
-      else { throw new Error("No such property '" + name + "' in genome"); }
+      else { Archonia.Axioms.hurl(new Error("No such property '" + name + "' in genome")); }
       break;
     }
   }

@@ -159,7 +159,7 @@ Archonia.Form.Legs.prototype = {
       optimalDeltaV.set(this.velocity.minus(this.targetVelocity));
 
     } else {
-      throw new Error("Bad target type");
+      Archonia.Axioms.hurl(new Error("Bad target type"));
     }
     
     // The magnitude of that vector

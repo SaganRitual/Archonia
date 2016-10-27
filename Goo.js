@@ -23,7 +23,7 @@ if(typeof window === "undefined") {
 Archonia.Form.Goo = function(archon) {
   
   if(archon === undefined) {
-    throw new TypeError("Goo needs an archon");
+    Archonia.Axioms.hurl(new Error("Goo needs an archon"));
   }
   
   this.archon = archon;
