@@ -57,6 +57,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
     Archonia.Engine.game.physics.enable(this.mannaGroup, Phaser.Physics.ARCADE);
 
     this.mannaGroup.forEach(function(m) {
+      m.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
       m.calories = Archonia.Axioms.caloriesPerManna;
       m.anchor.setTo(0.5, 0.5);
       m.alpha = 1;

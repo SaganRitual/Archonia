@@ -14,6 +14,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.archoniaGooRadius = 50;
   Archonia.Axioms.babyFatAtBirth = 100;
   Archonia.Axioms.babyFatDensity = 1000;
+  Archonia.Axioms.caloriesPerFatManna = 500;
   Archonia.Axioms.caloriesPerManna = 8;
   Archonia.Axioms.calorieLossRatioForPredation = 2;
   Archonia.Axioms.costFactorForGivingBirth = 2;
