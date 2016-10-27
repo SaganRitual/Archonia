@@ -113,7 +113,7 @@ Archonia.Form.HeadState.prototype = {
       if(state.current === "foodSearchState") {
         if(this.frameCount > this.whenToIssueNextFoodSearchCommand) {
           this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
-          state.action = "foodSearchState"; state.where = this.foodSearchState.where;
+          state.action = "foodSearch"; state.where = this.foodSearchState.where;
         } else {
           // If we were already searching, wait a bit before updating
           state.action = "waitForCommand";
@@ -121,7 +121,7 @@ Archonia.Form.HeadState.prototype = {
       } else {
         // If we weren't already searching, tell head to restart
         this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
-        state.action = "rFoodSearch";
+        state.action = "rFoodSearch"; state.where = this.foodSearchState.where;
       }
 
       state.current = "foodSearchState";
