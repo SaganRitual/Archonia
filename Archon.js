@@ -287,7 +287,7 @@ Archonia.Form.Archon.prototype.startTween = function(which) {
     this.color.L = 75;
   
     this.tween = Archonia.Engine.game.add.tween(this.color).
-      to({ L: 100 }, 2 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+      to({ L: 100 }, 1 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
 
     this.tween.onComplete.add(this.color.stopTween);
     break;
