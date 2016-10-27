@@ -141,6 +141,7 @@ Archonia.Form.HeadState.prototype = {
     this.evade.reset();
     this.pursue.reset();
     this.theOtherGuy.reset();
+    this.encysted = false;
     
     this.tweenStage = "birth";
     this.tween = false;
@@ -203,6 +204,20 @@ Archonia.Form.HeadState.prototype = {
   updateNonSpatialSenses: function() {
     this.tempSignal = this.tempInput.getSignalStrength();
     this.hungerSignal = this.hungerInput.getSignalStrength();
+    
+    var encystIf = this.getFoodSearchAction();
+
+    if(this.encysted) {
+      if(encystIf.action !== "encyst") {
+        this.tweenStage = "stop";
+        this.encysted = false;
+      }
+    } else {
+      if(encystIf.action === "encyst") {
+        this.tweenStage = "encyst";
+        this.encysted = true;
+      }
+    }
   },
   
   updateSensedArchonTargets: function(myMass) {

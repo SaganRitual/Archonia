@@ -288,9 +288,38 @@ Archonia.Form.Archon.prototype.startTween = function(which) {
     this.birthTween.onComplete.add(colorTweenComplete);
     break;
     
-  case "beingEaten":
-  case "beingPoisoned":
-  case "encysted":
+  case "eaten":
+    this.archoniaHue = 0;               // Red, but the saturation will make it black
+    this.sprite.archoniaSaturation = 0; // (sprite because I don't have archon sat set up yet)
+    this.archoniaLuma = 0;
+
+    this.beingEatenTween = Archonia.Engine.game.add.tween(this).
+      to({ archoniaLuma: 1 }, 0.25 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+
+    this.beingEatenTween.onComplete.add(colorTweenComplete);
+    break;
+    
+  case "poisoned":
+    this.archoniaHue = 0; // Red
+    this.sprite.archoniaSaturation = 1; // (sprite because I don't have archon sat set up yet)
+    this.archoniaLuma = 0;
+    
+    this.beingPoisonedTween = Archonia.Engine.game.add.tween(this).
+      to({ archoniaLuma: 1 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+
+    this.beingPoisonedTween.onComplete.add(colorTweenComplete);
+    break;
+    
+  case "encyst":
+    this.archoniaHue = 30;
+    this.sprite.archoniaSaturation = 0.50;
+    this.archoniaLuma = 0.75;
+  
+    this.encystedTween = Archonia.Engine.game.add.tween(this).
+      to({ archoniaLuma: 1 }, 2 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+
+    this.encystedTween.onComplete.add(colorTweenComplete);
+    break;
   }
 };
 

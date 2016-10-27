@@ -175,7 +175,11 @@ Archonia.Form.Head.prototype = {
     
     var tween = this.state.getTween();
     if(tween !== false) {
-      this.archon.startTween(tween);
+      if(tween === "stop") {
+        this.archon.stopTween();
+      } else {
+        this.archon.startTween(tween);
+      }
     }
     
     this.firstTickAfterLaunch = false;
