@@ -242,7 +242,7 @@ Archonia.Form.HeadState.prototype = {
       var hisMass = checkArchon.goo.getMass();
       var hisPosition = checkArchon.position;
       
-      if(hisPosition.equals(this.touchedArchonState.theOtherGuy)) {
+      if(this.touchedArchonState && hisPosition.equals(this.touchedArchonState.theOtherGuy)) {
         result.newOtherGuy = false;
         theOtherGuy.set(this.touchedArchonState.theOtherGuy);
         this.head.archon.goo.eat(checkArchon);
