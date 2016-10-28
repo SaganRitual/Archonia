@@ -118,7 +118,7 @@ Archonia.Cosmos.Dronery = {
   
   senseArchon: function(sensor, theOtherGuy) { sensor.archon.head.state.senseOtherArchon(theOtherGuy.archon); },
   senseManna: function(sensor, manna) { sensor.archon.head.state.senseManna(manna); },
-  touch: function(phaseron, theOtherPhaseron) { phaseron.archon.head.state.touchOtherArchon(theOtherPhaseron.archon); },
+  touch: function(phaseron, theOtherPhaseron) { phaseron.archon.head.state.touchState.touchOtherArchon(theOtherPhaseron.archon); },
 
   tick: function(frameCount) {
     Archonia.Cosmos.Dronery.frameCount = frameCount;

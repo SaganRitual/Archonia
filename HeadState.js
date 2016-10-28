@@ -7,15 +7,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 (function(Archonia) {
   
-  var tooCloselyRelated = function(me, theOtherGuy) {
-    var r = Archonia.Cosmos.familyTree.getDegreeOfRelatedness(
-      me.archoniaUniqueObjectId, theOtherGuy.archoniaUniqueObjectId
-    );
-    
-    // Self is 0, parent/child is 1, siblings are 2; everyone else is fair game
-    return r <= 2;
-  };
-
 Archonia.Form.HeadState = function(head, position) {
   this.head = head;
   this.headState = {};
@@ -23,6 +14,7 @@ Archonia.Form.HeadState = function(head, position) {
   this.mannaOfInterest = Archonia.Form.XY();
   this.evade = Archonia.Form.XY();
   this.pursue = Archonia.Form.XY();
+  this.touchState = new Archonia.Form.TouchState(this);
   this.reset();
 };
 
@@ -96,14 +88,14 @@ Archonia.Form.HeadState.prototype = {
       }
     }
     
-    if(!stateSet && this.touchedArchonState) {
-      if(state.current !== "touchedArchonState") { state.action = "stop"; }
+    if(!stateSet && this.touchState.active) {
+      if(state.current !== "touchState") { state.action = "stop"; }
       
-      if(this.touchedArchonState.newOtherGuy) { state.tween = this.touchedArchonState.tween; }
+      if(this.touchState.newState) { state.tween = this.touchState.tween; }
       else { state.tween = false; }
       
-      state.current = "touchedArchonState"; stateSet = true;
-    } else if(state.current === "touchedArchonState") {
+      state.current = "touchState"; stateSet = true;
+    } else if(state.current === "touchState") {
       // we went from being touched to not being touched; being touched causes
       // a tween to run; when we leave the touched state we need to stop it
       state.tween = "stop";
@@ -233,45 +225,6 @@ Archonia.Form.HeadState.prototype = {
     this.sensedArchons = [];
   },
   
-  computeTouchedArchonState: function(myMass) {
-    var theOtherGuy = Archonia.Form.XY();
-    var result = {};
-    
-    for(var i = 0; i < this.touchedArchons.length; i++) {
-      var checkArchon = this.touchedArchons[i];
-      var hisMass = checkArchon.goo.getMass();
-      var hisPosition = checkArchon.position;
-      
-      if(this.touchedArchonState && hisPosition.equals(this.touchedArchonState.theOtherGuy)) {
-        result.newOtherGuy = false;
-        theOtherGuy.set(this.touchedArchonState.theOtherGuy);
-        this.head.archon.goo.eat(checkArchon);
-        break;
-      } else {
-        result.newOtherGuy = true; result.tween = false;
-        theOtherGuy.set(hisPosition);
-        
-        var iAmThePoisoner = this.genome.toxinStrength > checkArchon.genome.toxinResistance;
-        var iAmThePoisoned = checkArchon.genome.toxinStrength > this.genome.toxinResistance;
-
-        var iAmThePredator = myMass * this.genome.predationRatio > hisMass;
-        var iAmThePrey = hisMass * checkArchon.genome.predationRatio > myMass;
-
-        if(iAmThePredator) {
-          if(iAmThePoisoned) { result.tween = "poisoned"; }
-        } else if(iAmThePrey) {
-          if(!iAmThePoisoner) { result.tween = "eaten"; }
-        }
-      }
-    }
-    
-    if(theOtherGuy.equals(0)) { result = false; }
-    else { result.theOtherGuy = theOtherGuy; result.action = "stop"; }
-
-    this.touchedArchonState = result;
-    this.touchedArchons = [];
-  },
-  
   getAction: function() {
     return { action: this.headState.action, where: this.headState.where };
   },
@@ -302,20 +255,28 @@ Archonia.Form.HeadState.prototype = {
     );
   },
   
+  report: function() {
+    console.log("encystmentState", this.encystmentState);
+    console.log("foodSearchState", this.foodSearchState);
+    console.log("mannaGrabState", this.mannaGrabState);
+    console.log("sensedArchonState", this.sensedArchonState);
+    console.log("touchState", this.touchState);
+    console.log("headState", this.headState);
+  },
+  
   reset: function() {
     this.firstTickAfterLaunch = true;
     this.eatingOtherArchon = false;
     this.beingEaten = false;
     this.manna = [];
     this.sensedArchons = [];
-    this.touchedArchons = [];
     this.mannaOfInterest.reset();
     this.evade.reset();
     this.pursue.reset();
     
     this.foodSearchState = {};
     this.encystmentState = {};
-    this.touchedArchonState = { theOtherGuy: Archonia.Form.XY() };
+    
     this.sensedArchonState = {};
     this.mannaGrabState = {};
     this.headState = { action: "waitForCommand", tween: "birth" };
@@ -324,7 +285,7 @@ Archonia.Form.HeadState.prototype = {
   senseManna: function(manna) { this.manna.push(manna); },
 
   senseOtherArchon: function(otherArchon) {
-    if(!tooCloselyRelated(this.head.archon, otherArchon)) { this.sensedArchons.push(otherArchon); }
+    if(!this.tooCloselyRelated(this.head.archon, otherArchon)) { this.sensedArchons.push(otherArchon); }
   },
 
   senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
@@ -342,15 +303,22 @@ Archonia.Form.HeadState.prototype = {
     this.computeFoodSearchState();
     this.computeMannaGrabState();
     this.computeSensedArchonState(currentMass);
-    this.computeTouchedArchonState(currentMass);
     this.computeHeadState();
+    
+    this.touchState.tick(currentMass);
     
     this.firstTickAfterLaunch = false;
   },
-  
-  touchOtherArchon: function(otherArchon) {
-    if(!tooCloselyRelated(this.head.archon, otherArchon)) { this.touchedArchons.push(otherArchon); }
+
+  tooCloselyRelated: function(me, theOtherGuy) {
+    var r = Archonia.Cosmos.familyTree.getDegreeOfRelatedness(
+      me.archoniaUniqueObjectId, theOtherGuy.archoniaUniqueObjectId
+    );
+    
+    // Self is 0, parent/child is 1, siblings are 2; everyone else is fair game
+    return r <= 2;
   }
+
 };
 
 })(Archonia);
