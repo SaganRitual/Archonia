@@ -8,7 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
 
 Archonia.Form.Range = function(lo, hi) {
-  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi) || lo === hi) { Archonia.Axioms.hurl(new Error("Bad arguments to Range()")); }
+  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi)) { Archonia.Axioms.hurl(new Error("Bad arguments to Range()")); }
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;

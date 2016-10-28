@@ -10,6 +10,13 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 var mannaIndexFind = function(manna) {
   return this.currentTarget.equals(manna);
 };
+
+var mannaSort = function(a, b) {
+  var aDistance = this.headState.head.archon.position.getDistanceTo(a);
+  var bDistance = this.headState.head.archon.position.getDistanceTo(b);
+
+  return aDistance < bDistance;
+};
   
 Archonia.Form.SenseMannaState = function(headState) {
   this.headState = headState;
@@ -26,17 +33,13 @@ Archonia.Form.SenseMannaState = function(headState) {
 Archonia.Form.SenseMannaState.prototype = {
 
   computeSenseState: function() {
+    var _this = this;
+    
     if(this.sensedManna.length === 0) { this.active = false; }
     else {
       if(this.sensedManna.findIndex(mannaIndexFind, this) === -1) {
         
-        var _this = this;
-        this.sensedManna.sort(function(a, b) {
-          var aDistance = _this.headState.head.archon.position.getDistanceTo(a);
-          var bDistance = _this.headState.head.archon.position.getDistanceTo(b);
-
-          return aDistance < bDistance;
-        });
+        this.sensedManna.sort(function(a, b) { mannaSort.call(_this, a, b); });
 
         this.currentTarget.set(this.sensedManna[0]);
       }

@@ -174,13 +174,6 @@ Archonia.Form.Head.prototype = {
       case "waitForCommand":                                break;
     }
     
-    var tween = this.state.getTween();
-    if(tween === "stop") {
-      this.archon.stopTween();
-    } else if(tween) {
-      this.archon.startTween(tween);
-    }
-    
     this.firstTickAfterLaunch = false;
   }
 };

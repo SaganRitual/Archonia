@@ -85,7 +85,7 @@ Archonia.Form.Archon = function(phaseron) {
 	s.anchor.setTo(0.5, 0.5); s.alpha = 0.01; s.tint = 0x0000FF;  // s scale set in launch
 
 	p.body.collideWorldBounds = true; p.inputEnabled = true; p.input.enableDrag();
-  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); s.archon.head.state.report(); } );
+  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); } );
   
   this.activatePhysicsBodies();
   
@@ -259,7 +259,7 @@ Archonia.Form.Archon.prototype.startTween = function(which) {
     this.tween.onComplete.add(this.color.stopTween);
     break;
     
-  case "eaten":
+  case "prey":
     this.color.h = 0; // Red, but the saturation will make it black
     this.color.s = 0;
     this.color.L = 0;
@@ -295,6 +295,7 @@ Archonia.Form.Archon.prototype.startTween = function(which) {
 };
 
 Archonia.Form.Archon.prototype.stopTween = function() {
+  if(this.tweening) { this.tween.stop(); }
   this.tweening = false;
 };
 

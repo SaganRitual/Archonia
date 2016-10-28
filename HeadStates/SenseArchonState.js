@@ -6,10 +6,15 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
-  
+
 var otherGuySort = function(a, b) {
   var aArchon = Archonia.Cosmos.Dronery.getArchonById(a);
   var bArchon = Archonia.Cosmos.Dronery.getArchonById(b);
+  
+  // Really should look into this
+  if(aArchon === null && bArchon !== null) { return -1; }
+  if(bArchon === null && aArchon !== null) { return 1; }
+  if(aArchon === null && bArchon === null) { return 0; }
 
   var aDistance = this.headState.head.archon.position.getDistanceTo(aArchon.position);
   var bDistance = this.headState.head.archon.position.getDistanceTo(bArchon.position);
@@ -52,6 +57,8 @@ Archonia.Form.SenseArchonState.prototype = {
   },
 
   computeSenseState: function(myMass) {
+    var _this = this;
+    
     if(this.sensedArchons.length === 0) { this.active = false; return; }
     
     for(var i = 0; i < this.sensedArchons.length; i++) {
@@ -64,9 +71,9 @@ Archonia.Form.SenseArchonState.prototype = {
     var currentId = null, currentRelationship = null;
     
     if(this.relationships.evade.length > 0) {
-      this.relationships.evade.sort(otherGuySort);
+      this.relationships.evade.sort(function(a, b) { otherGuySort.call(_this, a, b); });
       
-      currentId = this.relationships.evade.hisId;
+      currentId = this.relationships.evade[0];
       currentRelationship = "evade";
       
     } else {
@@ -76,7 +83,7 @@ Archonia.Form.SenseArchonState.prototype = {
         // We are currently engaged; if that guy has disappeared from our
         // radar, go after the closest one
         if(this.relationships.pursue.indexOf(currentId) === -1) {
-          this.relationships.pursue.sort(otherGuySort);
+          this.relationships.pursue.sort(function(a, b) { otherGuySort.call(_this, a, b); });
           currentId = this.relationships.pursue[0];
         }
       }

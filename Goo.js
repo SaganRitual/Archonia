@@ -192,6 +192,14 @@ Archonia.Form.Goo.prototype = {
     this.genome = genome;
     this.larvalCalorieBudget = this.genome.birthMassLarvalCalories;
     this.adultCalorieBudget = this.genome.birthMassAdultCalories;
+
+    if(this.genome.optimalTempLo >= this.genome.optimalTempHi) {
+      Archonia.Axioms.hurl(
+        new Archonia.Essence.BirthDefect(
+          "optimalTempLo " + this.genome.optimalTempLo + ", optimalTempHi " + this.genome.optimalTempHi
+        )
+      );
+    }
     
     this.optimalTempRange = new Archonia.Form.Range(this.genome.optimalTempLo, this.genome.optimalTempHi);
     

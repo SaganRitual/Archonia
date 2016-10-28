@@ -12,7 +12,7 @@ Archonia.Form.TouchState = function(headState) {
 
   this.active = false;
   this.newState = false;
-  this.tween = null;
+  this.tween = false;
 
   this.interaction = "";
   this.touchedArchons = [];
@@ -32,10 +32,14 @@ computeTouchInteraction: function(checkArchonId, myMass) {
   
   var iAmThePoisoner = this.headState.genome.toxinStrength > checkArchon.genome.toxinResistance;
   var iAmThePoisoned = checkArchon.genome.toxinStrength > this.headState.genome.toxinResistance;
+  
+  if(iAmThePoisoner && iAmThePoisoned) { iAmThePoisoner = false; iAmThePoisoned = false; }
 
   var hisMass = checkArchon.goo.getMass();
-  var iAmThePredator = myMass * this.headState.genome.predationRatio > hisMass;
-  var iAmThePrey = hisMass * checkArchon.genome.predationRatio > myMass;
+  var iAmThePredator = myMass * this.headState.genome.predationRatio > hisMass * checkArchon.genome.predationRatio;
+  var iAmThePrey = myMass * this.headState.genome.predationRatio < hisMass * checkArchon.genome.predationRatio;
+
+  // note: if the two values are equal, both bools will be false, and we'll ignore each other
 
   var interaction = null;
   if(iAmThePredator) {
@@ -52,14 +56,16 @@ computeTouchInteraction: function(checkArchonId, myMass) {
 computeTouchState: function(myMass) {
   this.newState = false;
   
-  if(this.touchedArchons.length === 0) { return; }
+  var foundSomeoneOfInterest = false;
   
   for(var i = 0; i < this.touchedArchons.length; i++) {
     var archonId = this.touchedArchons[i];
     var interaction = this.computeTouchInteraction(archonId, myMass);
     
-    if(interaction !== "") { this.relationships[interaction].push(archonId); }
+    if(interaction !== "") { foundSomeoneOfInterest = true; this.relationships[interaction].push(archonId); }
   }
+
+  if(!foundSomeoneOfInterest) { this.active = false; return; }
   
   var currentId = null, currentRelationship = null;
   
@@ -74,17 +80,16 @@ computeTouchState: function(myMass) {
     }
   }
 
-  if(currentId === null) { this.newState = true; this.setNewRelationship(); }
+  if(currentId === null) { this.newState = true; currentId = this.setNewRelationship(); }
   
-  // If we still don't have a relationship, then we're done; acutally, I don't think
-  // this should happen, but I'm putting it here in case
   this.active = currentId !== null;
-  
+
   if(this.active) {
     var c = this.currentEngagement.relationship;
     var a = Archonia.Cosmos.Dronery.getArchonById(this.currentEngagement.hisId);
     
-    this.action = "stop";
+    this.action = "stop"; this.tween = false;
+    
     if(c === "prey") { this.tween = c; }
     else if(c === "predator") { this.headState.head.archon.goo.eat(a); }
     else if(c === "poisoned") { this.tween = c; this.headState.head.archon.goo.bePoisoned(a); }
@@ -102,6 +107,8 @@ setNewRelationship: function() {
       this.currentEngagement.relationship = r;
     }
   }
+  
+  return this.currentEngagement.hisId;
 },
 
 tick: function(myMass) {

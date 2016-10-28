@@ -9,11 +9,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   
 Archonia.Form.HeadState = function(head, position) {
   this.head = head;
-  this.headState = {};
+  this.headState = { currentStatelet: "" };
   this.position = position;
-  this.mannaOfInterest = Archonia.Form.XY();
-  this.evade = Archonia.Form.XY();
-  this.pursue = Archonia.Form.XY();
   this.touchState = new Archonia.Form.TouchState(this);
   this.encystmentState = new Archonia.Form.EncystmentState(this);
   this.senseArchonState = new Archonia.Form.SenseArchonState(this);
@@ -30,28 +27,30 @@ Archonia.Form.HeadState.prototype = {
     if(!stateSet) {
       if(this.encystmentState.newState) {
         state.action = this.encystmentState.action;
-        state.tween = this.encystmentState.tween;
+        this.tweens.push(this.encystmentState.tween);
+        state.currentStatelet = "encystmentState";
         stateSet = true;
       } else if(this.encystmentState.active) {
         state.action = "waitForCommand";
-        state.tween = false;
+        state.currentStatelet = "encystmentState";
         stateSet = true;
-      } else {
-        state.tween = "stop";
+      } else if(state.currentStatelet === "encystmentState") {
+        this.tweens.push("stop");
       }
     }
     
     if(!stateSet) {
       if(this.touchState.newState) {
         state.action = this.touchState.action;
-        state.tween = this.touchState.tween;
+        this.tweens.push(this.touchState.tween);
+        state.currentStatelet = "touchState";
         stateSet = true;
       } else if(this.touchState.active) {
         state.action = "waitForCommand";
-        state.tween = false;
+        state.currentStatelet = "touchState";
         stateSet = true;
-      } else {
-        state.tween = "stop";
+      } else if(state.currentStatelet === "touchState") {
+        this.tweens.push("stop");
       }
     }
     
@@ -59,12 +58,16 @@ Archonia.Form.HeadState.prototype = {
       state.action = this.senseArchonState.action;
       state.where = this.senseArchonState.where;
       stateSet = true;
+
+      state.currentStatelet = "senseArchonState";
     }
     
     if(!stateSet && this.senseMannaState.active) {
       state.action = this.senseMannaState.action;
       state.where = this.senseMannaState.where;
       stateSet = true;
+
+      state.currentStatelet = "senseMannaState";
     }
     
     if(stateSet) {
@@ -84,20 +87,24 @@ Archonia.Form.HeadState.prototype = {
         state.action = "rFoodSearch"; state.where = this.foodSearchState.where;
         this.foodSearchState.active = true;
       }
+      
+      state.currentStatelet = "foodSearchState";
     }
-    
-    if(this.firstTickAfterLaunch) {
-      if(state.tween === false) { state.tween = "birth"; }
-    } else {
-      if(state.tween === "birth") { state.tween = false; }
+
+    if(this.tweens.length) {
+      var tween = this.tweens.shift();
+      if(tween === "stop") {
+        this.head.archon.stopTween();
+      } else if(tween) {
+        this.head.archon.startTween(tween);
+      }
     }
   },
   
   getAction: function() {
-    return { action: this.headState.action, where: this.headState.where };
+    var action = { action: this.headState.action, where: this.headState.where };
+    return action;
   },
-  
-  getTween: function() { return this.headState.tween; },
   
   launch: function(genome) {
     this.genome = genome;
@@ -123,18 +130,10 @@ Archonia.Form.HeadState.prototype = {
     );
   },
   
-  report: function() {
-    console.log("encystmentState", this.encystmentState);
-    console.log("foodSearchState", this.foodSearchState);
-    console.log("mannaGrabState", this.mannaGrabState);
-    console.log("sensedArchonState", this.sensedArchonState);
-    console.log("touchState", this.touchState);
-    console.log("headState", this.headState);
-  },
-  
   reset: function() {
     this.firstTickAfterLaunch = true;
-    this.headState = { action: "waitForCommand", tween: "birth" };
+    this.tweens = [ "stop", "birth" ];
+    this.headState = { currentStatelet: "", action: "waitForCommand" };
   },
 
   senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
@@ -165,7 +164,7 @@ Archonia.Form.HeadState.prototype = {
     );
     
     // Self is 0, parent/child is 1, siblings are 2; everyone else is fair game
-    return r <= 0;
+    return r <= 2;
   }
 
 };
