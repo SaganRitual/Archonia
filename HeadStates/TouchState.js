@@ -60,7 +60,7 @@ computetouchState: function(myMass) {
   if(currentId !== null) {
     // We are currently engaged; if our relationship with that guy
     // has changed, then we completely reset with the cutest guy on the market
-    if(this.relationships[currentRelationship].find(currentId) === -1) {
+    if(this.relationships[currentRelationship].indexOf(currentId) === -1) {
       currentId = null;
     }
   }
@@ -75,8 +75,8 @@ computetouchState: function(myMass) {
     var c = this.currentEngagement.relationship;
     var a = Archonia.Cosmos.Dronery.getArchonById(this.currentEngagement.hisId);
     if(c === "prey") { this.tween = c; }
-    else if(c === "predator") { this.head.archon.goo.eat(a); }
-    else if(c === "poisoned") { this.tween = c; this.head.archon.goo.bePoisoned(a); }
+    else if(c === "predator") { this.headState.head.archon.goo.eat(a); }
+    else if(c === "poisoned") { this.tween = c; this.headState.head.archon.goo.bePoisoned(a); }
   }
 },
 
@@ -104,7 +104,9 @@ tick: function(myMass) {
 },
 
 touchOtherArchon: function(otherArchon) {
-  if(!this.headState.tooCloselyRelated(this.headState.head.archon, otherArchon)) { this.touchedArchons.push(otherArchon); }
+  if(!this.headState.tooCloselyRelated(this.headState.head.archon, otherArchon)) {
+    this.touchedArchons.push(otherArchon.archoniaUniqueObjectId);
+  }
 }
 
 };
