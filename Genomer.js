@@ -86,7 +86,7 @@ Archonia.Form.ScalarGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
   this.value = this.mutateScalar(parentGene.value);
   
-  if(this.value < 0) { Archonia.Axioms.hurl(Archonia.Essence.BirthDefect("Scalar gene value < 0")); }
+  if(this.value < 0) { Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("Scalar gene value < 0")); }
 };
 
 Archonia.Form.ColorGene = function(gene) { this.color = tinycolor(gene); Archonia.Form.Gene.call(this); };
@@ -176,7 +176,19 @@ Archonia.Form.Genome.prototype = {
   inherit: function(parentGenome) {
     for(var i in parentGenome.core) { 
       if(parentGenome.core[i] === null) { this.core[i] = null; }
-      else { this.core[i].inherit(parentGenome.core[i]); }
+      else {
+        try {
+          this.core[i].inherit(parentGenome.core[i]);
+        } catch(e) {
+          if(e.message === "Scalar gene value < 0") {
+            Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect(
+              "Scalar gene '" + i + "' value = " + this.core[i].value.toFixed(4)
+            ));
+          } else {
+            throw Archonia.Axioms.hurl(e);
+          }
+        }
+      }
     }
   }
 };
