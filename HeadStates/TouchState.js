@@ -23,6 +23,8 @@ Archonia.Form.TouchState.prototype = {
 computeTouchInteraction: function(checkArchonId, myMass) {
   var checkArchon = Archonia.Cosmos.Dronery.getArchonById(checkArchonId);
   
+  if(checkArchon === null) { return ""; } // Sometimes they die before we can check them
+  
   var iAmThePoisoner = this.headState.genome.toxinStrength > checkArchon.genome.toxinResistance;
   var iAmThePoisoned = checkArchon.genome.toxinStrength > this.headState.genome.toxinResistance;
 
