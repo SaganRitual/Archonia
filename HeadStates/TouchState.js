@@ -5,10 +5,15 @@
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
+(function(Archonia) {
+  
 Archonia.Form.TouchState = function(headState) {
   this.headState = headState;
+
   this.active = false;
+  this.newState = false;
   this.tween = null;
+
   this.interaction = "";
   this.touchedArchons = [];
   
@@ -44,8 +49,10 @@ computeTouchInteraction: function(checkArchonId, myMass) {
   return interaction;
 },
 
-computetouchState: function(myMass) {
+computeTouchState: function(myMass) {
   this.newState = false;
+  
+  if(this.touchedArchons.length === 0) { return; }
   
   for(var i = 0; i < this.touchedArchons.length; i++) {
     var archonId = this.touchedArchons[i];
@@ -76,6 +83,8 @@ computetouchState: function(myMass) {
   if(this.active) {
     var c = this.currentEngagement.relationship;
     var a = Archonia.Cosmos.Dronery.getArchonById(this.currentEngagement.hisId);
+    
+    this.action = "stop";
     if(c === "prey") { this.tween = c; }
     else if(c === "predator") { this.headState.head.archon.goo.eat(a); }
     else if(c === "poisoned") { this.tween = c; this.headState.head.archon.goo.bePoisoned(a); }
@@ -96,7 +105,7 @@ setNewRelationship: function() {
 },
 
 tick: function(myMass) {
-  this.computetouchState(myMass);
+  this.computeTouchState(myMass);
   this.touchedArchons = [];
 
   for(var i = 0; i < this.relationshipHierarchy.length; i++) {
@@ -112,3 +121,5 @@ touchOtherArchon: function(otherArchon) {
 }
 
 };
+
+})(Archonia);

@@ -15,108 +15,62 @@ Archonia.Form.HeadState = function(head, position) {
   this.evade = Archonia.Form.XY();
   this.pursue = Archonia.Form.XY();
   this.touchState = new Archonia.Form.TouchState(this);
+  this.encystmentState = new Archonia.Form.EncystmentState(this);
+  this.senseArchonState = new Archonia.Form.SenseArchonState(this);
+  this.senseMannaState = new Archonia.Form.SenseMannaState(this);
+  this.foodSearchState = new Archonia.Form.FoodSearchState(this);
   this.reset();
 };
 
 Archonia.Form.HeadState.prototype = {
-  computeEncystmentState: function() {
-    var result = false;
-    var tempSignal = this.tempInput.getSignalStrength();
-    
-    if(Math.abs(tempSignal) > this.genome.tempThresholdEncyst) {
-      result = "encyst";
-    } else if(Math.abs(tempSignal) < this.genome.tempThresholdUnencyst) {
-      result = "unencyst";
-    }
-    
-    this.encystmentState = result;
-  },
-  
-  computeFoodSearchState: function() {
-    var tempSignal = this.tempInput.getSignalStrength();
-    var hungerSignal = this.hungerInput.getSignalStrength();
-    var action = 0;
-    
-    if(Math.abs(tempSignal) > this.genome.tempThresholdHorizontalOk) { action++; }
-    if(Math.abs(tempSignal) > this.genome.tempThresholdVerticalOnly) { action++; }
-    
-    var netTemp = Math.abs(tempSignal) * this.genome.tempToleranceMultiplier;
-    var netHunger = hungerSignal * this.genome.hungerToleranceMultiplier;
-    
-    var result = { action: "foodSearch", where: "random" };
-    if(netTemp > netHunger) {
-      switch(action) {
-        case 0: if(tempSignal < 0) { result.where = "randomNoDown"; } else { result.where = "randomNoUp"; } break;
-        
-        case 1:
-        case 2: if(tempSignal < 0) { result.where = "randomUpOnly"; } else { result.where = "randomDownOnly"; } break;
-      }
-    } else {
-      switch(action) {
-        case 0: result = { action: "foodSearch", where: "random" }; break;
-        case 1: if(tempSignal < 0) { result.where = "randomNoDown"; } else { result.where = "randomNoUp"; } break;
-        case 2: if(tempSignal < 0) { result.where = "randomUpOnly"; } else { result.where = "randomDownOnly"; } break;
-      }
-    }
-    
-    this.foodSearchState = result;
-  },
-  
   computeHeadState: function() {
-    var state = this.headState; state.action = "waitForCommand";
+    var state = this.headState;
     var stateSet = false;
     
-    if(!stateSet && this.encystmentState) {
-      if(state.current === "encysted") {
-        if(this.encystmentState === "unencyst") {
-          // Note: we don't say stateSet = true here; after
-          // unencysting, we want one of the other states to awaken
-          state.tween = "stop";
-        } else {
-          state.tween = false;
-          stateSet = true;
-        }
+    if(!stateSet) {
+      if(this.encystmentState.newState) {
+        state.action = this.encystmentState.action;
+        state.tween = this.encystmentState.tween;
+        stateSet = true;
+      } else if(this.encystmentState.active) {
+        state.action = "waitForCommand";
+        state.tween = false;
+        stateSet = true;
       } else {
-        if(this.encystmentState === "encyst") {
-          state.current = "encysted";
-          state.tween = "encyst";
-          state.action = "encyst";
-          stateSet = true;
-        } else {
-          state.tween = false;
-        }
+        state.tween = "stop";
       }
     }
     
-    if(!stateSet && this.touchState.active) {
-      if(state.current !== "touchState") { state.action = "stop"; }
-      
-      if(this.touchState.newState) { state.tween = this.touchState.tween; }
-      else { state.tween = false; }
-      
-      state.current = "touchState"; stateSet = true;
-    } else if(state.current === "touchState") {
-      // we went from being touched to not being touched; being touched causes
-      // a tween to run; when we leave the touched state we need to stop it
-      state.tween = "stop";
+    if(!stateSet) {
+      if(this.touchState.newState) {
+        state.action = this.touchState.action;
+        state.tween = this.touchState.tween;
+        stateSet = true;
+      } else if(this.touchState.active) {
+        state.action = "waitForCommand";
+        state.tween = false;
+        stateSet = true;
+      } else {
+        state.tween = "stop";
+      }
     }
     
-    if(!stateSet && this.sensedArchonState) {
-      state.current = "sensedArchonState";
-      state.action = this.sensedArchonState.action;
-      state.where = this.sensedArchonState.where;
+    if(!stateSet && this.senseArchonState.active) {
+      state.action = this.senseArchonState.action;
+      state.where = this.senseArchonState.where;
       stateSet = true;
     }
     
-    if(!stateSet && this.mannaGrabState) {
-      state.current = "mannaGrabState";
-      state.action = this.mannaGrabState.action;
-      state.where = this.mannaGrabState.where;
+    if(!stateSet && this.senseMannaState.active) {
+      state.action = this.senseMannaState.action;
+      state.where = this.senseMannaState.where;
       stateSet = true;
     }
     
-    if(!stateSet && this.foodSearchState) {
-      if(state.current === "foodSearchState") {
+    if(stateSet) {
+      this.foodSearchState.active = false;
+    } else {
+      if(this.foodSearchState.active) {
         if(this.frameCount > this.whenToIssueNextFoodSearchCommand) {
           this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
           state.action = "foodSearch"; state.where = this.foodSearchState.where;
@@ -128,10 +82,8 @@ Archonia.Form.HeadState.prototype = {
         // If we weren't already searching, tell head to restart
         this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
         state.action = "rFoodSearch"; state.where = this.foodSearchState.where;
+        this.foodSearchState.active = true;
       }
-
-      state.current = "foodSearchState";
-      stateSet = true;
     }
     
     if(this.firstTickAfterLaunch) {
@@ -139,90 +91,6 @@ Archonia.Form.HeadState.prototype = {
     } else {
       if(state.tween === "birth") { state.tween = false; }
     }
-  },
-  
-  computeMannaGrabState: function() {
-    var closestManna = Archonia.Form.XY();
-
-    for(var i = 0; i < this.manna.length; i++) {
-      var checkManna = Archonia.Form.XY(this.manna[i]);
-      
-      if(checkManna.equals(this.mannaOfInterest)) {
-        closestManna.set(this.mannaOfInterest); // If we're already targeting, stay the course
-        break;
-      } else {
-        if(checkManna.getDistanceTo(this.position) < closestManna.getDistanceTo(this.position)) {
-          closestManna.set(checkManna);
-        }
-      }
-    }
-    
-    var result = {};
-    
-    if(closestManna.equals(0)) { this.mannaOfInterest.reset(); result = false; }
-    else { this.mannaOfInterest.set(closestManna); result = { action: "move", where: closestManna }; }
-    
-    this.mannaGrabState = result;
-    this.manna = [];
-  },
-  
-  computeSensedArchonState: function(myMass) {
-    var closestArchon = Archonia.Form.XY();
-    var action = null;
-    
-    if(this.evade.equals(0)) {
-      if(!this.pursue.equals(0)) {
-        closestArchon.set(this.pursue);
-      }
-    } else {
-      closestArchon.set(this.evade);
-    }
-
-    for(var i = 0; i < this.sensedArchons.length; i++) {
-      var checkArchon = this.sensedArchons[i];
-      var hisMass = checkArchon.goo.getMass();
-      var hisPosition = checkArchon.position;
-      
-      if((hisPosition.equals(this.evade)) || hisMass * this.genome.predatorFearRatio > myMass) {
-        closestArchon.set(hisPosition);
-        action = "evade";
-        break;
-      } else {
-        if(myMass * this.genome.predationRatio > hisMass) {
-          action = "pursue";
-          
-          if(hisPosition.equals(this.pursue)) {
-            closestArchon.set(this.pursue); // If we're already targeting, stay the course
-            break;
-          } else {
-            if(hisPosition.getDistanceTo(this.position) < closestArchon.getDistanceTo(this.position)) {
-              closestArchon.set(hisPosition);
-            }
-          }
-        }
-      }
-    }
-
-    var result = {};
-    
-    this.evade.reset(); this.pursue.reset();
-
-    if(action === "evade") {
-      var a = this.position.getAngleFrom(closestArchon);
-      var d = Archonia.Form.XY().setPolar(25, a).plus(this.position); d.floor();
-
-      this.evade.set(d);
-      result = { action: "move", where: Archonia.Form.XY(this.evade) };
-
-    } else if(action === "pursue") {
-      this.pursue.set(closestArchon);
-      result = { action: "move", where: Archonia.Form.XY(this.pursue) };
-    } else {
-      result = false;
-    }
-    
-    this.sensedArchonState = result;
-    this.sensedArchons = [];
   },
   
   getAction: function() {
@@ -266,26 +134,7 @@ Archonia.Form.HeadState.prototype = {
   
   reset: function() {
     this.firstTickAfterLaunch = true;
-    this.eatingOtherArchon = false;
-    this.beingEaten = false;
-    this.manna = [];
-    this.sensedArchons = [];
-    this.mannaOfInterest.reset();
-    this.evade.reset();
-    this.pursue.reset();
-    
-    this.foodSearchState = {};
-    this.encystmentState = {};
-    
-    this.sensedArchonState = {};
-    this.mannaGrabState = {};
     this.headState = { action: "waitForCommand", tween: "birth" };
-  },
-  
-  senseManna: function(manna) { this.manna.push(manna); },
-
-  senseOtherArchon: function(otherArchon) {
-    if(!this.tooCloselyRelated(this.head.archon, otherArchon)) { this.sensedArchons.push(otherArchon); }
   },
 
   senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
@@ -298,14 +147,14 @@ Archonia.Form.HeadState.prototype = {
     
     this.senseHunger();
     this.senseTemp();
-    
-    this.computeEncystmentState();
-    this.computeFoodSearchState();
-    this.computeMannaGrabState();
-    this.computeSensedArchonState(currentMass);
-    this.computeHeadState();
-    
+
+    this.encystmentState.tick(this.tempInput.getSignalStrength(), this.hungerInput.getSignalStrength());
     this.touchState.tick(currentMass);
+    this.senseArchonState.tick(currentMass);
+    this.senseMannaState.tick();
+    this.foodSearchState.tick();
+    
+    this.computeHeadState();
     
     this.firstTickAfterLaunch = false;
   },
@@ -316,7 +165,7 @@ Archonia.Form.HeadState.prototype = {
     );
     
     // Self is 0, parent/child is 1, siblings are 2; everyone else is fair game
-    return r <= 2;
+    return r <= 0;
   }
 
 };
