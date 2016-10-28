@@ -12,7 +12,7 @@ if(typeof window === 'undefined') {
 (function(Archonia) {
   
   Archonia.Form.Cbuffer = function(howManyElements) {
-    if(howManyElements === 0) { Archonia.Axioms.hurl(new Error("Can't store in zero-length Cbuffer")); }
+    if(howManyElements === 0) { Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("Zero-length Cbuffer")); }
 
     this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     this.reset();

@@ -24,7 +24,7 @@ Archonia.Form.SignalSmoother = function(depth, decayRate, rangeLo, rangeHi) {
   else { this.storedValuesRange = Archonia.Essence.zeroToOneRange; }
   
   this.empty = true;
-  this.depth = depth || 1;
+  this.depth = depth;
   this.rangeLo = rangeLo;
   this.rangeHi = rangeHi;
 
