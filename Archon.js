@@ -85,7 +85,7 @@ Archonia.Form.Archon = function(phaseron) {
 	s.anchor.setTo(0.5, 0.5); s.alpha = 0.01; s.tint = 0x0000FF;  // s scale set in launch
 
 	p.body.collideWorldBounds = true; p.inputEnabled = true; p.input.enableDrag();
-  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); } );
+  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); s.archon.head.state.report(); } );
   
   this.activatePhysicsBodies();
   
