@@ -85,6 +85,8 @@ Archonia.Form.ScalarGene.prototype.newGene = function() { return new Archonia.Fo
 Archonia.Form.ScalarGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
   this.value = this.mutateScalar(parentGene.value);
+  
+  if(this.value < 0) { Archonia.Axioms.hurl(Archonia.Essence.BirthDefect("Scalar gene value < 0")); }
 };
 
 Archonia.Form.ColorGene = function(gene) { this.color = tinycolor(gene); Archonia.Form.Gene.call(this); };
