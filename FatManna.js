@@ -89,7 +89,7 @@ Archonia.Cosmos.FatManna.prototype = {
   takethAway: function() {
     this.mannaGroup.forEachAlive(function(a) {
       var t = Archonia.Cosmos.Sun.getTemperature(a.position);
-      if(t > -200 && t < 200) { a.kill(); }
+      if(t > -300 && t < 300) { a.kill(); }
     });
   },
     
