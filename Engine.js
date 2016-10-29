@@ -31,6 +31,8 @@ if(typeof window === "undefined") {
       Archonia.Engine.cursors = Archonia.Engine.game.input.keyboard.createCursorKeys();
       Archonia.Engine.game.input.onUp.add(Archonia.Engine.onMouseUp, Archonia.Engine);
       Archonia.Engine.game.input.onDown.add(Archonia.Engine.onMouseDown, Archonia.Engine);
+      
+      Archonia.Essence.Logger.initialize(1000);
 
       Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
       Archonia.Cosmos.Seasons = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSeasons');
