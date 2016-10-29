@@ -54,20 +54,20 @@ Archonia.Form.HeadState.prototype = {
       }
     }
     
-    if(!stateSet && this.senseArchonState.active) {
-      state.action = this.senseArchonState.action;
-      state.where = this.senseArchonState.where;
-      stateSet = true;
-
-      state.currentStatelet = "senseArchonState";
-    }
-    
     if(!stateSet && this.senseMannaState.active) {
       state.action = this.senseMannaState.action;
       state.where = this.senseMannaState.where;
       stateSet = true;
 
       state.currentStatelet = "senseMannaState";
+    }
+    
+    if(!stateSet && this.senseArchonState.active) {
+      state.action = this.senseArchonState.action;
+      state.where = this.senseArchonState.where;
+      stateSet = true;
+
+      state.currentStatelet = "senseArchonState";
     }
     
     if(stateSet) {
@@ -163,8 +163,13 @@ Archonia.Form.HeadState.prototype = {
       me.archoniaUniqueObjectId, theOtherGuy.archoniaUniqueObjectId
     );
     
-    // Self is 0, parent/child is 1, siblings are 2; everyone else is fair game
-    return r <= 2;
+    // Self is 0
+    // parent/child is 1
+    // grandparent/grandchild, sibling -- 2
+    // sibling of parent or child of sibling (uncle/nephew) -- 3
+    // children of parent's siblings (immediate cousin), g-grandparent/child, siblings of grandparent -- 4
+    // 5 is way the hell out there, 2nd cousins, great-uncles & stuff
+    return r <= 5;
   }
 
 };
