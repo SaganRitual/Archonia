@@ -19,8 +19,17 @@ var initialize_ = function(size, testOutput_) {
   testOutput = testOutput_;
 };
   
-var log_ = function(message) {
-  messages.store(message);
+var log_ = function(/*arguments*/) {
+  var a = arguments[0]; // Because caller in Logger passes us its own arguments array
+  
+  var sep = "";
+  var store = "";
+  for(var i = 0; i < a.length; i++) {
+    store += sep + a[i].toString();
+    sep = ", ";
+  }
+
+  messages.store(store);
 };
 
 var show_ = function(howFarBack) {
@@ -41,7 +50,7 @@ var show_ = function(howFarBack) {
   
 Archonia.Essence.Logger = {
   initialize: function(size, testOutput) { initialize_(size, testOutput); },
-  log: function(message) { log_(message); },
+  log: function() { log_(arguments); },
   show: function(howFarBack) { show_(howFarBack); }
 };
   
