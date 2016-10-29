@@ -151,7 +151,7 @@ Archonia.Form.HeadState.prototype = {
     this.touchState.tick(currentMass);
     this.senseArchonState.tick(currentMass);
     this.senseMannaState.tick();
-    this.foodSearchState.tick();
+    this.foodSearchState.tick(this.tempInput.getSignalStrength(), this.hungerInput.getSignalStrength());
     
     this.computeHeadState();
     
