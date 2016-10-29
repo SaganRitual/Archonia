@@ -39,6 +39,37 @@ Archonia.Form.HeadState.prototype = {
       }
     }
     
+    // Note: check sense archon state twice: before we check
+    // for manna, check whether we need to be fleeing from
+    // a predator. After we check for manna, check whether
+    // there is another archon nearby whom we can eat
+    
+    if(!stateSet && this.senseArchonState.active && this.senseArchonState.currentEngagement.relationship === "evade") {
+      state.action = this.senseArchonState.action;
+      state.where = this.senseArchonState.where;
+      stateSet = true;
+
+      state.currentStatelet = "senseArchonState";
+    }
+    
+    // Manna
+    if(!stateSet && this.senseMannaState.active) {
+      state.action = this.senseMannaState.action;
+      state.where = this.senseMannaState.where;
+      stateSet = true;
+
+      state.currentStatelet = "senseMannaState";
+    }
+    
+    // Pursue prey
+    if(!stateSet && this.senseArchonState.active && this.senseArchonState.currentEngagement.relationship === "pursue") {
+      state.action = this.senseArchonState.action;
+      state.where = this.senseArchonState.where;
+      stateSet = true;
+
+      state.currentStatelet = "senseArchonState";
+    }
+    
     if(!stateSet) {
       if(this.touchState.newState) {
         state.action = this.touchState.action;
@@ -52,22 +83,6 @@ Archonia.Form.HeadState.prototype = {
       } else if(state.currentStatelet === "touchState") {
         this.tweens.push("stop");
       }
-    }
-    
-    if(!stateSet && this.senseMannaState.active) {
-      state.action = this.senseMannaState.action;
-      state.where = this.senseMannaState.where;
-      stateSet = true;
-
-      state.currentStatelet = "senseMannaState";
-    }
-    
-    if(!stateSet && this.senseArchonState.active) {
-      state.action = this.senseArchonState.action;
-      state.where = this.senseArchonState.where;
-      stateSet = true;
-
-      state.currentStatelet = "senseArchonState";
     }
     
     if(stateSet) {
@@ -96,7 +111,10 @@ Archonia.Form.HeadState.prototype = {
       if(tween === "stop") {
         this.head.archon.stopTween();
       } else if(tween) {
+        this.activeTween = tween;
         this.head.archon.startTween(tween);
+      } else {
+        this.activeTween = false;
       }
     }
   },
@@ -132,7 +150,7 @@ Archonia.Form.HeadState.prototype = {
   
   reset: function() {
     this.firstTickAfterLaunch = true;
-    this.tweens = [ "stop", "birth" ];
+    this.tweens = [ "birth" ];
     this.headState = { currentStatelet: "", action: "waitForCommand" };
   },
 
