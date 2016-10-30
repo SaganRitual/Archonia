@@ -1,6 +1,3 @@
 [submodule "TinyColor"]
 	path = TinyColor
 	url = https://github.com/GreatBigBore/TinyColor.git
-[submodule "proto"]
-	path = proto
-	url = https://github.com/GreatBigBore/proto.git

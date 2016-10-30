@@ -10,9 +10,9 @@ if(typeof window === "undefined") {
   Archonia.Engine.game = new Phaser.Game();
 
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Form.Range = require('./widgets/Range.js');
+  Archonia.Form.Range = require('./Pixies/Range.js');
   
-  var xy = require('./widgets/XY.js');
+  var xy = require('./Pixies/XY.js');
   Archonia.Form.XY = xy.XY;
   Archonia.Form.RandomXY = xy.RandomXY;
   

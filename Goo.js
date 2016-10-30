@@ -9,9 +9,9 @@ var tinycolor = tinycolor || {};
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
-  Archonia.Form.Range = require('./widgets/Range.js');
+  Archonia.Form.Range = require('./Pixies/Range.js');
 
-  tinycolor = require('./widgets/tinycolor.js');
+  tinycolor = require('./Pixies/tinycolor.js');
 }
 
 (function(Archonia) {
@@ -23,7 +23,7 @@ if(typeof window === "undefined") {
 Archonia.Form.Goo = function(archon) {
   
   if(archon === undefined) {
-    Archonia.Axioms.hurl(new Error("Goo needs an archon"));
+    Archonia.Essence.hurl(new Error("Goo needs an archon"));
   }
   
   this.archon = archon;
@@ -194,7 +194,7 @@ Archonia.Form.Goo.prototype = {
     this.adultCalorieBudget = this.genome.birthMassAdultCalories;
 
     if(this.genome.optimalTempLo >= this.genome.optimalTempHi) {
-      Archonia.Axioms.hurl(
+      Archonia.Essence.hurl(
         new Archonia.Essence.BirthDefect(
           "optimalTempLo " + this.genome.optimalTempLo + ", optimalTempHi " + this.genome.optimalTempHi
         )

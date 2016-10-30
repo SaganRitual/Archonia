@@ -6,7 +6,8 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Archonia.Form.XY = require('./widgets/XY.js').XY;
+  Archonia.Essence = require('./Essence.js');
+  Archonia.Form.XY = require('./Pixies/XY.js').XY;
 }
 
 (function(Archonia) {
@@ -159,7 +160,7 @@ Archonia.Form.Legs.prototype = {
       optimalDeltaV.set(this.velocity.minus(this.targetVelocity));
 
     } else {
-      Archonia.Axioms.hurl(new Error("Bad target type"));
+      Archonia.Essence.hurl(new Error("Bad target type"));
     }
     
     // The magnitude of that vector

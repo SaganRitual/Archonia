@@ -1,332 +1,195 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global Phaser, tinycolor */
-
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
   
-// Have to delay creation of the prototype because it needs XY,
-// which doesn't exist until later, when XY.js gets loaded
-var generateArchonoidPrototype = function() { 
-  if(Archonia.Form.Archonoid === undefined) {
-    Archonia.Form.Archonoid = function(archonite) { this.archonite = archonite; Archonia.Form.XY.call(this); };
-
-    Archonia.Form.Archonoid.prototype = Object.create(Archonia.Form.XY.prototype);
-    Archonia.Form.Archonoid.prototype.constructor = Archonia.Form.Archonoid;
-
-    Object.defineProperty(Archonia.Form.Archonoid.prototype, 'x', {
-      get: function x() { return this.archonite.x; },
-      set: function x(v) { this.archonite.x = v; }
-    });
-
-    Object.defineProperty(Archonia.Form.Archonoid.prototype, 'y', {
-      get: function y() { return this.archonite.y; },
-      set: function y(v) { this.archonite.y = v; }
-    });
-  }
+Archonia.Form.HeadState = function(head, position) {
+  this.head = head;
+  this.headState = { currentStatelet: "" };
+  this.position = position;
+  this.touchState = new Archonia.Form.TouchState(this);
+  this.encystmentState = new Archonia.Form.EncystmentState(this);
+  this.senseArchonState = new Archonia.Form.SenseArchonState(this);
+  this.senseMannaState = new Archonia.Form.SenseMannaState(this);
+  this.foodSearchState = new Archonia.Form.FoodSearchState(this);
+  this.reset();
 };
 
-var geneReport = function(e, archon) {
-  console.log(e, archon.archoniaUniqueObjectId);
-  console.log(
-    "Mass:", archon.goo.getMass().toFixed(2),
-    "Temp:", Archonia.Cosmos.Sun.getTemperature(archon.position).toFixed()
-  );
-  
-  for(var i in archon.genome.core) {
-    if(i === "color") {
-      var c = archon.genome.color;
-      var s = c.toString(16);
-      var z = ("000000").substr(0, 6 - s.length);
-      var o = "#" + z + s;
-      var t = tinycolor(o);
-      console.log(t.toHslString());
-    } else {
-      console.log(i, archon.genome[i]);
+Archonia.Form.HeadState.prototype = {
+  computeHeadState: function() {
+    var state = this.headState;
+    var stateSet = false;
+    
+    if(!stateSet) {
+      if(this.encystmentState.newState) {
+        state.action = this.encystmentState.action;
+        this.tweens.push(this.encystmentState.tween);
+        state.currentStatelet = "encystmentState";
+        stateSet = true;
+      } else if(this.encystmentState.active) {
+        state.action = "waitForCommand";
+        state.currentStatelet = "encystmentState";
+        stateSet = true;
+      } else if(state.currentStatelet === "encystmentState") {
+        this.tweens.push("stop");
+      }
     }
-  }
-  console.log('****************************');
-};
+    
+    // Note: check sense archon state twice: before we check
+    // for manna, check whether we need to be fleeing from
+    // a predator. After we check for manna, check whether
+    // there is another archon nearby whom we can eat
+    
+    if(!stateSet && this.senseArchonState.active && this.senseArchonState.currentEngagement.relationship === "evade") {
+      state.action = this.senseArchonState.action;
+      state.where = this.senseArchonState.where;
+      stateSet = true;
 
-Archonia.Form.Color = function(archon) {
-  this.h = 0;
-  this.s = 0;
-  this.L = 0;
-  this.archon = archon;
-};
+      state.currentStatelet = "senseArchonState";
+    }
+    
+    // Manna
+    if(!stateSet && this.senseMannaState.active) {
+      state.action = this.senseMannaState.action;
+      state.where = this.senseMannaState.where;
+      stateSet = true;
 
-Archonia.Form.Color.prototype = {
-  getColorAsDecimal: function() {
-    var hslString = "hsl(" + this.h + ", " + this.s + "%, " + this.L + "%)";
-    return parseInt(tinycolor(hslString).toHex(), 16);
+      state.currentStatelet = "senseMannaState";
+    }
+    
+    // Pursue prey
+    if(!stateSet && this.senseArchonState.active && this.senseArchonState.currentEngagement.relationship === "pursue") {
+      state.action = this.senseArchonState.action;
+      state.where = this.senseArchonState.where;
+      stateSet = true;
+
+      state.currentStatelet = "senseArchonState";
+    }
+    
+    if(!stateSet) {
+      if(this.touchState.newState) {
+        state.action = this.touchState.action;
+        this.tweens.push(this.touchState.tween);
+        state.currentStatelet = "touchState";
+        stateSet = true;
+      } else if(this.touchState.active) {
+        state.action = "waitForCommand";
+        state.currentStatelet = "touchState";
+        stateSet = true;
+      } else if(state.currentStatelet === "touchState") {
+        this.tweens.push("stop");
+      }
+    }
+    
+    if(stateSet) {
+      this.foodSearchState.active = false;
+    } else {
+      if(this.foodSearchState.active) {
+        if(this.frameCount > this.whenToIssueNextFoodSearchCommand) {
+          this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
+          state.action = "foodSearch"; state.where = this.foodSearchState.where;
+        } else {
+          // If we were already searching, wait a bit before updating
+          state.action = "waitForCommand";
+        }
+      } else {
+        // If we weren't already searching, tell head to restart
+        this.whenToIssueNextFoodSearchCommand = this.frameCount + this.ticksBetweenFoodSearchCommands;
+        state.action = "rFoodSearch"; state.where = this.foodSearchState.where;
+        this.foodSearchState.active = true;
+      }
+      
+      state.currentStatelet = "foodSearchState";
+    }
+
+    if(this.tweens.length) {
+      var tween = this.tweens.shift();
+      if(tween === "stop") {
+        this.head.archon.stopTween();
+      } else if(tween) {
+        this.activeTween = tween;
+        this.head.archon.startTween(tween);
+      } else {
+        this.activeTween = false;
+      }
+    }
   },
   
-  stopTween: function(_this) {
-    _this.archon.tweening = false;
-  }
-};
-
-Archonia.Form.Archon = function(phaseron) {
-  this.firstLaunch = true;
-  this.launched = false;
-  this.sprite = phaseron;
-  this.button = phaseron.button;
-  this.sensor = phaseron.sensor;  this.sensor.archon = this;
-  this.whichArchonReport = 0;
+  getAction: function() {
+    var action = { action: this.headState.action, where: this.headState.where };
+    return action;
+  },
   
-  var p = phaseron, b = p.button, s = p.sensor;
-
-	p.anchor.setTo(0.5, 0.5); p.alpha = 1.0; p.tint = 0xFF0000; p.scale.setTo(0.07, 0.07);
-	b.anchor.setTo(0.5, 0.5);	b.alpha = 1.0; b.tint = 0;        b.scale.setTo(0.25, 0.25);
-	s.anchor.setTo(0.5, 0.5); s.alpha = 0.01; s.tint = 0x0000FF;  // s scale set in launch
-
-	p.body.collideWorldBounds = true; p.inputEnabled = true; p.input.enableDrag();
-  p.events.onDragStart.add(function(s) { geneReport("Report", s.archon); } );
-  
-  this.activatePhysicsBodies();
-  
-  generateArchonoidPrototype(); // This happens only once
-
-  this.foundCurrentFoodTarget = false;
-  this.currentFoodTarget = Archonia.Form.XY();
-  this.newFoodTarget = Archonia.Form.XY();
-  
-  this.color = new Archonia.Form.Color(this);
-  
-  this.position = new Archonia.Form.Archonoid(p);
-  this.velocity = new Archonia.Form.Archonoid(p.body.velocity);
-  
-  Archonia.Cosmos.Genomer.genomifyMe(this); // No inheritance here; just getting a skeleton genome
-  
-  this.goo = new Archonia.Form.Goo(this);
-  this.legs = new Archonia.Form.Legs();
-  this.head = new Archonia.Form.Head(this);
-};
-
-Archonia.Form.Archon.prototype.activatePhysicsBodies = function() {
-	var enable = function(c) {
-		Archonia.Engine.game.physics.enable(c, Phaser.Physics.ARCADE);
-
-		c.body.syncBounds = true;
-		c.body.bounce.setTo(0, 0);
-	};
-
-	enable(this.sprite);
-	enable(this.sensor);
-};
-
-Archonia.Form.Archon.prototype.breed = function() {
-  if(!this.isDisabled) {
-    this.howManyChildren++;
-    Archonia.Cosmos.Dronery.breed(this);
-  }
-};
-
-Archonia.Form.Archon.prototype.die = function() {
-  this.sprite.kill(); this.button.kill(); this.sensor.kill();
-};
-
-Archonia.Form.Archon.prototype.eat = function(manna) {
-  this.goo.eat(manna);
-};
-
-Archonia.Form.Archon.prototype.encyst = function() {
-  this.velocity.set(0);
-  this.encysted = true;
-};
-
-Archonia.Form.Archon.prototype.getMVelocity = function() {
-  return this.velocity.getMagnitude();
-};
-
-Archonia.Form.Archon.prototype.getPosition = function() {
-  return this.position;
-};
-
-Archonia.Form.Archon.prototype.getVelocity = function() {
-  return this.velocity;
-};
-
-Archonia.Form.Archon.prototype.launch = function(myParentArchon) {
-  this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
-  
-  Archonia.Cosmos.Genomer.inherit(this, myParentArchon);
-  
-  this.myParentArchon = myParentArchon;
-  this.frameCount = Archonia.Axioms.integerInRange(0, 60);
-  this.howManyChildren = 0;
-  this.isDisabled = false;
-  this.isDefending = false;
-  this.injuryFactor = 0;
-  this.encysted = false;
-  this.whenToUnencyst = 0;
-  this.currentPrey = null;
-  this.currentPreyStillThere = false;
-  this.newPrey = null;
-  this.currentPredator = null;
-  this.currentPredatorStillThere = false;
-  this.newPredator = null;
-  this.poisoning = false;
-
-  // Clean this up -- two flags, two tweens, treated the same way, duplicated code
-  this.beingEaten = false;
-
-  // Because the tween can still be running while this
-  // dead archon waits around in the dronery to be revived
-  if(this.beingEatenTween !== null && this.beingEatenTween !== undefined) { this.beingEatenTween.stop(); }
-
-  this.beingEatenTween = null;
-
-  this.beingPoisoned = false;
-
-  // Because the tween can still be running while this
-  // dead archon waits around in the dronery to be revived
-  if(this.beingPoisonedTween !== null && this.beingPoisonedTween !== undefined) { this.beingPoisonedTween.stop(); }
-
-  this.beingPoisonedTween = null;
-
-  this.sensor.scale.setTo(this.genome.sensorScale, this.genome.sensorScale);  
-  
-  this.sensorWidth = this.sensor.width;
-  this.sensorRadius = this.sensor.width / 2;
-
-	this.sensor.body.setSize(this.sensorRadius, this.sensorRadius);
-	this.sensor.body.setCircle(this.sensorRadius);
-
-  this.firstLaunch = false;
-  this.launched = true;
-  
-  this.legs.launch(this.position, this.genome.maxMVelocity, this.velocity, this.genome.maxMAcceleration);
-  this.goo.launch(this.genome);
-  this.head.launch(this.genome, this.legs, this.position);
-
-  // Have to use reset instead of revive(); otherwise, everyone gets a
-  // false positive on detecting another archon, and they all run away,
-  // usually toward zero (that bit I'm not clear on, but it bothers me
-  // much more for them to get a giant false positive at the beginning
-  // of life)
-  var x = null, y = null;
-  
-  if(myParentArchon === undefined) {
-    x = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.width - 20);
-    y = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20);
-
-    this.myParentArchonId = 0;
-    Archonia.Cosmos.familyTree.addMe(this.archoniaUniqueObjectId, 'god');
-  } else {
-    x = myParentArchon.position.x; y = myParentArchon.position.y;
-
-    this.position.set(myParentArchon.position);
-    this.velocity.set(myParentArchon.velocity).timesScalar(-1);
-    this.myParentArchonId = myParentArchon.archoniaUniqueObjectId;
+  launch: function(genome) {
+    this.genome = genome;
+    this.reset();
     
-    Archonia.Cosmos.familyTree.addMe(this.archoniaUniqueObjectId, myParentArchon.archoniaUniqueObjectId);
+    this.ticksBetweenFoodSearchCommands = 60;
+    this.whenToIssueNextFoodSearchCommand = 0;
+    
+    this.tempSignalScaleLo = this.genome.optimalTempLo - this.genome.tempRadius;
+    this.tempSignalScaleHi = this.genome.optimalTempHi + this.genome.tempRadius;
+
+    this.tempInput = new Archonia.Form.SignalSmoother(
+      Math.floor(this.genome.tempSignalBufferSize), this.genome.tempSignalDecayRate,
+      this.tempSignalScaleLo, this.tempSignalScaleHi
+    );
+    
+    this.hungerSignalScaleLo = this.genome.reproductionThreshold - this.genome.birthMassAdultCalories;
+    this.hungerSignalScaleHi = 0;
+
+    this.hungerInput = new Archonia.Form.SignalSmoother(
+      Math.floor(this.genome.hungerSignalBufferSize), this.genome.hungerSignalDecayRate,
+      this.hungerSignalScaleLo, this.hungerSignalScaleHi
+    );
+  },
+  
+  reset: function() {
+    this.firstTickAfterLaunch = true;
+    this.tweens = [ "birth" ];
+    this.headState = { currentStatelet: "", action: "waitForCommand" };
+  },
+
+  senseHunger: function() { this.hungerInput.store(this.head.archon.goo.embryoCalorieBudget); },
+  senseTemp: function() {
+    this.tempInput.store(Archonia.Cosmos.Sun.getTemperature(this.position) - this.genome.optimalTemp);
+  },
+  
+  tick: function(frameCount, currentMass) {
+    this.frameCount = frameCount;
+    
+    this.senseHunger();
+    this.senseTemp();
+
+    this.encystmentState.tick(this.tempInput.getSignalStrength(), this.hungerInput.getSignalStrength());
+    this.touchState.tick(currentMass);
+    this.senseArchonState.tick(currentMass);
+    this.senseMannaState.tick();
+    this.foodSearchState.tick(this.tempInput.getSignalStrength(), this.hungerInput.getSignalStrength());
+    
+    this.computeHeadState();
+    
+    this.firstTickAfterLaunch = false;
+  },
+
+  tooCloselyRelated: function(me, theOtherGuy) {
+    var r = Archonia.Cosmos.familyTree.getDegreeOfRelatedness(
+      me.archoniaUniqueObjectId, theOtherGuy.archoniaUniqueObjectId
+    );
+    
+    // Self is 0
+    // parent/child is 1
+    // grandparent/grandchild, sibling -- 2
+    // sibling of parent or child of sibling (uncle/nephew) -- 3
+    // children of parent's siblings (immediate cousin), g-grandparent/child, siblings of grandparent -- 4
+    // 5 is way the hell out there, 2nd cousins, great-uncles & stuff
+    return r <= 5;
   }
 
-  this.sprite.reset(x, y, 1); this.button.reset(0, 0, 1); this.sensor.reset(x, y, 1);
 };
-
-Archonia.Form.Archon.prototype.setPosition = function(a1, a2) {
-  this.position.set(a1, a2);
-};
-
-Archonia.Form.Archon.prototype.setVelocity = function(a1, a2) {
-  this.velocity.set(a1, a2);
-};
-
-Archonia.Form.Archon.prototype.setMVelocity = function(vector) {
-  this.velocity.set(vector);
-};
-
-Archonia.Form.Archon.prototype.startTween = function(which) {
-  this.tweening = true;
-  
-  switch(which) {
-  case "birth":
-    // Remember: the property in the prototype is on the archon; the property
-    // here is on the sprite. The get/set for the archon refer to this value
-    this.color.h = 0;
-    this.color.s = 100;
-    this.color.L = 50;
-  
-    this.tween = Archonia.Engine.game.add.tween(this.color).
-      to({ h: 240 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2, false);
-    
-    this.tween.onComplete.add(this.color.stopTween);
-    break;
-    
-  case "prey":
-    this.color.h = 0; // Red, but the saturation will make it black
-    this.color.s = 0;
-    this.color.L = 0;
-
-    this.tween = Archonia.Engine.game.add.tween(this.color).
-      to({ L: 100 }, 0.25 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
-
-    this.tween.onComplete.add(this.color.stopTween);
-    break;
-    
-  case "poisoned":
-    this.color.h = 0;     // Red
-    this.color.s = 100;
-    this.color.L = 0;
-    
-    this.tween = Archonia.Engine.game.add.tween(this.color).
-      to({ L: 100 }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
-
-    this.tween.onComplete.add(this.color.stopTween);
-    break;
-    
-  case "encyst":
-    this.color.h = 30;
-    this.color.s = 50;
-    this.color.L = 75;
-  
-    this.tween = Archonia.Engine.game.add.tween(this.color).
-      to({ L: 100 }, 1 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
-
-    this.tween.onComplete.add(this.color.stopTween);
-    break;
-  }
-};
-
-Archonia.Form.Archon.prototype.stopTween = function() {
-  if(this.tweening) { this.tween.stop(); }
-  this.tweening = false;
-};
-
-Archonia.Form.Archon.prototype.throttle = function(id, interval, callback, context) {
-  if(this.uniqueID === id && this.frameCount % interval === 0) {
-    callback.call(context);
-  }
-};
-
-Archonia.Form.Archon.prototype.tick = function() {
-  if(!this.launched) { return; }
-  
-  this.frameCount++;
-
-  this.sensor.x = this.sprite.x; // So the sensor will stay attached
-  this.sensor.y = this.sprite.y; // So the sensor will stay attached
-  
-  this.sprite.tint = this.tweening ? this.color.getColorAsDecimal() : this.genome.color;
-  
-  if(!this.encysted) {
-    this.legs.tick(this.frameCount);
-  }
-  
-  this.goo.tick(this.frameCount);
-  this.head.tick(this.frameCount, this.currentFoodTarget, this.currentPredator, this.currentPrey);
-};
-
-Archonia.Form.Archon.prototype.unencyst = function() { this.encysted = false; };
 
 })(Archonia);
-
-if(typeof window === "undefined") {
-  module.exports = Archonia.Form.Archon;
-}

@@ -5,10 +5,14 @@
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
+if(typeof window === "undefined") {
+  Archonia.Essence = require('../Essence.js');
+}
+
 (function(Archonia) {
 
 Archonia.Form.Range = function(lo, hi) {
-  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi)) { Archonia.Axioms.hurl(new Error("Bad arguments to Range()")); }
+  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi)) { Archonia.Essence.hurl(new Error("Bad arguments to Range()")); }
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;
@@ -21,7 +25,7 @@ Archonia.Form.Range.prototype = {
     if(
       thePointOnHisMap === undefined || isNaN(thePointOnHisMap) ||
       hisRange === undefined || !(hisRange instanceof Archonia.Form.Range)
-    ) { Archonia.Axioms.hurl(new Error("Bad arguments to convertPoint()")); }
+    ) { Archonia.Essence.hurl(new Error("Bad arguments to convertPoint()")); }
 
     // This is a signed value, indicating both his distance
     // and direction from his center; if it's a negative
