@@ -2,5 +2,5 @@
 assets
 build
 node_modules
-logsNbugs
+_logsNbugs
 deps.js
