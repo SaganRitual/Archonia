@@ -27,13 +27,20 @@ if(typeof window === "undefined") {
   Archonia.Essence.zeroToOneRange = new Archonia.Form.Range(0, 1);
   Archonia.Essence.centeredZeroRange = new Archonia.Form.Range(-1, 1);
   
-  Archonia.Essence.BirthDefect = proto(Error, function(superclass) {
-    this.name = 'BirthDefect';
-    this.init = function(msg, properties) {
-      superclass.call(this, msg);
-      for(var n in properties) { this[n] = properties[n]; }
-    };
-  });
+  // This came straight from
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+  var BirthDefect = function(message) {
+    this.message = message;
+    var last_part = new Error().stack.match(/[^\s]+$/);
+    this.stack = this.name + " at " + last_part;
+  };
+
+  BirthDefect.prototype = Object.create(Error.prototype);
+  BirthDefect.prototype.name = "BirthDefect";
+  BirthDefect.prototype.message = "";
+  BirthDefect.prototype.constructor = BirthDefect;
+  
+  Archonia.Essence.BirthDefect = BirthDefect;
 
 })(Archonia);
 
