@@ -1,0 +1,1 @@
+exclude = "{$exclude,assets,build,dist,node_modules,proto,TinyColor}"
