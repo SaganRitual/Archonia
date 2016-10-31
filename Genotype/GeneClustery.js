@@ -17,11 +17,16 @@ if(typeof window === "undefined") {
 var geneClustery = {
   
   makeGeneCluster: function(genome, whichCluster) {
-    return new Proxy(genome, geneClustery["cluster_" + whichCluster]);
+    var handlerName = "cluster_" + whichCluster;
+    
+    if(!(handlerName in geneClustery)) { Archonia.Essence.hurl(new Error("No gene cluster for '" + whichCluster + "'")); }
+
+    return new Proxy(genome, geneClustery[handlerName]);
   },
   
-  getGene: function(genome, whichGene) {
+  getGene: function(component, genome, whichGene) {
     geneClustery.throwIfNotPresent(genome, whichGene);
+    geneClustery.throwIfNotAccessible(component, whichGene);
     
     switch(whichGene) {
       case "color":         return genome.color.getColorAsDecimal();
@@ -35,24 +40,37 @@ var geneClustery = {
     }
   },
   
+  throwIfNotAccessible: function(component, gene) {
+    if(component !== "archon") {
+      var handlerName = "cluster_" + component;
+      var valid = geneClustery[handlerName].valid;
+    
+      if(valid.indexOf(gene) === -1) { throw Error("Component '" + component + "' has no access to gene '" + gene + "'"); }
+    }
+  },
+  
   throwIfNotPresent: function(target, name) {
     if(!(name in target)) { Archonia.Essence.hurl(new Error("No such gene '" + name + "'")); }
   },
 
-  // Archon gets to see everything
-  cluster_archon: {
-    get: function(genome, gene) { 
-      return geneClustery.getGene(genome, gene);
-    }
+  cluster_archon: { get: function(genome, gene) {  return geneClustery.getGene("archon", genome, gene); } },
+  
+  cluster_goo: {
+  
+    valid: [
+      "birthMassLarvalCalories", "birthMassAdultCalories",
+      "embryoThreshold", "hungerToleranceFactor", "maxMAcceleration", "maxMVelocity",
+      "offspringMassAdultCalories", "offspringMassLarvalCalories",
+      "optimalTemp", "optimalTempHi", "optimalTempLo",
+      "reproductionThreshold", "sensorScale", "tempRange", "toxinResistance", "toxinStrength"
+    ],
+
+    get: function(genome, gene) { return geneClustery.getGene("goo", genome, gene); }
   },
   
   cluster_legs: {
-    get:  function(genome, gene) {
-      var valid = [ "maxMAcceleration", "maxMVelocity" ];
-
-      if(valid.indexOf(gene) === -1) { throw Error("Component 'legs' has no access to gene '" + gene + "'"); }
-      else { return geneClustery.getGene(genome, gene); }
-    }
+    valid: [ "maxMAcceleration", "maxMVelocity" ],
+    get: function(genome, gene) { return geneClustery.getGene("legs", genome, gene); }
   }
 };
 

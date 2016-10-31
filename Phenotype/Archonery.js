@@ -14,7 +14,13 @@ var breed = function() {
   var archon = getArchon();
 
   try { launchArchon(archon); }
-  catch(e) { console.log("Birth defect: " + e.message); archon.die(); }
+  catch(e) {
+    if(e instanceof Archonia.Essence.BirthDefect) {
+      console.log("Birth defect: " + e.message); archon.die();
+    } else {
+      Archonia.Essence.hurl(e);
+    }
+  }
 };
 
 // Have to delay creation of the prototype because it needs XY,

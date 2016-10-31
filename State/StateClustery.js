@@ -17,12 +17,35 @@ if(typeof window === "undefined") {
 var stateClustery = {
   
   makeStateneCluster: function(statome, whichCluster) {
-    return new Proxy(statome, stateClustery["cluster_" + whichCluster]);
+    var handlerName = "cluster_" + whichCluster;
+    
+    if(!(handlerName in stateClustery)) { Archonia.Essence.hurl(new Error("No statene cluster for '" + whichCluster + "'")); }
+
+    return new Proxy(statome, stateClustery[handlerName]);
   },
   
-  getStatene: function(statome, whichStatene) {
+  getStatene: function(component, statome, whichStatene) {
     stateClustery.throwIfNotPresent(statome, whichStatene);
+    stateClustery.throwIfNotAccessible(component, whichStatene);
     return statome[whichStatene];
+  },
+  
+  setStatene: function(component, statome, whichStatene, v) {
+    stateClustery.throwIfNotPresent(statome, whichStatene);
+    stateClustery.throwIfNotAccessible(component, whichStatene);
+    statome[whichStatene] = v;
+    return true;  // Tell proxy everything went ok
+  },
+  
+  throwIfNotAccessible: function(component, statene) {
+    if(component !== "archon") {
+      var handlerName = "cluster_" + component;
+      var valid = stateClustery[handlerName].valid;
+    
+      if(valid.indexOf(statene) === -1) {
+        throw Error("Component '" + component + "' has no access to statene '" + statene + "'");
+      }
+    }
   },
   
   throwIfNotPresent: function(target, name) {
@@ -31,29 +54,22 @@ var stateClustery = {
 
   // Archon gets to see everything
   cluster_archon: {
-    get: function(statome, statene) {  return stateClustery.getStatene(statome, statene); },
-    set: function(statome, statene, v) { stateClustery.setStatene(statome, statene, v); }
+    get: function(statome, statene) {  return stateClustery.getStatene("archon", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("archon", statome, statene, v); }
   },
   
   cluster_goo: {
-    valid: [ "beingPoisoned" ],
-    
-    get: function(statome, statene) {
-      stateClustery.throwIfNotPresent(statome, statene);
-      
-      if(stateClustery.cluster_goo.valid.indexOf(statene) === -1) {
-        throw Error("Component 'goo' has no access to statene '" + statene + "'");
-      } else { return statome[statene]; }
-    },
-    
-    set: function(statome, statene, v) {
-      stateClustery.throwIfNotPresent(statome, statene);
-      
-      if(stateClustery.cluster_goo.valid.indexOf(statene) === -1) {
-        throw Error("Component 'goo' has no access to statene '" + statene + "'");
-      } else { statome[statene] = v; }
-    }
+    valid: [ "beingPoisoned", "encysted", "position", "velocity" ],
+    get: function(statome, statene) {  return stateClustery.getStatene("goo", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("goo", statome, statene, v); }
+  },
+  
+  cluster_legs: {
+    valid: [ "position", "velocity" ],
+    get: function(statome, statene) {  return stateClustery.getStatene("goo", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("goo", statome, statene, v); }
   }
+
 };
 
 Archonia.Cosmos.StateClustery = stateClustery;

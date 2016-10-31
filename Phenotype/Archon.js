@@ -12,16 +12,17 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 var Archon = function() {
   this.drone = Archonia.Cosmos.Dronery.getDrone();
 
-  this.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
-  this.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
-
   this.color = new Color(this);
 
   Archonia.Cosmos.Genomery.genomifyMe(this); // No inheritance here; just getting a skeleton genome
+  Archonia.Cosmos.Statery.statomifyMe(this);
 
-  this.goo = new Archonia.Form.Goo(this.genomeId);
-  this.legs = new Archonia.Form.Legs(this.genomeId);
-  //this.head = new Archonia.Form.Head(this.position);
+  this.state.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
+  this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
+
+  this.goo = new Archonia.Form.Goo(this);
+  this.legs = new Archonia.Form.Legs(this);
+  //this.head = new Archonia.Form.Head(this.state.position);
 };
 
 Archon.prototype = {
@@ -37,9 +38,9 @@ Archon.prototype = {
     Archonia.Cosmos.Genomery.inherit(this, myParentArchon);
   
     this.moving = true;
-    this.legs.launch(this.position, this.velocity);
+    this.legs.launch(this.state.position, this.state.velocity);
     this.goo.launch();
-    //this.head.launch(this.legs, this.position);
+    //this.head.launch(this.legs, this.state.position);
 
     var x = null, y = null;
 
@@ -52,8 +53,8 @@ Archon.prototype = {
     } else {
       x = myParentArchon.position.x; y = myParentArchon.position.y;
 
-      this.position.set(myParentArchon.position);
-      this.velocity.set(myParentArchon.velocity).timesScalar(-1);
+      this.state.position.set(myParentArchon.position);
+      this.state.velocity.set(myParentArchon.velocity).timesScalar(-1);
       this.myParentArchonId = myParentArchon.archonUniqueId;
   
       Archonia.Cosmos.FamilyTree.addMe(this.archonUniqueId, myParentArchon.archonUniqueId);
@@ -64,7 +65,9 @@ Archon.prototype = {
   },
 
   senseSkinnyManna: function(manna) {
-    if(this.position.getDistanceTo(manna) < this.avatarRadius * 1.25) {
+    var barf = this.state.position.getDistanceTo(manna);
+    console.log(this.state.position.toString(), barf, this.avatarRadius);
+    if(barf < this.avatarRadius) {
       this.goo.eat(manna);
       manna.kill();
     } else {

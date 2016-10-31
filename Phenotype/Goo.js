@@ -1,8 +1,6 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global tinycolor */
-
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
@@ -13,11 +11,10 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   var larvaFatDensity = 1000;
   var embryoFatDensity = 1000;
 
-Archonia.Form.Goo = function(genomeId, position) {
+Archonia.Form.Goo = function(archon) {
   
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(genomeId, "goo");
-
-  this.position = position;
+  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "goo");
+  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "goo");
 
   this.embryoCalorieBudget = 0;
   this.larvalCalorieBudget = 0;
@@ -104,7 +101,7 @@ Archonia.Form.Goo.prototype = {
   },
 
   eat: function(food) {
-    if(this.archon.encysted) { return; }  // You don't gain anything while encysted
+    if(this.state.encysted) { return; }  // You don't gain anything while encysted
     
     var benefit = 0;
     
@@ -133,8 +130,6 @@ Archonia.Form.Goo.prototype = {
         this.breed();
       }
     }
-    
-    this.setSize();  
   },
   
   eatArchon: function(dinner) {
@@ -164,7 +159,7 @@ Archonia.Form.Goo.prototype = {
   getSensorCost: function() { return 15 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale; },
 
   getTempCost: function() {
-    var t = Archonia.Cosmos.Sun.getTemperature(this.archon.position);
+    var t = Archonia.Cosmos.Sun.getTemperature(this.state.position);
     var d = Math.abs(t - this.genome.optimalTemp);
     var s = this.getMass();
     var p = 2 * Math.log((d || 1) + 1) * Math.log(s + 1);
@@ -178,10 +173,9 @@ Archonia.Form.Goo.prototype = {
     return (this.genome.reproductionThreshold - this.embryoCalorieBudget) * this.genome.hungerToleranceFactor;
   },
   
-  launch: function(genome) {
+  launch: function() {
     this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     
-    this.genome = genome;
     this.larvalCalorieBudget = this.genome.birthMassLarvalCalories;
     this.adultCalorieBudget = this.genome.birthMassAdultCalories;
 
@@ -195,7 +189,6 @@ Archonia.Form.Goo.prototype = {
     
     this.optimalTempRange = new Archonia.Form.Range(this.genome.optimalTempLo, this.genome.optimalTempHi);
     
-    this.setSize();
   },
   
   metabolize: function() {
@@ -204,43 +197,14 @@ Archonia.Form.Goo.prototype = {
     var s = this.getSensorCost();
     var c = (m + t + s) / 500;
     
-    if(this.archon.encysted) { c /= 2; }
+    if(this.state.encysted) { c /= 2; }
 
     this.debit(c);
-  },
-
-  setButtonColor: function(temp) {
-  	temp = Archonia.Axioms.clamp(temp, this.optimalTempRange.lo, this.optimalTempRange.hi);
-
-  	var hue = Archonia.Essence.hueRange.convertPoint(temp, this.optimalTempRange);
-  	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
-  	var rgb = tinycolor(hsl).toHex();
-  	var tint = parseInt(rgb, 16);
-
-  	this.archon.button.tint = tint;
-  },
-  
-  setColors: function() {
-    var t = Archonia.Cosmos.Sun.getTemperature(this.archon.position);
-
-    this.setButtonColor(t);
-  },
-  
-  setSize: function() {
-    var m = this.getMass();
-  	var p = Archonia.Essence.archonSizeRange.convertPoint(m, Archonia.Essence.archonMassRange);
-
-  	this.archon.sprite.scale.setTo(p, p);
-
-  	var w = this.archon.sprite.width;	// Have to tell the body to keep up with the sprite
-  	this.archon.sprite.body.setSize(w, w);
-  	this.archon.sprite.body.setCircle(w / 2);
   },
   
   tick: function(frameCount) {
     this.frameCount = frameCount;
     
-    this.setColors();
     this.metabolize();
   }
 };

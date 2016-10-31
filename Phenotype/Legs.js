@@ -12,12 +12,10 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
 
-Archonia.Form.Legs = function(genomeId, position, velocity) {
+Archonia.Form.Legs = function(archon) {
 
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(genomeId, "legs");
-
-  this.position = position;
-  this.velocity = velocity;
+  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "legs");
+  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "legs");
 
   this.damper = 10;
   this.damperDecay = 0.1;
@@ -37,24 +35,20 @@ Archonia.Form.Legs.prototype = {
   },
   
   launch: function() {
-    // Have to re-get these from the genome when we
-    // launch -- we're a new archon now, with different genes
-    this.maxMVelocity = this.genome.maxMVelocity;
-    this.maxMAcceleration = this.genome.maxMAcceleration;
   },
   
   reflect: function(vertical) {
     this.running = true;
-    var fromZero = Archonia.Axioms.robalizeAngle(this.velocity.getAngleFrom(0));
+    var fromZero = Archonia.Axioms.robalizeAngle(this.state.velocity.getAngleFrom(0));
     var theta = null;
     
     if(vertical) {
-      if(this.velocity.x > 0) {
+      if(this.state.velocity.x > 0) {
 
         theta = (3 * Math.PI / 2) - fromZero;
         this.setTargetAngle(theta);
 
-      } else  if(this.velocity.x < 0) {
+      } else  if(this.state.velocity.x < 0) {
 
         theta = (3 * Math.PI / 2) + fromZero;
         this.setTargetAngle(theta);
@@ -66,7 +60,7 @@ Archonia.Form.Legs.prototype = {
   rotate: function(angle) {
     // Angle from zero, not from the world center, because
     // we're talking velocity here, not position
-    var theta = this.velocity.getAngleTo(0);
+    var theta = this.state.velocity.getAngleTo(0);
     
     theta = Archonia.Axioms.robalizeAngle(theta) + angle;
     
@@ -85,7 +79,7 @@ Archonia.Form.Legs.prototype = {
     if(damper === undefined) { damper = 10; }
     if(damperDecay === undefined) { damperDecay = 0; }
     
-    this.currentMVelocity = this.maxMVelocity;
+    this.currentMVelocity = this.genome.maxMVelocity;
     
     this.damper = damper; this.damperDecay = damperDecay;
 
@@ -98,7 +92,7 @@ Archonia.Form.Legs.prototype = {
   },
   
   setTargetVelocity: function(v) {
-    this.currentMVelocity = this.maxMVelocity;
+    this.currentMVelocity = this.genome.maxMVelocity;
 
     // Force update on next tick, in case we're in the middle of a maneuver
     this.nextUpdate = 0;
@@ -108,7 +102,7 @@ Archonia.Form.Legs.prototype = {
     this.targetVelocity.set(v);
   },
   
-  stop: function() { this.running = false; this.velocity.set(0); },
+  stop: function() { this.running = false; this.state.velocity.set(0); },
 
   tick: function(frameCount) {
     this.frameCount = frameCount;
@@ -119,19 +113,19 @@ Archonia.Form.Legs.prototype = {
 
       Archonia.Essence.Dbitmap.bm.clear();
 
-      s1 = this.velocity.getAngleFrom(0);
-      v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.position));
-      Archonia.Essence.Dbitmap.aLine(this.position, v1, 'red');
+      s1 = this.state.velocity.getAngleFrom(0);
+      v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.state.position));
+      Archonia.Essence.Dbitmap.aLine(this.state.position, v1, 'red');
 
       if(this.targetType === 'point') {
 
-        Archonia.Essence.Dbitmap.aLine(this.position, this.targetPosition, 'black');
+        Archonia.Essence.Dbitmap.aLine(this.state.position, this.targetPosition, 'black');
 
       } else if(this.targetType === 'angle') {
 
         s1 = this.targetVelocity.getAngleTo(0);
-        v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.position));
-        Archonia.Essence.Dbitmap.aLine(this.position, v1, 'green');
+        v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.state.position));
+        Archonia.Essence.Dbitmap.aLine(this.state.position, v1, 'green');
 
       }
     }
@@ -156,16 +150,16 @@ Archonia.Form.Legs.prototype = {
       // my vector and the distance vector from me to the target
     
       // This is the vector from my velocity to the target position
-      optimalDeltaV.set(this.targetPosition.minus(this.position).plus(this.velocity));
+      optimalDeltaV.set(this.targetPosition.minus(this.state.position).plus(this.state.velocity));
 
     } else if(this.targetType === 'angle') {
       
-      this.targetVelocity = Archonia.Form.XY.fromPolar(this.maxMVelocity, this.targetAngle);
-      optimalDeltaV.set(this.velocity.minus(this.targetVelocity));
+      this.targetVelocity = Archonia.Form.XY.fromPolar(this.genome.maxMVelocity, this.targetAngle);
+      optimalDeltaV.set(this.state.velocity.minus(this.targetVelocity));
       
     } else if(this.targetType === 'velocity') {
       
-      optimalDeltaV.set(this.velocity.minus(this.targetVelocity));
+      optimalDeltaV.set(this.state.velocity.minus(this.targetVelocity));
 
     } else {
       Archonia.Essence.hurl(new Error("Bad target type"));
@@ -203,20 +197,20 @@ Archonia.Form.Legs.prototype = {
     // Now we have the best possible vector that our max mVelocity
     // will allow. But now we have to curtail it further to comply
     // with our maximum mAcceleration
-    var bestDeltaV = curtailedV.minus(this.velocity);
+    var bestDeltaV = curtailedV.minus(this.state.velocity);
     var bestDeltaM = bestDeltaV.getMagnitude();
 
-    if(bestDeltaM > this.maxMAcceleration) {
+    if(bestDeltaM > this.genome.maxMAcceleration) {
       this.needUpdate = true;
     
-      bestDeltaV.scalarMultiply(this.maxMAcceleration / bestDeltaM);
+      bestDeltaV.scalarMultiply(this.genome.maxMAcceleration / bestDeltaM);
     }
     
-    this.velocity.add(bestDeltaV);
+    this.state.velocity.add(bestDeltaV);
 
-    if(this.velocity.getMagnitude() > this.maxMVelocity) {
-      this.velocity.normalize();
-      this.velocity.scalarMultiply(this.maxMVelocity);
+    if(this.state.velocity.getMagnitude() > this.genome.maxMVelocity) {
+      this.state.velocity.normalize();
+      this.state.velocity.scalarMultiply(this.genome.maxMVelocity);
     }
     
     // Note: doing it this way means we're never actually setting

@@ -43,7 +43,7 @@ if(typeof window === "undefined") {
     var throwException = false;
     
     if(e instanceof Archonia.Essence.BirthDefect || throwException || (typeof window === "undefined")) { throw e; }
-    else { console.log("Debug exception " + e.message); debugger; } // jshint ignore: line
+    else { console.log("Debug exception " + e.message, e.stack); debugger; } // jshint ignore: line
   };
 
 })(Archonia);

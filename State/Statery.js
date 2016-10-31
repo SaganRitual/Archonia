@@ -16,6 +16,7 @@ var statomePool = [];
 
 var primordialStatome = {
   beingPoisoned: false,
+  encysted: false,
   position: null,
   velocity: null
 };
@@ -37,7 +38,7 @@ Archonia.Cosmos.Statery = {
     // to be reset and re-launched with each precious cycle of life
     archon.statomeId = statomePool.length;
     statomePool.push(newStatome);
-    archon.statome = Archonia.Cosmos.StateClustery.makeStateneCluster(newStatome, "archon");
+    archon.state = Archonia.Cosmos.StateClustery.makeStateneCluster(newStatome, "archon");
   },
   
   makeStateneCluster: function(archonOrStatomeId, clusterName) {
