@@ -106,3 +106,7 @@ Color.prototype = {
 Archonia.Form.Archon = Archon;
 
 })(Archonia);
+
+if(typeof window === "undefined") {
+  module.exports = Archonia.Form.Archon;
+}
