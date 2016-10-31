@@ -23,7 +23,7 @@ Drone.prototype = {
     this.avatar.reset(0, 0, 100);
     this.button.reset(0, 0, 100);
 
-    var avatarScale = 10 / (sensorScale * 100);
+    var avatarScale = Archonia.Axioms.avatarRadius * 2 / (sensorScale * 100);
     var buttonScale = avatarScale / 3;
 
     this.sensor.scale.setTo(sensorScale, sensorScale);

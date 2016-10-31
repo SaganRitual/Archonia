@@ -15,11 +15,12 @@ var Archon = function() {
   this.color = new Color(this);
 
   Archonia.Cosmos.Genomery.genomifyMe(this); // No inheritance here; just getting a skeleton genome
-  Archonia.Cosmos.Statery.statomifyMe(this);
+  Archonia.Cosmos.Statery.statifyMe(this);
 
   this.state.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
   this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
 
+  this.senses = new Archonia.Form.Senses(this);
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs(this);
   //this.head = new Archonia.Form.Head(this.state.position);
@@ -37,8 +38,8 @@ Archon.prototype = {
 
     Archonia.Cosmos.Genomery.inherit(this, myParentArchon);
   
-    this.moving = true;
-    this.legs.launch(this.state.position, this.state.velocity);
+    this.senses.launch();
+    this.legs.launch();
     this.goo.launch();
     //this.head.launch(this.legs, this.state.position);
 
@@ -61,13 +62,11 @@ Archon.prototype = {
     }
 
     this.drone.launch(this.archonUniqueId, this.genome.sensorScale);
-    this.avatarRadius = this.drone.avatar.width / 2;
   },
 
   senseSkinnyManna: function(manna) {
-    var barf = this.state.position.getDistanceTo(manna);
-    console.log(this.state.position.toString(), barf, this.avatarRadius);
-    if(barf < this.avatarRadius) {
+    var d = this.state.position.getDistanceTo(manna);
+    if(d < Archonia.Axioms.avatarRadius + manna.width) {
       this.goo.eat(manna);
       manna.kill();
     } else {

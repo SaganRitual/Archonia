@@ -29,7 +29,7 @@ var selectStatome = function(archonOrStatomeId) {
 
 Archonia.Cosmos.Statery = {
   
-  statomifyMe: function(archon) {
+  statifyMe: function(archon) {
     var newStatome = { };
 
     for(var i in primordialStatome) { newStatome[i] = primordialStatome[i]; }

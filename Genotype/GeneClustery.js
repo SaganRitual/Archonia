@@ -71,6 +71,15 @@ var geneClustery = {
   cluster_legs: {
     valid: [ "maxMAcceleration", "maxMVelocity" ],
     get: function(genome, gene) { return geneClustery.getGene("legs", genome, gene); }
+  },
+  
+  cluster_senses: {
+    valid: [
+      "birthMassAdultCalories", "hungerSignalBufferSize", "hungerSignalDecayRate", "optimalTempHi",
+      "optimalTempLo", "reproductionThreshold", "tempRadius", "tempSignalBufferSize", "tempSignalDecayRate"
+    ],
+    
+    get: function(genome, gene) { return geneClustery.getGene("senses", genome, gene); }
   }
 };
 
