@@ -14,8 +14,8 @@ if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
   Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
-  Archonia.Form.Range = require('./Pixies/Range.js');
-  Archonia.Form.XY = require('./Pixies/XY.js').XY;
+  Archonia.Form.Range = require('./Minions/Range.js');
+  Archonia.Form.XY = require('./Minions/XY.js').XY;
 
   Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
 }

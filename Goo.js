@@ -9,9 +9,9 @@ var tinycolor = tinycolor || {};
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
-  Archonia.Form.Range = require('./Pixies/Range.js');
+  Archonia.Form.Range = require('./Minions/Range.js');
 
-  tinycolor = require('./Pixies/tinycolor.js');
+  tinycolor = require('./Minions/tinycolor.js');
 }
 
 (function(Archonia) {

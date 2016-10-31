@@ -7,8 +7,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Form.Range = require('./Pixies/Range.js');
-  Archonia.Form.XY = require('./Pixies/XY.js').XY;
+  Archonia.Form.Range = require('./Minions/Range.js');
+  Archonia.Form.XY = require('./Minions/XY.js').XY;
 }
 
 (function(Archonia) {
