@@ -8,12 +8,15 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 var tinycolor = tinycolor || {};
 
+if(typeof window === "undefined") {
+  Archonia.Essence = require("../Essence.js");
+}
+
 (function(Archonia) {
   
 var geneClustery = {
   
   getCluster: function(genome, whichCluster) {
-    console.log("gtCluster", "cluster_" + whichCluster);
     return new Proxy(genome, geneClustery["cluster_" + whichCluster]);
   },
   
@@ -33,19 +36,23 @@ var geneClustery = {
   },
   
   throwIfNotPresent: function(target, name) {
-    if(!(name in target)) { Archonia.Axioms.hurl(new Error("No such gene '" + name + "'")); }
+    if(!(name in target)) { Archonia.Essence.hurl(new Error("No such gene '" + name + "'")); }
   },
 
   // Archon gets to see everything
-  cluster_archon: function(genome, gene) { 
-    console.log("archon", gene);
-    return geneClustery.getGene(genome, gene); },
+  cluster_archon: {
+    get: function(genome, gene) { 
+      return geneClustery.getGene(genome, gene);
+    }
+  },
   
-  cluster_legs: function(genome, gene) {
-    var valid = [ "maxMAcceleration", "maxMVelocity" ];
-    
-    if(gene in valid) { return geneClustery.getGene(genome, gene); }
-    else { throw Error("Component 'legs' has no access to gene '" + gene + "'"); }
+  cluster_legs: {
+    get:  function(genome, gene) {
+      var valid = [ "maxMAcceleration", "maxMVelocity" ];
+
+      if(valid.indexOf(gene) === -1) { throw Error("Component 'legs' has no access to gene '" + gene + "'"); }
+      else { return geneClustery.getGene(genome, gene); }
+    }
   }
 };
 

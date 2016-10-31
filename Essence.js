@@ -4,14 +4,11 @@
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
-var proto = proto || {};
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
-  Archonia.Form.Range = require('./widgets/Range.js');
-  Archonia.Form.XY = require('./widgets/XY.js').XY;
-  
-  proto = require('./proto/proto.js');
+  Archonia.Form.Range = require('./Pixies/Range.js');
+  Archonia.Form.XY = require('./Pixies/XY.js').XY;
 }
 
 (function(Archonia) {
@@ -41,6 +38,13 @@ if(typeof window === "undefined") {
   BirthDefect.prototype.constructor = BirthDefect;
   
   Archonia.Essence.BirthDefect = BirthDefect;
+
+  Archonia.Essence.hurl = function(e) {
+    var throwException = false;
+    
+    if(e instanceof Archonia.Essence.BirthDefect || throwException || (typeof window === "undefined")) { throw e; }
+    else { console.log("Debug exception " + e.message); debugger; } // jshint ignore: line
+  };
 
 })(Archonia);
 

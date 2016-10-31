@@ -5,6 +5,11 @@
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
+
+if(typeof window === "undefined") {
+  Archonia.Essence = require('../Essence.js');
+}
+
 (function(Archonia) {
 
 var otherGuySort = function(a, b) {
@@ -89,7 +94,7 @@ Archonia.Form.SenseArchonState.prototype = {
       }
     }
 
-    if(currentId === null) { Archonia.Axioms.hurl(new Error("This shouldn't happen")); }
+    if(currentId === null) { Archonia.Essence.hurl(new Error("This shouldn't happen")); }
     else {
       this.active = true; this.newState = true;
       this.action = "move";

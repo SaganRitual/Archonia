@@ -7,12 +7,13 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === 'undefined') {
   Archonia.Axioms = require('../Axioms.js');
+  Archonia.Essence = require('../Essence.js');
 }
 
 (function(Archonia) {
   
   Archonia.Form.Cbuffer = function(howManyElements) {
-    if(howManyElements === 0) { Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("Zero-length Cbuffer")); }
+    if(howManyElements === 0) { Archonia.Essence.hurl(new Archonia.Essence.BirthDefect("Zero-length Cbuffer")); }
 
     this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     this.reset();
@@ -21,7 +22,7 @@ if(typeof window === 'undefined') {
   
   Archonia.Form.Cbuffer.prototype = {
     add: function(index, howMany) {
-      if(this.elements.length === 0) { Archonia.Axioms.hurl(new Error("plus() can't work with an empty Cbuffer")); }
+      if(this.elements.length === 0) { Archonia.Essence.hurl(new Error("plus() can't work with an empty Cbuffer")); }
       return (index + howMany + this.elements.length) % this.elements.length;
     },
 
@@ -59,12 +60,12 @@ if(typeof window === 'undefined') {
     getElementAt: function(ix) { ix = this.add(ix, 0); return this.elements[ix]; },
     
     getIndexOfNewestElement: function() {
-      if(this.elements.length === 0) { Archonia.Axioms.hurl(new Error("getIndexOfNewestElement() can't work with an empty Cbuffer")); }
+      if(this.elements.length === 0) { Archonia.Essence.hurl(new Error("getIndexOfNewestElement() can't work with an empty Cbuffer")); }
       return (this.indexForNextElement + this.elements.length - 1) % this.elements.length;
     },
     
     getIndexOfOldestElement: function() {
-      if(this.elements.length === 0) { Archonia.Axioms.hurl(new Error("getIndexOfOldestElement() can't work with an empty Cbuffer")); }
+      if(this.elements.length === 0) { Archonia.Essence.hurl(new Error("getIndexOfOldestElement() can't work with an empty Cbuffer")); }
       return (this.elements.length === this.howManyElements) ? this.indexForNextElement : 0;
     },
     
@@ -100,7 +101,7 @@ if(typeof window === 'undefined') {
     },
   
     slice: function(start, howMany) {
-      if(this.elements.length === 0) { Archonia.Axioms.hurl(new Error("Bad arguments to slice()")); }
+      if(this.elements.length === 0) { Archonia.Essence.hurl(new Error("Bad arguments to slice()")); }
       var ix = null;
       
       if(start >= 0) {

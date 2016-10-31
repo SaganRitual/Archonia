@@ -112,13 +112,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
     return a;
   };
-  
-  Archonia.Axioms.hurl = function(e) {
-    var throwException = false;
-    
-    if(e instanceof Archonia.Essence.BirthDefect || throwException) { throw e; }
-    else { console.log("Debug exception " + e.message); debugger; } // jshint ignore: line
-  };
 })(Archonia);
 
 if(typeof window === "undefined") {

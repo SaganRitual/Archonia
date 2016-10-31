@@ -6,8 +6,10 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 var tinycolor = tinycolor || {};
 
-
 if(typeof window === "undefined") {
+  Archonia.Axioms = require('../Axioms.js');
+  Archonia.Essence = require('../Essence.js');
+  Archonia.Cosmos.Archonery = require('../Archonery.js');
   tinycolor = require('../TinyColor/tinycolor.js');
 }
 
@@ -20,7 +22,7 @@ Archonia.Form.Gene = function() {
 };
 
 Archonia.Form.Gene.prototype = {
-  inherit: function() { Archonia.Axioms.hurl(new Error("Gene base class doesn't inherit")); },
+  inherit: function() { Archonia.Essence.hurl(new Error("Gene base class doesn't inherit")); },
   
   mutateMutatability: function(parentGene) {
     // Have to assign these first, before the mutation, because the
@@ -40,7 +42,7 @@ Archonia.Form.Gene.prototype = {
     var probability = this.changeProbability;
     var range = this.changeRange;
   
-    // Hopefull make creation a bit more interesting
+    // Hopefully make creation a bit more interesting
     if(Archonia.Cosmos.Archonery.momentOfCreation) { probability *= 10; range *= 10; }
 
     // Just to make it interesting, every once in a while, a big change
@@ -82,7 +84,7 @@ Archonia.Form.ScalarGene.prototype.inherit = function(parentGene) {
   this.mutateMutatability(parentGene);
   this.value = this.mutateScalar(parentGene.value);
   
-  if(this.value < 0) { Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("Scalar gene value < 0")); }
+  if(this.value < 0) { Archonia.Essence.hurl(new Archonia.Essence.BirthDefect("Scalar gene value < 0")); }
 };
 
 Archonia.Form.ColorGene = function(gene) { this.color = tinycolor(gene); Archonia.Form.Gene.call(this); };
@@ -112,7 +114,7 @@ Archonia.Form.ColorGene.prototype.inherit = function(parentGene) {
 
   var r = this.getTempRange();
   if(r < 0 || r > Archonia.Axioms.temperatureHi || s < 0 || s > 100 || L < 0 || L > 100) {
-    Archonia.Axioms.hurl(new Archonia.Essence.BirthDefect("Bad color gene: " + hsl));
+    Archonia.Essence.hurl(new Archonia.Essence.BirthDefect("Bad color gene: " + hsl));
   }
 };
 

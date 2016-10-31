@@ -14,8 +14,8 @@ if(typeof window === "undefined") {
   Archonia.Axioms = require('./Axioms.js');
   Archonia.Essence = require('./Essence.js');
   Archonia.Essence.BitmapFactory = require('./BitmapFactory.js');
-  Archonia.Form.Range = require('./widgets/Range.js');
-  Archonia.Form.XY = require('./widgets/XY.js').XY;
+  Archonia.Form.Range = require('./Pixies/Range.js');
+  Archonia.Form.XY = require('./Pixies/XY.js').XY;
 
   Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
 }
@@ -83,7 +83,7 @@ if(typeof window === "undefined") {
     },
     
     getTemperature: function(w, wY) {
-      if(w === undefined) { Archonia.Axioms.hurl(new Error("Bad arguments to getTemperature()")); }
+      if(w === undefined) { Archonia.Essence.hurl(new Error("Bad arguments to getTemperature()")); }
 
       var where = Archonia.Form.XY(w, wY).floored();
 

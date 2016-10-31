@@ -3,11 +3,12 @@
 
 "use strict";
 
-// jshint ignore: start
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 (function(Archonia) {
-  
+  Archonia.Cosmos.Archonery = { momentOfCreation: true };
 })(Archonia);
 
-// jshint ignore: end
+if(typeof window === "undefined") {
+  module.exports = Archonia.Cosmos.Archonery;
+}
