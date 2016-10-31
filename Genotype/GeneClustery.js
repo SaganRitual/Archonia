@@ -16,7 +16,7 @@ if(typeof window === "undefined") {
   
 var geneClustery = {
   
-  getCluster: function(genome, whichCluster) {
+  makeGeneCluster: function(genome, whichCluster) {
     return new Proxy(genome, geneClustery["cluster_" + whichCluster]);
   },
   

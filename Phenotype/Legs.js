@@ -12,7 +12,13 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
 
-Archonia.Form.Legs = function() {
+Archonia.Form.Legs = function(genomeId, position, velocity) {
+
+  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(genomeId, "legs");
+
+  this.position = position;
+  this.velocity = velocity;
+
   this.damper = 10;
   this.damperDecay = 0.1;
   this.running = false;
@@ -30,9 +36,11 @@ Archonia.Form.Legs.prototype = {
     this.running = false;
   },
   
-  launch: function(position, maxMVelocity, velocity, maxMAcceleration) {
-    this.position = position; this.maxMVelocity = maxMVelocity;
-    this.velocity = velocity; this.maxMAcceleration = maxMAcceleration;
+  launch: function() {
+    // Have to re-get these from the genome when we
+    // launch -- we're a new archon now, with different genes
+    this.maxMVelocity = this.genome.maxMVelocity;
+    this.maxMAcceleration = this.genome.maxMAcceleration;
   },
   
   reflect: function(vertical) {

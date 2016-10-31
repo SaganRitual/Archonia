@@ -62,28 +62,32 @@ var primordialGenome = {
   hungerSignalDecayRate:       new Archonia.Form.ScalarGene(0.03)
 };
 
-var getGenome = function(archon) {
-  if(archon === undefined) { return primordialGenome; }
-  else { return genomePool.find(function(g) { return g.archonUniqueId === archon.archonUniqueId; }); }
+var selectGenome = function(archonOrGenomeId) {
+  if(archonOrGenomeId === undefined) { return primordialGenome; }
+  else if(archonOrGenomeId instanceof Archonia.Form.Archon) { return genomePool[archonOrGenomeId.genomeId]; }
+  else { return genomePool[archonOrGenomeId]; }
 };
 
 Archonia.Cosmos.Genomery = {
   
   genomifyMe: function(archon) {
-    var newGenome = { archonUniqueId: archon.archonUniqueId };
+    var newGenome = { };
 
     for(var i in primordialGenome) {
       if(primordialGenome[i] === null) { newGenome[i] = null; }
       else { newGenome[i] = primordialGenome[i].newGene(); }
     }
     
+    // This genome and this archon will forever be linked, both
+    // to be reset and re-launched with each precious cycle of life
+    archon.genomeId = genomePool.length;
     genomePool.push(newGenome);
-    archon.genome = Archonia.Cosmos.GeneClustery.getCluster(newGenome, "archon");
+    archon.genome = Archonia.Cosmos.GeneClustery.makeGeneCluster(newGenome, "archon");
   },
   
-  getCluster: function(archon, clusterName) {
-    var genome = getGenome(archon);
-    return Archonia.Cosmos.GeneClustery.getCluster(genome, clusterName);
+  makeGeneCluster: function(archonOrGenomeId, clusterName) {
+    var genome = selectGenome(archonOrGenomeId);
+    return Archonia.Cosmos.GeneClustery.makeGeneCluster(genome, clusterName);
   },
   
   inherit: function(childArchon, parentArchon) {
@@ -94,8 +98,8 @@ Archonia.Cosmos.Genomery = {
     // weird, and it doesn't waste anything; we're not creating new
     // genes, we're just updating the existing ones, using the
     // primordial as our starting point
-    var parentGenome = getGenome(parentArchon);
-    var childGenome = getGenome(childArchon);
+    var parentGenome = selectGenome(parentArchon);
+    var childGenome = selectGenome(childArchon);
 
     for(var i in parentGenome) {
       if(parentGenome[i] === null) { childGenome[i] = null; }
@@ -113,7 +117,7 @@ Archonia.Cosmos.Genomery = {
         }
       }
     }
-  }
+  },
 };
 
 })(Archonia);

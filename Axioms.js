@@ -8,7 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 10;  // must be <= archon pool size
+  Archonia.Axioms.archonCount = 1;  // must be <= archon pool size
   Archonia.Axioms.archonPoolSize = 500;
   Archonia.Axioms.archoniaGooDiameter = 100;
   Archonia.Axioms.archoniaGooRadius = 50;

@@ -1,18 +1,11 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
+/* global tinycolor */
+
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
-var tinycolor = tinycolor || {};
-
-if(typeof window === "undefined") {
-  Archonia.Axioms = require('./Axioms.js');
-  Archonia.Essence = require('./Essence.js');
-  Archonia.Form.Range = require('./Minions/Range.js');
-
-  tinycolor = require('./Minions/tinycolor.js');
-}
 
 (function(Archonia) {
   
@@ -20,13 +13,12 @@ if(typeof window === "undefined") {
   var larvaFatDensity = 1000;
   var embryoFatDensity = 1000;
 
-Archonia.Form.Goo = function(archon) {
+Archonia.Form.Goo = function(genomeId, position) {
   
-  if(archon === undefined) {
-    Archonia.Essence.hurl(new Error("Goo needs an archon"));
-  }
-  
-  this.archon = archon;
+  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(genomeId, "goo");
+
+  this.position = position;
+
   this.embryoCalorieBudget = 0;
   this.larvalCalorieBudget = 0;
   this.adultCalorieBudget = 0;

@@ -1,155 +1,95 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
+/* global Phaser */
+
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
-if(typeof window === "undefined") {
-  var Phaser = require('./test/support/Phaser.js');
-  Archonia.Engine.game = new Phaser.Game();
-  
-  Archonia.Form.Archon = require('./Archon.js');
-}
-
 (function(Archonia) {
   
-  var spritePools = { sensors: null, phaserons: null, buttons: null };
+var Drone = function(dronoid) {
+  this.sensor = dronoid;
+  this.avatar = dronoid.getChildAt(0);
+  this.button = dronoid.getChildAt(1);
+};
 
-  var constructPhaserons = function() {
-  	spritePools.phaserons.forEach(function(a) {
-  		var ix = spritePools.phaserons.getIndex(a);
-  		var s = spritePools.sensors.getChildAt(ix);
-
-  		Archonia.Engine.game.physics.enable(a, Phaser.Physics.ARCADE);
-  		Archonia.Engine.game.physics.enable(s, Phaser.Physics.ARCADE);
-
-  		// Always get the one at zero, because the addChild() below
-  		// removes this one from the pool
-  		var b = spritePools.buttons.getChildAt(0);
-  		a.addChild(b);	// b is removed from its pool by this call
+Drone.prototype = {
+  launch: function(archonId, sensorScale) {
+    this.sensor.archonId = archonId;
     
-        a.sensor = s; a.button = b; s.sprite = a;
-  	}, Archonia.Cosmos.Dronery);
-  };
+    this.sensor.reset(300, 300, 100);
+    this.avatar.reset(0, 0, 100);
+    this.button.reset(0, 0, 100);
 
-  var setupSpritePools = function() {
-  	var setupPool = function(whichPool) {
-  		spritePools[whichPool] = Archonia.Engine.game.add.group();
-  	  spritePools[whichPool].enableBody = true;
-  	  spritePools[whichPool].createMultiple(Archonia.Axioms.archonPoolSize, Archonia.Engine.game.cache.getBitmapData('archoniaGoo'), 0, false);
-  	  Archonia.Engine.game.physics.enable(spritePools[whichPool], Phaser.Physics.ARCADE);
-  	};
+    var avatarScale = 10 / (sensorScale * 100);
+    var buttonScale = avatarScale / 3;
 
-  	setupPool('sensors');
-  	setupPool('phaserons');
-  	setupPool('buttons');
-  };
+    this.sensor.scale.setTo(sensorScale, sensorScale);
+    this.sensor.anchor.setTo(0.5, 0.5);
+    this.sensor.alpha = 1;
+  
+    this.avatar.scale.setTo(avatarScale, avatarScale);
+    this.avatar.anchor.setTo(0.5, 0.5);
+    this.avatar.alpha = 3; this.avatar.tint = 0x00ffff;
+  
+    this.button.scale.setTo(buttonScale, buttonScale);
+    this.button.anchor.setTo(0.5, 0.5);
+    this.button.alpha = 3; this.button.tint = 0xff0000;
+  }
+};
+
+var spritePools = { sensors: null, avatars: null, buttons: null };
+
+var constructDronoids = function() {
+	spritePools.sensors.forEach(function(s) {
+    var a = spritePools.avatars.getChildAt(0);
+    var b = spritePools.buttons.getChildAt(0);
+
+    s.addChild(a); s.addChild(b);
+    s.avatar = a; s.button = b;
+
+    s.inputEnabled = true;
+    s.input.enableDrag();
+    s.events.onDragStart.add(function(s) { var a = getArchonById(s.archonId); a.toggleMotion(); } );
+	});
+};
+
+var getArchonById = function(id) { return Archonia.Cosmos.Archonery.getArchonById(id); };
+
+var getDronoid = function() {
+  var d = spritePools.sensors.getFirstDead();
+  if(d === null) { throw new Error("No more dronoids in pool"); } else { return d; }
+};
+
+var handleOverlaps = function() {
+  Archonia.Engine.game.physics.arcade.overlap(
+    spritePools.sensors, Archonia.Cosmos.skinnyManna.mannaGroup, Archonia.Cosmos.Archonery.senseSkinnyManna
+  );
+};
+
+var setupSpritePools = function() {
+	var setupPool = function(whichPool) {
+    var bmData = (whichPool === "sensors") ? "archoniaSensorGoo" : "archoniaGoo";
+
+		spritePools[whichPool] = Archonia.Engine.game.add.group();
+	  spritePools[whichPool].createMultiple(
+      Archonia.Axioms.archonPoolSize, Archonia.Engine.game.cache.getBitmapData(bmData), 0, false
+    );
+	};
+
+	setupPool('sensors');
+	setupPool('avatars');
+	setupPool('buttons');
+
+  Archonia.Engine.game.physics.enable(spritePools.sensors, Phaser.Physics.ARCADE);
+};
 
 Archonia.Cosmos.Dronery = {
-
-  start: function() {
-  	setupSpritePools();
-  	constructPhaserons();
-  
-  	for(var i = 0; i < Archonia.Axioms.archonCount; i++) {
-      Archonia.Cosmos.Dronery.breed();
-    }
-  },
-
-  breed: function(parentArchon) {
-  	var phaseron = spritePools.phaserons.getFirstDead();
-  	if(phaseron === null) { throw "No more phaserons in pool"; }
-  
-    phaseron.inputEnabled = true;
-    phaseron.input.enableDrag();
-  
-    if(phaseron.archon === undefined) {
-      phaseron.archon = new Archonia.Form.Archon(phaseron);
-    }
-  
-    // Birth defects do happen
-    try { phaseron.archon.launch(parentArchon); }
-    catch(e) { console.log("Birth defect: " + e.message); phaseron.archon.die(); }
-  },
-  
-  // Weird; the order is reversed when I pass the manna as my own
-  // array into the overlap function
-  eat: function(phaseron, manna) {
-    phaseron.archon.eat(manna);
-    manna.kill();
-  },
-  
-  getArchonById: function(archoniaUniqueObjectId) {
-    var a = null;
-    
-    spritePools.phaserons.forEachAlive(function(phaseron) {
-      if(phaseron.archon.archoniaUniqueObjectId === archoniaUniqueObjectId) {
-        a = phaseron.archon;
-      }
-    });
-    
-    return a;
-  },
-  
-  getArchonPosition: function(archoniaUniqueObjectId) {
-    var a = Archonia.Cosmos.Dronery.getArchonById(archoniaUniqueObjectId);
-    var p = null;
-    
-    // Check for null in case he has died or something
-    if(a !== null) { p = Archonia.Form.XY(a.phaseron.position); }
-
-    return p;
-  },
-
-  render: function() {
-  	var showDebugOutlines = false;
-
-  	if(showDebugOutlines) {
-  		spritePools.phaserons.forEachAlive(function(a) {
-        Archonia.Engine.game.debug.body(a, 'yellow', false);
-        Archonia.Engine.game.debug.body(a.archon.sensor, 'blue', false);
-        
-        Archonia.Engine.game.debug.spriteBounds(a, 'blue', false);
-        Archonia.Engine.game.debug.spriteBounds(a.archon.sensor, 'magenta', false);
-      });
-  	}
-  },
-  
-  senseArchon: function(sensor, theOtherGuy) { sensor.archon.head.state.senseArchonState.senseOtherArchon(theOtherGuy.archon); },
-  senseManna: function(sensor, manna) { sensor.archon.head.state.senseMannaState.senseManna(manna); },
-  touch: function(phaseron, theOtherPhaseron) { phaseron.archon.head.state.touchState.touchOtherArchon(theOtherPhaseron.archon); },
-
-  tick: function(frameCount) {
-    Archonia.Cosmos.Dronery.frameCount = frameCount;
-    
-    Archonia.Essence.Dbitmap.bm.clear();
-
-    Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.phaserons, spritePools.phaserons,
-      Archonia.Cosmos.Dronery.touch
-    );
-
-    Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.sensors, Archonia.Cosmos.skinnyManna.mannaGroup,
-      Archonia.Cosmos.Dronery.senseManna
-    );
-
-    Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.phaserons, Archonia.Cosmos.skinnyManna.mannaGroup,
-      Archonia.Cosmos.Dronery.eat
-    );
-
-    Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.sensors, spritePools.phaserons,
-      Archonia.Cosmos.Dronery.senseArchon
-    );
-    
-  	spritePools.phaserons.forEachAlive(function(a) {
-      a.archon.tick();
-  	});
-  }
-
+  getDrone: function(archonId) { var dronoid = getDronoid(archonId); return new Drone(dronoid); },
+  start: function() { setupSpritePools(); constructDronoids(); },
+  tick: function() { handleOverlaps(); }
 };
 
 })(Archonia);
