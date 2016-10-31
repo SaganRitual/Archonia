@@ -40,10 +40,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Cosmos.skinnyManna.initialize(Archonia.Cosmos.allTheManna);
       Archonia.Cosmos.skinnyManna.start();
 
-      Archonia.Cosmos.fatManna = new Archonia.Cosmos.FatManna();
-      Archonia.Cosmos.fatManna.initialize(Archonia.Cosmos.allTheManna);
-      Archonia.Cosmos.fatManna.start();
-      
       Archonia.Cosmos.FamilyTree = new Archonia.Cosmos.FamilyTree();
       
       Archonia.Cosmos.Archonery.start();
@@ -63,12 +59,10 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
     preload: function() {
       Archonia.Engine.game.load.image('particles', 'assets/sprites/pangball.png');
-      Archonia.Engine.game.load.image('fatManna', 'assets/sprites/orb-green.png');
     },
     
     render: function() {
       Archonia.Cosmos.skinnyManna.render();
-      Archonia.Cosmos.fatManna.render();
     },
     
     start: function() {
@@ -85,7 +79,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       
       Archonia.Essence.Dbitmap.bm.clear();
       
-      Archonia.Cosmos.fatManna.tick(frameCount);
       Archonia.Cosmos.skinnyManna.tick(frameCount);
       Archonia.Cosmos.Archonery.tick(frameCount);
       Archonia.Cosmos.Year.tick();
