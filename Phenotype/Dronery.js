@@ -141,16 +141,6 @@ Archonia.Cosmos.Dronery = {
     );
 
     Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.sensors, Archonia.Cosmos.fatManna.mannaGroup,
-      Archonia.Cosmos.Dronery.senseManna
-    );
-
-    Archonia.Engine.game.physics.arcade.overlap(
-      spritePools.phaserons, Archonia.Cosmos.fatManna.mannaGroup,
-      Archonia.Cosmos.Dronery.eat
-    );
-
-    Archonia.Engine.game.physics.arcade.overlap(
       spritePools.sensors, spritePools.phaserons,
       Archonia.Cosmos.Dronery.senseArchon
     );
