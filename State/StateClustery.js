@@ -38,7 +38,7 @@ var stateClustery = {
   },
   
   throwIfNotAccessible: function(component, statene) {
-    if(component !== "archon") {
+    if(component !== "archon" && component !== "head") {
       var handlerName = "cluster_" + component;
       var valid = stateClustery[handlerName].valid;
     
@@ -57,6 +57,12 @@ var stateClustery = {
     get: function(statome, statene) {  return stateClustery.getStatene("archon", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("archon", statome, statene, v); }
   },
+
+  // Head gets to see everything
+  cluster_head: {
+    get: function(statome, statene) {  return stateClustery.getStatene("head", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("head", statome, statene, v); }
+  },
   
   cluster_goo: {
     valid: [ "beingPoisoned", "encysted", "position", "velocity" ],
@@ -65,9 +71,15 @@ var stateClustery = {
   },
   
   cluster_legs: {
-    valid: [ "position", "velocity" ],
-    get: function(statome, statene) {  return stateClustery.getStatene("goo", statome, statene); },
-    set: function(statome, statene, v) { return stateClustery.setStatene("goo", statome, statene, v); }
+    valid: [ "frameCount", "position", "velocity" ],
+    get: function(statome, statene) {  return stateClustery.getStatene("legs", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("legs", statome, statene, v); }
+  },
+  
+  cluster_senses: {
+    valid: [ "hungerInput", "sensedArchons", "sensedSkinnyManna", "tempInput" ],
+    get: function(statome, statene) {  return stateClustery.getStatene("senses", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("senses", statome, statene, v); }
   }
 
 };

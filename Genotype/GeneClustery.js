@@ -41,7 +41,7 @@ var geneClustery = {
   },
   
   throwIfNotAccessible: function(component, gene) {
-    if(component !== "archon") {
+    if(component !== "archon" && component !== "head") {
       var handlerName = "cluster_" + component;
       var valid = geneClustery[handlerName].valid;
     
@@ -67,6 +67,8 @@ var geneClustery = {
 
     get: function(genome, gene) { return geneClustery.getGene("goo", genome, gene); }
   },
+  
+  cluster_head: { get: function(genome, gene) {  return geneClustery.getGene("head", genome, gene); } },
   
   cluster_legs: {
     valid: [ "maxMAcceleration", "maxMVelocity" ],

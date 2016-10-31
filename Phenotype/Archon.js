@@ -10,6 +10,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
 
 var Archon = function() {
+  this.hasLaunched = false;
+  
   this.drone = Archonia.Cosmos.Dronery.getDrone();
 
   this.color = new Color(this);
@@ -20,28 +22,48 @@ var Archon = function() {
   this.state.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
   this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
 
+  this.head = new Archonia.Form.Head(this);
   this.senses = new Archonia.Form.Senses(this);
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs(this);
-  //this.head = new Archonia.Form.Head(this.state.position);
 };
 
 Archon.prototype = {
-  die: function() {
+  chooseAction: function() {
+    switch(this.state.action) {
+    case "mannaGrab":
+      this.legs.setTargetPosition(this.state.where, 0, 0);
+      break;
+      
+    case "stop":
+      this.legs.stop();
+      break;
+      
+    default: Archonia.Essence.hurl(new Error("Bad action '" + this.state.action + "'")); break;
+    }
+  },
   
+  decohere: function() {
+    // This is what Phaser means by "die". For us, dying just means your
+    // metabolism stops; your body is still there, tastily edible
+  },
+  
+  die: function() {
+
   },
 
   launch: function(myParentArchon) {
     this.available = false;
+    this.hasLaunched = true;
   
-    this.frameCount = Archonia.Axioms.integerInRange(0, 60);
+    this.state.frameCount = Archonia.Axioms.integerInRange(0, 60);
 
     Archonia.Cosmos.Genomery.inherit(this, myParentArchon);
-  
+
+    this.head.launch();
     this.senses.launch();
     this.legs.launch();
     this.goo.launch();
-    //this.head.launch(this.legs, this.state.position);
 
     var x = null, y = null;
 
@@ -77,11 +99,14 @@ Archon.prototype = {
   startTween: function() {},
 
   tick: function() {
-    this.frameCount++;
-  
-    //this.head.tick(this.frameCount);
-    this.goo.tick(this.frameCount);
-    if(this.moving) { this.legs.tick(this.frameCount); }
+    this.state.frameCount++;
+
+    this.head.tick();
+    this.chooseAction();
+
+    this.goo.tick();
+    this.legs.tick();
+    this.senses.tick();
   },
 
   toggleMotion: function() { if(this.moving) { this.legs.stop(); } this.moving = !this.moving; }

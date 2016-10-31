@@ -9,7 +9,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   
 var Senses = function(archon) {
   this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "senses");
-  //this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "senses");
+  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "senses");
 };
 
 Senses.prototype = {
@@ -19,14 +19,14 @@ Senses.prototype = {
     lo = this.genome.optimalTempLo - this.genome.tempRadius;
     hi = this.genome.optimalTempHi + this.genome.tempRadius;
 
-    this.tempInput = new Archonia.Form.SignalSmoother(
+    this.state.tempInput = new Archonia.Form.SignalSmoother(
       Math.floor(this.genome.tempSignalBufferSize), this.genome.tempSignalDecayRate, lo, hi
     );
   
     lo = this.genome.reproductionThreshold - this.genome.birthMassAdultCalories;
     hi = 0;
 
-    this.hungerInput = new Archonia.Form.SignalSmoother(
+    this.state.hungerInput = new Archonia.Form.SignalSmoother(
       Math.floor(this.genome.hungerSignalBufferSize), this.genome.hungerSignalDecayRate, lo, hi
     );
 
@@ -34,16 +34,20 @@ Senses.prototype = {
   },
   
   reset: function() {
-    this.sensedSkinnyManna = [];
-    this.sensedArchons = [];
+    this.resetSpatialInputs();
     
-    this.tempInput.reset();
-    this.hungerInput.reset();
+    this.state.tempInput.reset();
+    this.state.hungerInput.reset();
   },
   
-  senseArchon: function(archon) { this.sensedArchons.push(archon); },
-  senseSkinnyManna: function(manna) { this.sensedSkinnyManna.push(manna); },
-  tick: function() { this.reset(); }
+  resetSpatialInputs: function() {
+    this.state.sensedSkinnyManna = [];
+    this.state.sensedArchons = [];
+  },
+  
+  senseArchon: function(archon) { this.state.sensedArchons.push(archon); },
+  senseSkinnyManna: function(manna) { this.state.sensedSkinnyManna.push(manna); },
+  tick: function() { this.resetSpatialInputs(); }
 };
 
 Archonia.Form.Senses = Senses;

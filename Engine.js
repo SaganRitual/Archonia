@@ -80,7 +80,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Essence.Dbitmap.bm.clear();
       
       Archonia.Cosmos.skinnyManna.tick(frameCount);
-      Archonia.Cosmos.Archonery.tick(frameCount);
+      Archonia.Cosmos.Archonery.tick();
       Archonia.Cosmos.Year.tick();
     }
     

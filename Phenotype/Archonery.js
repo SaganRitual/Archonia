@@ -86,9 +86,9 @@ Archonia.Cosmos.Archonery = {
     for(var i = 0; i < Archonia.Axioms.archonCount; i++) { breed(); }
   },
   
-  tick: function(frameCount) {
+  tick: function() {
     Archonia.Cosmos.Dronery.tick();
-    for(var i = 0; i < archonPool.length; i++) { archonPool[i].tick(frameCount); }
+    for(var i = 0; i < archonPool.length; i++) { if(archonPool[i].hasLaunched) { archonPool[i].tick(); } }
   }
 };
 

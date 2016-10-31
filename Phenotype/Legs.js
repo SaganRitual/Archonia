@@ -21,7 +21,6 @@ Archonia.Form.Legs = function(archon) {
   this.damperDecay = 0.1;
   this.running = false;
   this.nextUpdate = 0;
-  this.frameCount = 0;
   
   this.targetType = null;
   this.targetPosition = Archonia.Form.XY();
@@ -104,9 +103,7 @@ Archonia.Form.Legs.prototype = {
   
   stop: function() { this.running = false; this.state.velocity.set(0); },
 
-  tick: function(frameCount) {
-    this.frameCount = frameCount;
-    
+  tick: function() {
     var drawDebugLines = false;
     if(drawDebugLines) {
       var v1 = Archonia.Form.XY(), s1 = null;
@@ -130,9 +127,9 @@ Archonia.Form.Legs.prototype = {
       }
     }
 
-    if(this.running && frameCount > this.nextUpdate) {
+    if(this.running && this.state.frameCount > this.nextUpdate) {
       this.updateMotion();
-      this.nextUpdate = frameCount + this.damper;
+      this.nextUpdate = this.state.frameCount + this.damper;
     }
   },
   

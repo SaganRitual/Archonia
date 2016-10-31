@@ -15,10 +15,17 @@ if(typeof window === "undefined") {
 var statomePool = [];
 
 var primordialStatome = {
-  beingPoisoned: false,
-  encysted: false,
+  action: null,
+  beingPoisoned: null,
+  encysted: null,
+  frameCount: null,
+  hungerInput: null,
   position: null,
-  velocity: null
+  sensedArchons: null,
+  sensedSkinnyManna: null,
+  tempInput: null,
+  velocity: null,
+  where: Archonia.Form.XY()
 };
 
 var selectStatome = function(archonOrStatomeId) {
