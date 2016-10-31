@@ -99,6 +99,24 @@ if(typeof window === "undefined") {
       return new Archonia.Essence.Bitmap(bm);
     },
   
+    archoniaSensorGoo: function() {
+      var bm = Archonia.Engine.game.add.bitmapData(Archonia.Axioms.archoniaGooDiameter, Archonia.Axioms.archoniaGooDiameter);
+      var cx = bm.context;
+
+      cx.beginPath();
+
+      bm.circle(
+        Archonia.Axioms.archoniaGooRadius, Archonia.Axioms.archoniaGooRadius,
+        Archonia.Axioms.archoniaGooRadius, 'hsla(240, 100%, 50%, 0.01)'
+      );
+
+      cx.fill();
+
+      Archonia.Engine.game.cache.addBitmapData('archoniaSensorGoo', bm);
+    
+      return new Archonia.Essence.Bitmap(bm);
+    },
+  
     debug: function() {
       var bm = Archonia.Engine.game.add.bitmapData(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
       var cx = bm.context;
