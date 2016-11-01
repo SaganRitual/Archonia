@@ -22,15 +22,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     for(var i = 0; i < 8; i++) {
       if(searchParameters === "random") { theArray.push(i); }
       else {
-        switch(searchParameters) {
-          case "randomNoDown": if(i === 2 || i === 6) { theArray.push(i); } // jshint ignore: line
-          case "randomUpOnly": if(i === 7 || i === 0 || i === 1) { theArray.push(i); }  break;
-        }
-      
-        switch(searchParameters) {
-          case "randomNoUp": if(i === 2 || i === 6) { theArray.push(i); } // jshint ignore: line
-          case "randomDownOnly": if(i === 3 || i === 4 || i === 5) { theArray.push(i); } break;
-        }
+        if(searchParameters === "randomUpOnly") { if(i === 7 || i === 0 || i === 1) { theArray.push(i); } }
+        else if(searchParameters === "randomDownOnly") { if(i === 3 || i === 4 || i === 5) { theArray.push(i); } }
       }
     }
     
@@ -102,34 +95,41 @@ Archonia.Form.Forager.prototype = {
       });
     }
 
-    var drawDirectionLine = true;
+    var drawDirectionLine = false;
 
     if(drawDirectionLine && !this.trail.isEmpty()) {
       var ix = this.trail.getIndexOfNewestElement();
       var p = this.trail.getElementAt(ix);
-      Archonia.Essence.Dbitmap.aLine(this.state.position, p, "yellow", 2);
+      var color = null;
+      switch(this.where) {
+        case "random": color = "green"; break;
+        case "randomUpOnly": color = "blue"; break;
+        case "randomDownOnly": color = "red"; break;
+      }
+      
+      Archonia.Essence.Dbitmap.aLine(this.state.position, p, color, 2);
     }
   },
   
   forage: function(where) {
-    var bestChoices = [], acceptableChoices = [], fallbacks = [], i = null, p = null;
+    var bestChoices = [], acceptableChoices = [], fallbacks = [];
+    var i = null, p = null, r = null;
     
     bestChoices = populateMovementChoices.call(this, where);
     
-    for(i = 0; i < 8; i++) {
-      if(i < bestChoices.length) {
-        p = relativePositions[bestChoices[i]].plus(this.searchAnchor);
-      
-        if(p.isInBounds()) {
-          if(!this.doWeRemember(p)) { acceptableChoices.push(bestChoices[i]); }
-        }
+    for(i = 0; i < bestChoices.length; i++) {
+      p = relativePositions[bestChoices[i]].plus(this.searchAnchor);
+    
+      if(p.isInBounds()) {
+        if(this.doWeRemember(p)) { fallbacks.push(bestChoices[i]); }
+        else { acceptableChoices.push(bestChoices[i]); }
       }
-      
-      // If we can't find an old spot that we've forgotten just take any
-      // position that's in bounds
-      p = relativePositions[i].plus(this.searchAnchor);
-      if(p.isInBounds()) { fallbacks.push(i); }
     }
+    
+    // If we're in up-only or down-only mode, we need to allow
+    // for horizontal movement, in case we're crammed against
+    // the top or bottom of the world
+    fallbacks.push(2); fallbacks.push(6);
     
     if(acceptableChoices.length > 0) {
       i = Archonia.Axioms.integerInRange(0, acceptableChoices.length);
@@ -145,6 +145,11 @@ Archonia.Form.Forager.prototype = {
     // us -- the legs don't typically get us to the specific target
     this.searchAnchor.set(p);
     this.trail.store(p);
+
+    // Just to make the movement more interesting, especially when
+    // we're smashed up against the ceiling or floor
+    r = p.randomizedTo(squareSize); if(r.isInBounds()) { p.set(r); }
+    
     this.state.targetPosition.set(p);
   },
   
@@ -158,7 +163,6 @@ Archonia.Form.Forager.prototype = {
   
   tick: function() {
     if(this.state.sensedSkinnyManna.length > 0) {
-
       this.foraging = false;
 
       var ix = this.state.sensedSkinnyManna.findIndex(
