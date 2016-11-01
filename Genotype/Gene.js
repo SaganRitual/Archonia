@@ -43,7 +43,7 @@ Archonia.Form.Gene.prototype = {
     var range = this.changeRange;
   
     // Hopefully make creation a bit more interesting
-    if(Archonia.Cosmos.Archonery.momentOfCreation) { probability *= 10; range *= 10; }
+    if(Archonia.Cosmos.momentOfCreation) { probability *= 10; range *= 10; }
 
     // Just to make it interesting, every once in a while, a big change
     var i = null;
