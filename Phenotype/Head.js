@@ -10,6 +10,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 var Head = function(archon) {
   this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "head");
   this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "head");
+  
+  this.legs = archon.legs;
 };
 
 Head.prototype = {
@@ -19,9 +21,10 @@ Head.prototype = {
       this.state.sensedSkinnyManna.sort(function(a, b) { return p.getDistanceTo(a) < p.getDistanceTo(b); });
       
       this.state.action = "mannaGrab";
-      this.state.where.set(this.state.sensedSkinnyManna[0]);
+      this.legs.setTargetPosition(this.state.sensedSkinnyManna[0], 0, 0);
     } else {
-      this.state.action = "stop";
+      this.state.action = "forage";
+      
     }
   },
   

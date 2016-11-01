@@ -22,27 +22,13 @@ var Archon = function() {
   this.state.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
   this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
 
-  this.head = new Archonia.Form.Head(this);
   this.senses = new Archonia.Form.Senses(this);
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs(this);
+  this.forager = new Archonia.Form.Forager(this);
 };
 
 Archon.prototype = {
-  chooseAction: function() {
-    switch(this.state.action) {
-    case "mannaGrab":
-      this.legs.setTargetPosition(this.state.where, 0, 0);
-      break;
-      
-    case "stop":
-      this.legs.stop();
-      break;
-      
-    default: Archonia.Essence.hurl(new Error("Bad action '" + this.state.action + "'")); break;
-    }
-  },
-  
   decohere: function() {
     // This is what Phaser means by "die". For us, dying just means your
     // metabolism stops; your body is still there, tastily edible
@@ -60,8 +46,8 @@ Archon.prototype = {
 
     Archonia.Cosmos.Genomery.inherit(this, myParentArchon);
 
-    this.head.launch();
     this.senses.launch();
+    this.forager.launch();
     this.legs.launch();
     this.goo.launch();
 
@@ -101,9 +87,7 @@ Archon.prototype = {
   tick: function() {
     this.state.frameCount++;
 
-    this.head.tick();
-    this.chooseAction();
-
+    this.forager.tick();
     this.goo.tick();
     this.legs.tick();
     this.senses.tick();

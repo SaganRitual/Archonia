@@ -32,6 +32,17 @@ if(typeof window === "undefined") {
       this.cx.lineTo(to.x, to.y);
       this.cx.stroke();
     },
+    
+    cSquare: function(center, dimension, style, width) {
+      var ul = center.minus(dimension / 2, dimension / 2);
+      
+      this.cx.strokeStyle = style;
+      this.cx.lineWidth = width;
+
+      this.cx.beginPath();
+      this.cx.rect(ul.x, ul.y, dimension, dimension);
+      this.cx.stroke();
+    },
   
     rLine: function(from, relativeTo, style, width) {
       this.aLine(from, relativeTo.plus(from), style, width);

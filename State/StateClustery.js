@@ -57,17 +57,23 @@ var stateClustery = {
     get: function(statome, statene) {  return stateClustery.getStatene("archon", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("archon", statome, statene, v); }
   },
-
-  // Head gets to see everything
-  cluster_head: {
-    get: function(statome, statene) {  return stateClustery.getStatene("head", statome, statene); },
-    set: function(statome, statene, v) { return stateClustery.setStatene("head", statome, statene, v); }
+  
+  cluster_forager: {
+    valid: [ "action", "frameCount", "position" ],
+    get: function(statome, statene) {  return stateClustery.getStatene("forager", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("forager", statome, statene, v); }
   },
   
   cluster_goo: {
     valid: [ "beingPoisoned", "encysted", "position", "velocity" ],
     get: function(statome, statene) {  return stateClustery.getStatene("goo", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("goo", statome, statene, v); }
+  },
+
+  // Head gets to see everything
+  cluster_head: {
+    get: function(statome, statene) {  return stateClustery.getStatene("head", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("head", statome, statene, v); }
   },
   
   cluster_legs: {
