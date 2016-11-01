@@ -55,8 +55,6 @@ Archonia.Form.Forager = function(archon) {
 
 Archonia.Form.Forager.prototype = {
   computeFoodSearchState: function(tempSignal, hungerSignal) {
-    var ySignal = Archonia.Essence.centeredZeroRange.convertPoint(this.state.position.y, yAxisRange);
-    
     var netTemp = Math.abs(tempSignal) * this.genome.tempToleranceMultiplier;
     var netHunger = hungerSignal * this.genome.hungerToleranceMultiplier;
     
@@ -66,20 +64,16 @@ Archonia.Form.Forager.prototype = {
       if(tempSignal > 0) { this.where = "randomDownOnly"; } else { this.where = "randomUpOnly"; }
       
     } else {
-      var upOk = true, downOk = true;
+      var currentTemp = Archonia.Cosmos.Sun.getTemperature(this.state.position);
+      var scaledTemp = Archonia.Essence.centeredZeroRange.convertPoint(currentTemp, Archonia.Essence.worldTemperatureRange);
+      var scaledY = Archonia.Essence.centeredZeroRange.convertPoint(this.state.position.y, yAxisRange);
       
-      // At this temp, no manna will be growing nearby; if we're
-      // above the x-axis, we need to rule out upward movement
-      if(tempSignal > 0.5 && ySignal < 0) { upOk = false; }
+      var upOk = true, downOk = true, stayCloseToManna = 1.25;
       
-      if(tempSignal < 0.5 && ySignal > 0) { downOk = false; }
-      
-      if(this.state.archonUniqueId === 0) {
-        Archonia.Essence.Logger.log(
-          tempSignal.toFixed(2), hungerSignal.toFixed(2), ySignal.toFixed(2),
-          netTemp.toFixed(2), netHunger.toFixed(2), this.state.position.toString()
-        );
-      }
+      if( // Hunger wins over temp threshold; here we're just trying to stay within manna growth range
+        scaledTemp !== 0 && Math.sign(scaledTemp) !== Math.sign(scaledY) &&
+        Math.abs(scaledTemp / scaledY) > stayCloseToManna
+      ) { if(scaledTemp > 0) { upOk = false; } else { downOk = false; } }
 
       if(upOk && downOk) { this.where = "random"; }
       else if(upOk)      { this.where = "randomUpOnly"; }
