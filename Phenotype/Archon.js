@@ -30,12 +30,14 @@ var Archon = function() {
 
 Archon.prototype = {
   decohere: function() {
-    // This is what Phaser means by "die". For us, dying just means your
-    // metabolism stops; your body is still there, tastily edible
+    this.drone.decohere();
+    this.available = true;
+    this.hasLaunched = false;
   },
   
   die: function() {
-
+    console.log(this.state.archonUniqueId, "decohere");
+    this.decohere();  // For now; I'll come back to rotting corpses later
   },
 
   launch: function(myParentArchon) {
@@ -58,18 +60,18 @@ Archon.prototype = {
       y = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20);
 
       this.myParentArchonId = 0;
-      Archonia.Cosmos.FamilyTree.addMe(this.archonUniqueId, 'god');
+      Archonia.Cosmos.FamilyTree.addMe(this.state.archonUniqueId, 'god');
     } else {
       x = myParentArchon.position.x; y = myParentArchon.position.y;
 
       this.state.position.set(myParentArchon.position);
       this.state.velocity.set(myParentArchon.velocity).timesScalar(-1);
-      this.myParentArchonId = myParentArchon.archonUniqueId;
+      this.myParentArchonId = myParentArchon.state.archonUniqueId;
   
-      Archonia.Cosmos.FamilyTree.addMe(this.archonUniqueId, myParentArchon.archonUniqueId);
+      Archonia.Cosmos.FamilyTree.addMe(this.state.archonUniqueId, myParentArchon.state.archonUniqueId);
     }
 
-    this.drone.launch(this.archonUniqueId, this.genome.sensorScale);
+    this.drone.launch(this.state.archonUniqueId, this.genome.sensorScale);
   },
 
   senseSkinnyManna: function(manna) {

@@ -16,6 +16,7 @@ var statomePool = [];
 
 var primordialStatome = {
   action: null,
+  archonUniqueId: null,
   beingPoisoned: null,
   encysted: null,
   frameCount: null,
