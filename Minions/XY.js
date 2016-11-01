@@ -58,6 +58,14 @@ Archonia.Form.XY.prototype = {
   
   normalized: function() { var scratch = Archonia.Form.XY(this); scratch.normalize(); return scratch; },
   
+  randomizedTo: function(a1, a2) {
+    var r = Archonia.Form.XY(a1, a2);
+    var scratch = Archonia.Form.XY(this);
+    scratch.x = Archonia.Axioms.integerInRange(scratch.x - r.x / 2, scratch.x + r.x / 2);
+    scratch.y = Archonia.Axioms.integerInRange(scratch.y - r.y / 2, scratch.y + r.y / 2);
+    return scratch;
+  },
+  
   reset: function() { this.set(0, 0); },
   
   setPolar: function(r, theta) { this.x = r * Math.cos(theta); this.y = r * Math.sin(theta); return this; },
