@@ -37,10 +37,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   };
 
 Archonia.Form.Forager = function(archon) {
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "head");
-  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "head");
-  
-  this.legs = archon.legs;
+  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "forager");
   
   this.searchAnchor = Archonia.Form.XY();
   
@@ -64,12 +61,10 @@ Archonia.Form.Forager.prototype = {
   drawForagingMemory: function() {
     var drawDebugLines = false;
     
-    if(drawDebugLines) {
-      if(!this.trail.isEmpty()) {
-        this.trail.forEach(function(ix, value) {
-          Archonia.Essence.Dbitmap.cSquare(value, squareSize * 0.75, "yellow", 2);
-        });
-      }
+    if(drawDebugLines && !this.trail.isEmpty()) {
+      this.trail.forEach(function(ix, value) {
+        Archonia.Essence.Dbitmap.cSquare(value, squareSize * 0.75, "yellow", 2);
+      });
     }
   },
   
@@ -107,7 +102,7 @@ Archonia.Form.Forager.prototype = {
     // us -- the legs don't typically get us to the specific target
     this.searchAnchor.set(p);
     this.trail.store(p);
-    this.legs.setTargetPosition(p);
+    this.state.targetPosition.set(p);
   },
   
   launch: function() {
@@ -134,7 +129,7 @@ Archonia.Form.Forager.prototype = {
       }
       
       this.currentMannaTarget = this.state.sensedSkinnyManna[ix].archoniaUniqueObjectId;
-      this.legs.setTargetPosition(this.state.sensedSkinnyManna[ix], 0, 0);
+      this.state.targetPosition.set(this.state.sensedSkinnyManna[ix], 0, 0);
       
     } else {
       if(!this.foraging) {

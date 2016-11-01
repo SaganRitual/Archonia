@@ -61,7 +61,7 @@ var stateClustery = {
   },
   
   cluster_forager: {
-    valid: [ "action", "frameCount", "position" ],
+    valid: [ "position", "sensedSkinnyManna", "targetPosition" ],
     get: function(statome, statene) {  return stateClustery.getStatene("forager", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("forager", statome, statene, v); }
   },
@@ -79,7 +79,7 @@ var stateClustery = {
   },
   
   cluster_legs: {
-    valid: [ "frameCount", "position", "velocity" ],
+    valid: [ "frameCount", "position", "targetPosition", "velocity" ],
     get: function(statome, statene) {  return stateClustery.getStatene("legs", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("legs", statome, statene, v); }
   },

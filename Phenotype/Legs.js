@@ -104,29 +104,11 @@ Archonia.Form.Legs.prototype = {
   stop: function() { this.running = false; this.state.velocity.set(0); },
 
   tick: function() {
-    var drawDebugLines = false;
-    if(drawDebugLines) {
-      var v1 = Archonia.Form.XY(), s1 = null;
+    var p = this.state.targetPosition.get();
+    if(p) { this.setTargetPosition(p); }
 
-      Archonia.Essence.Dbitmap.bm.clear();
-
-      s1 = this.state.velocity.getAngleFrom(0);
-      v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.state.position));
-      Archonia.Essence.Dbitmap.aLine(this.state.position, v1, 'red');
-
-      if(this.targetType === 'point') {
-
-        Archonia.Essence.Dbitmap.aLine(this.state.position, this.targetPosition, 'black');
-
-      } else if(this.targetType === 'angle') {
-
-        s1 = this.targetVelocity.getAngleTo(0);
-        v1.set(Archonia.Form.XY.fromPolar(100, s1).plus(this.state.position));
-        Archonia.Essence.Dbitmap.aLine(this.state.position, v1, 'green');
-
-      }
-    }
-
+    this.state.targetPosition.clear();
+    
     if(this.running && this.state.frameCount > this.nextUpdate) {
       this.updateMotion();
       this.nextUpdate = this.state.frameCount + this.damper;

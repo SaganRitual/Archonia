@@ -15,7 +15,6 @@ if(typeof window === "undefined") {
 var statomePool = [];
 
 var primordialStatome = {
-  action: null,
   archonUniqueId: null,
   beingPoisoned: null,
   encysted: null,
@@ -24,6 +23,7 @@ var primordialStatome = {
   position: null,
   sensedArchons: null,
   sensedSkinnyManna: null,
+  targetPosition: new Archonia.Form.TargetPositionStatene(),
   tempInput: null,
   velocity: null,
   where: Archonia.Form.XY()
