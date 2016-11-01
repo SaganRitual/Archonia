@@ -33,6 +33,8 @@ var log_ = function(/*arguments*/) {
 };
 
 var show_ = function(howFarBack) {
+  if(messages.isEmpty()) { return; }
+
   var ix = null;
   
   ix = messages.getIndexOfNewestElement();
