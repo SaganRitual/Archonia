@@ -95,11 +95,19 @@ Archonia.Form.Forager.prototype = {
   
   drawForagingMemory: function() {
     var drawDebugLines = false;
-    
+
     if(drawDebugLines && !this.trail.isEmpty()) {
       this.trail.forEach(function(ix, value) {
         Archonia.Essence.Dbitmap.cSquare(value, squareSize * 0.75, "yellow", 2);
       });
+    }
+
+    var drawDirectionLine = true;
+
+    if(drawDirectionLine && !this.trail.isEmpty()) {
+      var ix = this.trail.getIndexOfNewestElement();
+      var p = this.trail.getElementAt(ix);
+      Archonia.Essence.Dbitmap.aLine(this.state.position, p, "yellow", 2);
     }
   },
   
@@ -171,7 +179,7 @@ Archonia.Form.Forager.prototype = {
       if(!this.foraging) {
         this.trail.reset();
         this.searchAnchor.set(this.state.position);
-        this.whenToIssueNextMove = 0;
+        this.whenToIssueNextMove = this.state.frameCount + howManyTicksBetweenMoves;
         this.foraging = true;
       }
 
