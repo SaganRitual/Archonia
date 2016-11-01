@@ -55,6 +55,12 @@ var geneClustery = {
 
   cluster_archon: { get: function(genome, gene) {  return geneClustery.getGene("archon", genome, gene); } },
   
+  cluster_forager: {
+    valid: [ "hungerToleranceMultiplier", "tempToleranceMultiplier" ],
+
+    get: function(genome, gene) { return geneClustery.getGene("forager", genome, gene); }
+  },
+  
   cluster_goo: {
   
     valid: [
@@ -77,7 +83,7 @@ var geneClustery = {
   
   cluster_senses: {
     valid: [
-      "birthMassAdultCalories", "hungerSignalBufferSize", "hungerSignalDecayRate", "optimalTempHi",
+      "birthMassAdultCalories", "hungerSignalBufferSize", "hungerSignalDecayRate", "optimalTemp", "optimalTempHi",
       "optimalTempLo", "reproductionThreshold", "tempRadius", "tempSignalBufferSize", "tempSignalDecayRate"
     ],
     

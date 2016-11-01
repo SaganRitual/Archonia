@@ -41,13 +41,25 @@ Senses.prototype = {
   },
   
   resetSpatialInputs: function() {
-    this.state.sensedSkinnyManna = [];
-    this.state.sensedArchons = [];
+    this.sensedSkinnyManna = [];
+    this.sensedArchons = [];
   },
   
-  senseArchon: function(archon) { this.state.sensedArchons.push(archon); },
-  senseSkinnyManna: function(manna) { this.state.sensedSkinnyManna.push(manna); },
-  tick: function() { this.resetSpatialInputs(); }
+  senseArchon: function(archon) { this.sensedArchons.push(archon); },
+  senseHunger: function() { this.state.hungerInput.store(this.state.embryoCalorieBudget); },
+  senseSkinnyManna: function(manna) { this.sensedSkinnyManna.push(manna); },
+  senseTemp: function() {
+    this.state.tempInput.store(Archonia.Cosmos.Sun.getTemperature(this.state.position) - this.genome.optimalTemp);
+  },
+  
+  tick: function() { this.transferSpatialInputs(); this.senseTemp(); this.senseHunger(); },
+  
+  transferSpatialInputs: function() {
+    this.state.sensedSkinnyManna = this.sensedSkinnyManna.splice(0, this.sensedSkinnyManna.length);
+    this.state.sensedArchons = this.sensedArchons.splice(0, this.sensedArchons.length);
+    
+    this.resetSpatialInputs();
+  }
 };
 
 Archonia.Form.Senses = Senses;

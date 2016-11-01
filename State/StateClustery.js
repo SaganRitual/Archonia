@@ -61,13 +61,17 @@ var stateClustery = {
   },
   
   cluster_forager: {
-    valid: [ "position", "sensedSkinnyManna", "targetPosition" ],
+    valid: [ "hungerInput", "position", "sensedSkinnyManna", "targetPosition", "tempInput" ],
     get: function(statome, statene) {  return stateClustery.getStatene("forager", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("forager", statome, statene, v); }
   },
   
   cluster_goo: {
-    valid: [ "beingPoisoned", "encysted", "position", "velocity" ],
+    valid: [
+      "adultCalorieBudget", "beingPoisoned", "embryoCalorieBudget", "encysted", "larvalCalorieBudget",
+      "position", "velocity"
+    ],
+    
     get: function(statome, statene) {  return stateClustery.getStatene("goo", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("goo", statome, statene, v); }
   },
@@ -85,7 +89,11 @@ var stateClustery = {
   },
   
   cluster_senses: {
-    valid: [ "hungerInput", "sensedArchons", "sensedSkinnyManna", "tempInput" ],
+    valid: [
+      "adultCalorieBudget", "embryoCalorieBudget", "hungerInput", "larvalCalorieBudget",
+      "position", "sensedArchons", "sensedSkinnyManna", "tempInput"
+    ],
+    
     get: function(statome, statene) {  return stateClustery.getStatene("senses", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("senses", statome, statene, v); }
   }

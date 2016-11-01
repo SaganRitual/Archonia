@@ -38,6 +38,8 @@ Archonia.Form.SignalSmoother.prototype = {
   getSignalStrength: function() {
     var signalStrength = 0;
     
+    if(this.isEmpty()) { return 0; }
+    
     this.cbuffer.forEach(function(ix, value) {
       signalStrength += value;
     });

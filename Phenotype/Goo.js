@@ -16,9 +16,9 @@ Archonia.Form.Goo = function(archon) {
   this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "goo");
   this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "goo");
 
-  this.embryoCalorieBudget = 0;
-  this.larvalCalorieBudget = 0;
-  this.adultCalorieBudget = 0;
+  this.state.embryoCalorieBudget = 0;
+  this.state.larvalCalorieBudget = 0;
+  this.state.adultCalorieBudget = 0;
   
 };
 
@@ -46,7 +46,7 @@ Archonia.Form.Goo.prototype = {
     // This function is the reciprocal of the eat function. Should clean up so
     // we don't have two functions doing basically the same thing
     var myTotalCalories = (
-      this.adultCalorieBudget + this.embryoCalorieBudget + this.larvalCalorieBudget
+      this.state.adultCalorieBudget + this.state.embryoCalorieBudget + this.state.larvalCalorieBudget
     ) / 60;
     
     var whatIWillLose = myTotalCalories * poisoner.genome.toxinStrength / this.genome.toxinResistance;
@@ -73,7 +73,7 @@ Archonia.Form.Goo.prototype = {
     // reserves necessary for the process. If the fees are too high, I die without
     // giving birth. Most of my calories are lost, but the other archons can eat
     // my rotting corpse.
-    if(this.adultCalorieBudget > 0) {
+    if(this.state.adultCalorieBudget > 0) {
       Archonia.Cosmos.Archonery.breed();
     }
   },
@@ -85,7 +85,7 @@ Archonia.Form.Goo.prototype = {
     // if you're starving, you can reabsorb any embryo reserves
     // you've built up, but you don't get all the calories back
 
-    if(costInCalories > 0 && this.embryoCalorieBudget > 0) {
+    if(costInCalories > 0 && this.state.embryoCalorieBudget > 0) {
       var t = costInCalories * (4 / 3);
 
       costInCalories = this.applyCost('embryoCalorieBudget', t);
@@ -93,7 +93,7 @@ Archonia.Form.Goo.prototype = {
     
     costInCalories = this.applyCost('adultCalorieBudget', costInCalories);
 
-    if(this.adultCalorieBudget === 0) { this.die(); }
+    if(this.state.adultCalorieBudget === 0) { this.die(); }
   },
   
   die: function() { Archonia.Cosmos.Archonery.acceptSoul(this.state.archonUniqueId); },
@@ -124,7 +124,7 @@ Archonia.Form.Goo.prototype = {
     if(benefit > 0) {
       benefit = this.applyBenefit('embryoCalorieBudget', benefit, Number.MAX_VALUE);
 
-      if(this.embryoCalorieBudget > this.genome.reproductionThreshold) {
+      if(this.state.embryoCalorieBudget > this.genome.reproductionThreshold) {
         this.breed();
       }
     }
@@ -132,7 +132,7 @@ Archonia.Form.Goo.prototype = {
   
   eatArchon: function(dinner) {
     var dinnerTotalCalories = (
-      dinner.goo.adultCalorieBudget + dinner.goo.embryoCalorieBudget + dinner.goo.larvalCalorieBudget
+      dinner.goo.state.adultCalorieBudget + dinner.goo.state.embryoCalorieBudget + dinner.goo.state.larvalCalorieBudget
     ) / 60;
     
     // Prey loses a lot more from predation than the predator gains
@@ -143,9 +143,9 @@ Archonia.Form.Goo.prototype = {
   },
   
   getMass: function() {
-    var a = this.embryoCalorieBudget / embryoFatDensity;
-    var b = this.adultCalorieBudget / adultFatDensity;
-    var c = this.larvalCalorieBudget / larvaFatDensity;
+    var a = this.state.embryoCalorieBudget / embryoFatDensity;
+    var b = this.state.adultCalorieBudget / adultFatDensity;
+    var c = this.state.larvalCalorieBudget / larvaFatDensity;
     
     return a + b + c;
   },
@@ -168,14 +168,14 @@ Archonia.Form.Goo.prototype = {
   },
   
   howHungryAmI: function() {
-    return (this.genome.reproductionThreshold - this.embryoCalorieBudget) * this.genome.hungerToleranceFactor;
+    return (this.genome.reproductionThreshold - this.state.embryoCalorieBudget) * this.genome.hungerToleranceFactor;
   },
   
   launch: function() {
     this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     
-    this.larvalCalorieBudget = this.genome.birthMassLarvalCalories;
-    this.adultCalorieBudget = this.genome.birthMassAdultCalories;
+    this.state.larvalCalorieBudget = this.genome.birthMassLarvalCalories;
+    this.state.adultCalorieBudget = this.genome.birthMassAdultCalories;
 
     if(this.genome.optimalTempLo >= this.genome.optimalTempHi) {
       Archonia.Essence.hurl(

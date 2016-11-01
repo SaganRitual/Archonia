@@ -89,10 +89,10 @@ Archon.prototype = {
   tick: function() {
     this.state.frameCount++;
 
+    this.senses.tick();
     this.forager.tick();
     this.goo.tick();
     this.legs.tick();
-    this.senses.tick();
     this.drone.setColor(this.genome.color);
   },
 

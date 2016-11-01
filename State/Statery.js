@@ -15,11 +15,14 @@ if(typeof window === "undefined") {
 var statomePool = [];
 
 var primordialStatome = {
+  adultCalorieBudget: null,
   archonUniqueId: null,
   beingPoisoned: null,
+  embryoCalorieBudget: null,
   encysted: null,
   frameCount: null,
   hungerInput: null,
+  larvalCalorieBudget: null,
   position: null,
   sensedArchons: null,
   sensedSkinnyManna: null,
