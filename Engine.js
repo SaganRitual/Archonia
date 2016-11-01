@@ -77,11 +77,13 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     update: function() {
       frameCount++;
       
-      Archonia.Essence.Dbitmap.bm.clear();
+      try {
+        Archonia.Essence.Dbitmap.bm.clear();
       
-      Archonia.Cosmos.skinnyManna.tick(frameCount);
-      Archonia.Cosmos.Archonery.tick();
-      Archonia.Cosmos.Year.tick();
+        Archonia.Cosmos.skinnyManna.tick(frameCount);
+        Archonia.Cosmos.Archonery.tick();
+        Archonia.Cosmos.Year.tick();
+      } catch(e) { debugger; }  // jshint ignore: line
     }
     
   };
