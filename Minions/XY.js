@@ -7,12 +7,21 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 if(typeof window === "undefined") {
   Archonia.Axioms = require("../Axioms.js");
-  Archonia.Essence = require("../Essence.js");
 }
 
 (function(Archonia) {
+  
+var hurl = null;
 
 Archonia.Form.XY = function(sourceOrMaybeX, maybeY) {
+  if(hurl === null) {
+    if(typeof window === "undefined") {
+      Archonia.Essence = require("../Essence.js");
+    }
+
+    hurl = Archonia.Essence.hurl;
+  }
+  
   if(this instanceof Archonia.Form.XY) {
     this.set(sourceOrMaybeX, maybeY);
   } else {
@@ -156,18 +165,18 @@ Archonia.Form.RandomXY.prototype = {
   },
   
   setMin: function(minX, minY) {
-    if(minX === undefined || minY === undefined) { Archonia.Essence.hurl(new Error("Bad arguments to setMin()")); }
+    if(minX === undefined || minY === undefined) { hurl(new Error("Bad arguments to setMin()")); }
     else { this.min.set(minX, minY); }
   },
   
   setMax: function(maxX, maxY) {
-    if(maxX === undefined || maxY === undefined) { Archonia.Essence.hurl(new Error("Bad arguments setMax()")); }
+    if(maxX === undefined || maxY === undefined) { hurl(new Error("Bad arguments setMax()")); }
     else { this.max.set(maxX, maxY); }
   }
 };
 
 // Although many of our functions are ok with undefined arguments, a number of them are not
-function rp(a1) { if(a1 === undefined) { Archonia.Essence.hurl(new Error("Bad arguments to rp()")); } }
+function rp(a1) { if(a1 === undefined) { hurl(new Error("Bad arguments to rp()")); } }
 
 function getMagnitude(a1, a2) {
   var xy = Archonia.Form.XY(a1, a2);
