@@ -62,7 +62,7 @@ Archonia.Form.Forager.prototype = {
   },
   
   drawForagingMemory: function() {
-    var drawDebugLines = true;
+    var drawDebugLines = false;
     
     if(drawDebugLines) {
       if(!this.trail.isEmpty()) {
@@ -133,6 +133,7 @@ Archonia.Form.Forager.prototype = {
         ix = 0;
       }
       
+      this.currentMannaTarget = this.state.sensedSkinnyManna[ix].archoniaUniqueObjectId;
       this.legs.setTargetPosition(this.state.sensedSkinnyManna[ix], 0, 0);
       
     } else {
