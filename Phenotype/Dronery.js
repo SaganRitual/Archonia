@@ -18,10 +18,10 @@ var Drone = function(dronoid) {
 Drone.prototype = {
   decohere: function() { this.sensor.kill(); this.avatar.kill(); this.button.kill(); },
   
-  launch: function(archonId, sensorScale) {
+  launch: function(archonId, sensorScale, x, y) {
     this.sensor.archonId = archonId;
     
-    this.sensor.reset(300, 300, 100);
+    this.sensor.reset(x, y, 100);
     this.avatar.reset(0, 0, 100);
     this.button.reset(0, 0, 100);
 
@@ -34,12 +34,14 @@ Drone.prototype = {
   
     this.avatar.scale.setTo(avatarScale, avatarScale);
     this.avatar.anchor.setTo(0.5, 0.5);
-    this.avatar.alpha = 3; this.avatar.tint = 0x00ffff;
+    this.avatar.alpha = 3;//this.avatar.tint = 0x00ffff;
   
     this.button.scale.setTo(buttonScale, buttonScale);
     this.button.anchor.setTo(0.5, 0.5);
     this.button.alpha = 3; this.button.tint = 0xff0000;
-  }
+  },
+  
+  setColor: function(colorAsDecimal) { this.avatar.tint = colorAsDecimal; }
 };
 
 var spritePools = { sensors: null, avatars: null, buttons: null };

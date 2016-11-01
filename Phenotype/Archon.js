@@ -71,7 +71,7 @@ Archon.prototype = {
       Archonia.Cosmos.FamilyTree.addMe(this.state.archonUniqueId, myParentArchon.state.archonUniqueId);
     }
 
-    this.drone.launch(this.state.archonUniqueId, this.genome.sensorScale);
+    this.drone.launch(this.state.archonUniqueId, this.genome.sensorScale, x, y);
   },
 
   senseSkinnyManna: function(manna) {
@@ -93,6 +93,7 @@ Archon.prototype = {
     this.goo.tick();
     this.legs.tick();
     this.senses.tick();
+    this.drone.setColor(this.genome.color);
   },
 
   toggleMotion: function() { if(this.moving) { this.legs.stop(); } this.moving = !this.moving; }
