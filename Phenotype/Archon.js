@@ -1,8 +1,6 @@
 /* jshint forin:false, noarg:true, noempty:true, eqeqeq:true, bitwise:true, strict:true, loopfunc:true,
 	undef:true, unused:true, curly:true, browser:true, indent:false, maxerr:50, jquery:true, node:true */
 
-/* global tinycolor */
-
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
@@ -11,13 +9,11 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 var Archon = function() {
   this.hasLaunched = false;
-  
-  this.drone = Archonia.Cosmos.Dronery.getDrone();
-
-  this.color = new Color(this);
 
   Archonia.Cosmos.Genomery.genomifyMe(this); // No inheritance here; just getting a skeleton genome
   Archonia.Cosmos.Statery.statifyMe(this);
+  
+  this.drone = Archonia.Cosmos.Dronery.getDrone(this);
 
   this.state.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
   this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
@@ -93,28 +89,10 @@ Archon.prototype = {
     this.forager.tick();
     this.goo.tick();
     this.legs.tick();
-    this.drone.setColor(this.genome.color);
+    this.drone.tick();
   },
 
   toggleMotion: function() { if(this.moving) { this.legs.stop(); } this.moving = !this.moving; }
-};
-
-var Color = function(archon) {
-  this.h = 0;
-  this.s = 0;
-  this.L = 0;
-  this.archon = archon;
-};
-
-Color.prototype = {
-  getColorAsDecimal: function() {
-    var hslString = "hsl(" + this.h + ", " + this.s + "%, " + this.L + "%)";
-    return parseInt(tinycolor(hslString).toHex(), 16);
-  },
-
-  stopTween: function(_this) {
-    _this.archon.tweening = false;
-  }
 };
 
 Archonia.Form.Archon = Archon;

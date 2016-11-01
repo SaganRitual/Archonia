@@ -55,6 +55,12 @@ var geneClustery = {
 
   cluster_archon: { get: function(genome, gene) {  return geneClustery.getGene("archon", genome, gene); } },
   
+  cluster_drone: {
+    valid: [ "color", "optimalTempHi", "optimalTempLo" ],
+
+    get: function(genome, gene) { return geneClustery.getGene("drone", genome, gene); }
+  },
+  
   cluster_forager: {
     valid: [ "hungerToleranceMultiplier", "tempToleranceMultiplier" ],
 

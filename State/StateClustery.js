@@ -60,6 +60,12 @@ var stateClustery = {
     set: function(statome, statene, v) { return stateClustery.setStatene("archon", statome, statene, v); }
   },
   
+  cluster_drone: {
+    valid: [ "position" ],
+    get: function(statome, statene) {  return stateClustery.getStatene("drone", statome, statene); },
+    set: function(statome, statene, v) { return stateClustery.setStatene("drone", statome, statene, v); }
+  },
+  
   cluster_forager: {
     valid: [ "hungerInput", "position", "sensedSkinnyManna", "targetPosition", "tempInput" ],
     get: function(statome, statene) {  return stateClustery.getStatene("forager", statome, statene); },

@@ -6,13 +6,22 @@
 "use strict";
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
+var tinycolor = tinycolor || {};
 
 (function(Archonia) {
   
-var Drone = function(dronoid) {
+var Drone = function(archon, dronoid) {
+  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "drone");
+  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "drone");
+
   this.sensor = dronoid;
   this.avatar = dronoid.getChildAt(0);
   this.button = dronoid.getChildAt(1);
+
+  // The actual values are set in launch
+  this.optimalTempRange = new Archonia.Form.Range(0, 1);
+  
+  this.tweenColor = new TweenColor(this);
 };
 
 Drone.prototype = {
@@ -20,6 +29,8 @@ Drone.prototype = {
   
   launch: function(archonId, sensorScale, x, y) {
     this.sensor.archonId = archonId;
+    
+    this.optimalTempRange.set(this.genome.optimalTempLo, this.genome.optimalTempHi);
     
     this.sensor.reset(x, y, 100);
     this.avatar.reset(0, 0, 100);
@@ -34,14 +45,78 @@ Drone.prototype = {
   
     this.avatar.scale.setTo(avatarScale, avatarScale);
     this.avatar.anchor.setTo(0.5, 0.5);
-    this.avatar.alpha = 3;//this.avatar.tint = 0x00ffff;
+    this.avatar.alpha = 3;
   
     this.button.scale.setTo(buttonScale, buttonScale);
     this.button.anchor.setTo(0.5, 0.5);
     this.button.alpha = 3; this.button.tint = 0xff0000;
   },
   
-  setColor: function(colorAsDecimal) { this.avatar.tint = colorAsDecimal; }
+  tick: function() {
+    this.avatar.tint = this.genome.color;
+
+    var temp = null, clampedTemp = null;
+    
+    temp = Archonia.Cosmos.Sun.getTemperature(this.state.position);
+  	clampedTemp = Archonia.Axioms.clamp(temp, this.genome.optimalTempLo, this.genome.optimalTempHi);
+
+  	var hue = Archonia.Essence.hueRange.convertPoint(clampedTemp, this.optimalTempRange);
+  	var hsl = 'hsl(' + Math.floor(hue) + ', 100%, 50%)';
+
+    if(temp < this.genome.optimalTempLo || temp > this.genome.optimalTempHi) {
+      this.tweenColor.start(hsl);
+      
+      this.button.tint = this.tweenColor.getColor();
+      //if(this.state.archonUniqueId === 0) { console.log(this.tweenColor.hslString)}
+    } else {
+      this.tweenColor.stop(this);
+      
+    	var rgb = tinycolor(hsl).toHex();
+
+    	this.button.tint = parseInt(rgb, 16);
+    }
+  }
+};
+
+var TweenColor = function(drone) {
+  this.drone = drone;
+  this.tweening = false;
+  this.tinycolor = null;
+  
+  this.h = 0;
+  this.s = 0;
+  this.L = 0;
+  
+  this.tween = null;
+};
+
+TweenColor.prototype = {
+  getColor: function() {
+    this.hslString = "hsl(" + this.h + ", " + Math.floor(this.s) + "%, " + Math.floor(this.L) + "%)";
+    return parseInt(tinycolor(this.hslString).toHex(), 16);
+  },
+  
+  onComplete: function(_this) { _this.tweening = false; },
+  
+  start: function(hslString) {
+    if(!this.tweening) {
+      //console.log("Start with " + hslString);
+      var hsl = tinycolor(hslString).toHsl();
+      this.h = hsl.h; this.s = hsl.s * 100; this.L = hsl.l * 100;
+      
+      var c = (this.h < 120) ? 60 : 180;
+      
+      this.tween = Archonia.Engine.game.add.tween(this).to(
+          { h: c }, 0.5 * 1000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true
+        );
+  
+      this.tween.onComplete.add(this.onComplete);
+
+      this.tweening = true;
+    }
+  },
+  
+  stop: function() { if(this.tweening) { this.tween.stop(); this.tweening = false; } }
 };
 
 var spritePools = { sensors: null, avatars: null, buttons: null };
@@ -91,7 +166,7 @@ var setupSpritePools = function() {
 };
 
 Archonia.Cosmos.Dronery = {
-  getDrone: function(archonId) { var dronoid = getDronoid(archonId); return new Drone(dronoid); },
+  getDrone: function(archon) { var dronoid = getDronoid(); return new Drone(archon, dronoid); },
   start: function() { setupSpritePools(); constructDronoids(); },
   tick: function() { handleOverlaps(); }
 };
