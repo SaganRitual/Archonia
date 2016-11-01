@@ -25,18 +25,18 @@ Archonia.Form.Goo = function(archon) {
 Archonia.Form.Goo.prototype = {
   
   applyBenefit: function(bucket, benefit, threshold) {
-    this[bucket] += benefit;
+    this.state[bucket] += benefit;
     
-    if(this[bucket] > threshold) { benefit = this[bucket] - threshold; this[bucket] = threshold; }
+    if(this.state[bucket] > threshold) { benefit = this.state[bucket] - threshold; this.state[bucket] = threshold; }
     else { benefit = 0; }
   
     return benefit;
   },
 
   applyCost: function(bucket, cost) {
-    this[bucket] -= cost;
+    this.state[bucket] -= cost;
     
-    if(this[bucket] < 0) { cost = -this[bucket]; this[bucket] = 0; }
+    if(this.state[bucket] < 0) { cost = -this.state[bucket]; this.state[bucket] = 0; }
     else { cost = 0; }
   
     return cost;
@@ -74,7 +74,7 @@ Archonia.Form.Goo.prototype = {
     // giving birth. Most of my calories are lost, but the other archons can eat
     // my rotting corpse.
     if(this.state.adultCalorieBudget > 0) {
-      Archonia.Cosmos.Archonery.breed();
+      Archonia.Cosmos.Archonery.breed(this.state.archonUniqueId);
     }
   },
   

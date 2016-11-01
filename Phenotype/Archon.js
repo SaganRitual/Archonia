@@ -59,7 +59,7 @@ Archon.prototype = {
       this.myParentArchonId = 0;
       Archonia.Cosmos.FamilyTree.addMe(this.state.archonUniqueId, 'god');
     } else {
-      x = myParentArchon.position.x; y = myParentArchon.position.y;
+      x = myParentArchon.state.position.x; y = myParentArchon.state.position.y;
 
       this.state.position.set(myParentArchon.position);
       this.state.velocity.set(myParentArchon.velocity).timesScalar(-1);

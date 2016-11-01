@@ -77,7 +77,7 @@ Archonia.Cosmos.Archonery = {
     getArchonById(archonUniqueId).die();
   },
   
-  breed: function(parent) { breed(parent); },
+  breed: function(parentId) { var p = getArchonById(parentId); breed(p); },
   
   getArchonById: function(id) { return getArchonById(id); },
   
