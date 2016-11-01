@@ -6,13 +6,17 @@
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
 if(typeof window === "undefined") {
-  Archonia.Essence = require('../Essence.js');
+  Archonia.Axioms = require("../Axioms.js");
+  Archonia.Essence = require("../Essence.js");
 }
 
 (function(Archonia) {
 
 Archonia.Form.Range = function(lo, hi) {
-  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi)) { Archonia.Essence.hurl(new Error("Bad arguments to Range()")); }
+  if(lo === undefined || hi === undefined || isNaN(lo) || isNaN(hi)) {
+    Archonia.Essence.hurl(new Error("Bad arguments to Range()"));
+  }
+
   this.lo = lo; this.hi = hi;
   
   this.radialRange = null;
@@ -75,6 +79,16 @@ Archonia.Form.Range.prototype = {
   }
 };
 
+Archonia.Essence.archonMassRange = new Archonia.Form.Range(0, 10);
+Archonia.Essence.archonTolerableTempRange = new Archonia.Form.Range(200, 1000);
+Archonia.Essence.archonSizeRange = new Archonia.Form.Range(0.07, 0.125);
+Archonia.Essence.hueRange = new Archonia.Form.Range(240, 0);	// Blue (240) is cold/small range, Red (0) is hot/large range
+Archonia.Essence.darknessRange = new Archonia.Form.Range(Archonia.Axioms.darknessAlphaHi, Archonia.Axioms.darknessAlphaLo);
+Archonia.Essence.oneToZeroRange = new Archonia.Form.Range(1, 0);
+Archonia.Essence.worldTemperatureRange = new Archonia.Form.Range(Archonia.Axioms.temperatureLo, Archonia.Axioms.temperatureHi);
+Archonia.Essence.yAxisRange = new Archonia.Form.Range(Archonia.Axioms.gameHeight, 0);
+Archonia.Essence.zeroToOneRange = new Archonia.Form.Range(0, 1);
+Archonia.Essence.centeredZeroRange = new Archonia.Form.Range(-1, 1);
   
 })(Archonia);
 

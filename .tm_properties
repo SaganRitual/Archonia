@@ -1,1 +1,1 @@
-exclude = "{$exclude,assets,build,dist,node_modules,proto,TinyColor}"
+exclude = "{$exclude,assets,build,dist,node_modules,proto,test,TinyColor}"
