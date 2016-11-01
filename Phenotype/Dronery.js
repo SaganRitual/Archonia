@@ -16,6 +16,8 @@ var Drone = function(dronoid) {
 };
 
 Drone.prototype = {
+  decohere: function() { this.sensor.kill(); this.avatar.kill(); this.button.kill(); },
+  
   launch: function(archonId, sensorScale) {
     this.sensor.archonId = archonId;
     

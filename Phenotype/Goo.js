@@ -74,7 +74,7 @@ Archonia.Form.Goo.prototype = {
     // giving birth. Most of my calories are lost, but the other archons can eat
     // my rotting corpse.
     if(this.adultCalorieBudget > 0) {
-      this.archon.breed();
+      Archonia.Cosmos.Archonery.breed();
     }
   },
   
@@ -96,9 +96,7 @@ Archonia.Form.Goo.prototype = {
     if(this.adultCalorieBudget === 0) { this.die(); }
   },
   
-  die: function() {
-    this.archon.die();
-  },
+  die: function() { Archonia.Cosmos.Archonery.acceptSoul(this.state.archonUniqueId); },
 
   eat: function(food) {
     if(this.state.encysted) { return; }  // You don't gain anything while encysted
