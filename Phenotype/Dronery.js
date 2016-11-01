@@ -31,7 +31,11 @@ Drone.prototype = {
     this.sensor.archonId = archonId;
     
     this.optimalTempRange.set(this.genome.optimalTempLo, this.genome.optimalTempHi);
-    
+
+    this.sensor.alpha = 0;
+    this.avatar.alpha = 0;
+    this.button.alpha = 0;
+
     this.sensor.reset(x, y, 100);
     this.avatar.reset(0, 0, 100);
     this.button.reset(0, 0, 100);
@@ -45,11 +49,11 @@ Drone.prototype = {
   
     this.avatar.scale.setTo(avatarScale, avatarScale);
     this.avatar.anchor.setTo(0.5, 0.5);
-    this.avatar.alpha = 3;
+    this.avatar.alpha = 1;
   
     this.button.scale.setTo(buttonScale, buttonScale);
     this.button.anchor.setTo(0.5, 0.5);
-    this.button.alpha = 3; this.button.tint = 0xff0000;
+    this.button.alpha = 1;
   },
   
   tick: function() {
