@@ -67,7 +67,11 @@ var stateClustery = {
   },
   
   cluster_forager: {
-    valid: [ "hungerInput", "position", "sensedSkinnyManna", "targetPosition", "tempInput" ],
+    valid: [
+      "adultCalorieBudget", "embryoCalorieBudget", "hungerInput", "larvalCalorieBudget",
+      "position", "sensedSkinnyManna", "targetPosition", "tempInput"
+    ],
+
     get: function(statome, statene) {  return stateClustery.getStatene("forager", statome, statene); },
     set: function(statome, statene, v) { return stateClustery.setStatene("forager", statome, statene, v); }
   },

@@ -62,7 +62,7 @@ var geneClustery = {
   },
   
   cluster_forager: {
-    valid: [ "hungerToleranceMultiplier", "tempToleranceMultiplier" ],
+    valid: [ "hungerToleranceMultiplier", "optimalTemp", "tempToleranceMultiplier" ],
 
     get: function(genome, gene) { return geneClustery.getGene("forager", genome, gene); }
   },

@@ -7,10 +7,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 (function(Archonia) {
   
-  var adultFatDensity = 100;  // 100 calories per gram
-  var larvaFatDensity = 1000;
-  var embryoFatDensity = 1000;
-
 Archonia.Form.Goo = function(archon) {
   
   this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "goo");
@@ -143,11 +139,7 @@ Archonia.Form.Goo.prototype = {
   },
   
   getMass: function() {
-    var a = this.state.embryoCalorieBudget / embryoFatDensity;
-    var b = this.state.adultCalorieBudget / adultFatDensity;
-    var c = this.state.larvalCalorieBudget / larvaFatDensity;
-    
-    return a + b + c;
+    return Archonia.Essence.getArchonMass(this.state);
   },
   
   getMotionCost: function() {
@@ -157,14 +149,7 @@ Archonia.Form.Goo.prototype = {
   getSensorCost: function() { return 15 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale; },
 
   getTempCost: function() {
-    var t = Archonia.Cosmos.Sun.getTemperature(this.state.position);
-    var d = Math.abs(t - this.genome.optimalTemp);
-    var s = this.getMass();
-    var p = 2 * Math.log((d || 1) + 1) * Math.log(s + 1);
-
-    var r = 5 * this.genome.tempRange / Archonia.Axioms.standardArchonTempRange;
-
-    return p + r;
+    return Archonia.Essence.getTempCost(this.state.position, this.getMass(), this.genome.optimalTemp, this.genome.tempRange);
   },
   
   howHungryAmI: function() {

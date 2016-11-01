@@ -91,7 +91,7 @@ Archonia.Form.Forager.prototype = {
 
     if(drawDebugLines && !this.trail.isEmpty()) {
       this.trail.forEach(function(ix, value) {
-        Archonia.Essence.Dbitmap.cSquare(value, squareSize * 0.75, "yellow", 2);
+        Archonia.Essence.Dbitmap.cSquare(value, squareSize, "yellow", 2);
       });
     }
 
@@ -148,13 +148,14 @@ Archonia.Form.Forager.prototype = {
 
     // Just to make the movement more interesting, especially when
     // we're smashed up against the ceiling or floor
-    r = p.randomizedTo(squareSize); if(r.isInBounds()) { p.set(r); }
+    r = p.randomizedTo(squareSize); if(!r.isInBounds()) { r.set(p); }
     
-    this.state.targetPosition.set(p);
+    this.state.targetPosition.set(r);
   },
   
   launch: function() {
-    this.active = false;
+    this.foraging = false;
+    this.firstMoveAfterForagingRestart = false;
     this.searchAnchor.reset();
     this.trail.reset();
     this.currentMannaTarget = null;
@@ -170,29 +171,50 @@ Archonia.Form.Forager.prototype = {
       );
       
       if(ix === -1) {
+        var archonMass = Archonia.Essence.getArchonMass(this.state);
+        var optimalTemp = this.genome.optimalTemp;
         var p = this.state.position;
-        this.state.sensedSkinnyManna.sort(function(a, b) { return p.getDistanceTo(a) < p.getDistanceTo(b); });
+        
+        this.state.sensedSkinnyManna.sort(function(a, b) {
+
+          var aTempCost = Archonia.Essence.getTempCost(a, archonMass, optimalTemp);
+          var bTempCost = Archonia.Essence.getTempCost(b, archonMass, optimalTemp);
+          
+          if(aTempCost === bTempCost) {
+            return p.getDistanceTo(a) < p.getDistanceTo(b);
+          } else {
+            return aTempCost < bTempCost;
+          }
+
+        });
         
         ix = 0;
       }
       
-      this.currentMannaTarget = this.state.sensedSkinnyManna[ix].archoniaUniqueObjectId;
-      this.state.targetPosition.set(this.state.sensedSkinnyManna[ix], 0, 0);
-      
+      var bestManna = this.state.sensedSkinnyManna[ix];
+      this.currentMannaTarget = bestManna.archoniaUniqueObjectId;
+      this.state.targetPosition.set(bestManna, 0, 0);
+
     } else {
+
       if(!this.foraging) {
         this.trail.reset();
-        this.searchAnchor.set(this.state.position);
         this.foraging = true;
+        this.firstMoveAfterForagingRestart = true;
 
         if(this.state.firstTickAfterLaunch) {
           this.whenToIssueNextMove = 0;
         } else {
-          this.whenToIssueNextMove = this.state.frameCount + howManyTicksBetweenMoves;
+          this.whenToIssueNextMove = this.state.frameCount + howManyTicksBetweenMoves / 2;
         }
       }
 
       if(this.state.frameCount > this.whenToIssueNextMove) {
+        if(this.firstMoveAfterForagingRestart) {
+          this.searchAnchor.set(this.state.position);
+          this.firstMoveAfterForagingRestart = false;
+        }
+
         var tempSignal = this.state.tempInput.getSignalStrength();
         var hungerSignal = this.state.hungerInput.getSignalStrength();
         this.computeFoodSearchState(tempSignal, hungerSignal);

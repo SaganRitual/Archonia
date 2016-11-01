@@ -105,7 +105,10 @@ Archonia.Form.Legs.prototype = {
 
   tick: function() {
     var p = this.state.targetPosition.get();
-    if(p) { this.setTargetPosition(p); }
+    if(p) {
+      if(p.equals(0)) { this.drift(); }
+      else { this.setTargetPosition(p); }
+    }
 
     this.state.targetPosition.clear();
     
