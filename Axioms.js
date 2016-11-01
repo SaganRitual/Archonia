@@ -8,13 +8,11 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 10;  // must be <= archon pool size
+  Archonia.Axioms.archonCount = 1;  // must be <= archon pool size
   Archonia.Axioms.archonPoolSize = 500;
   Archonia.Axioms.archoniaGooDiameter = 100;
   Archonia.Axioms.archoniaGooRadius = 50;
   Archonia.Axioms.avatarRadius = 5;
-  Archonia.Axioms.babyFatAtBirth = 100;
-  Archonia.Axioms.babyFatDensity = 1000;
   Archonia.Axioms.caloriesPerManna = 8;
   Archonia.Axioms.calorieLossRatioForPredation = 2;
   Archonia.Axioms.costFactorForGivingBirth = 2;
@@ -39,6 +37,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.howManyPointsForNonSpatialInputs = 1;
   Archonia.Axioms.howManyPointsForSpatialInputs = 12;
   Archonia.Axioms.howManyPointsForTemperatureInputs = 2;
+  Archonia.Axioms.larvalFatDensity = 1000;
   Archonia.Axioms.mannaPoolSize = 500;
   Archonia.Axioms.maxAcceleration = 15;
   Archonia.Axioms.maxMagnitudeA = 15;
