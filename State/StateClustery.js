@@ -38,7 +38,7 @@ var stateClustery = {
   },
   
   throwIfNotAccessible: function(component, statene) {
-    var universals = [ "archonUniqueId", "frameCount" ];
+    var universals = [ "archonUniqueId", "firstTickAfterLaunch", "frameCount" ];
     
     if(component !== "archon" && component !== "head" && universals.indexOf(statene) === -1) {
       var handlerName = "cluster_" + component;

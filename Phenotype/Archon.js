@@ -39,6 +39,7 @@ Archon.prototype = {
   launch: function(myParentArchon) {
     this.available = false;
     this.hasLaunched = true;
+    this.state.firstTickAfterLaunch = true;
   
     this.state.frameCount = Archonia.Axioms.integerInRange(0, 60);
 
@@ -90,6 +91,8 @@ Archon.prototype = {
     this.goo.tick();
     this.legs.tick();
     this.drone.tick();
+
+    this.state.firstTickAfterLaunch = false;
   },
 
   toggleMotion: function() { if(this.moving) { this.legs.stop(); } this.moving = !this.moving; }

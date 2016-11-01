@@ -20,6 +20,7 @@ var primordialStatome = {
   beingPoisoned: null,
   embryoCalorieBudget: null,
   encysted: null,
+  firstTickAfterLaunch: null,
   frameCount: null,
   hungerInput: null,
   larvalCalorieBudget: null,

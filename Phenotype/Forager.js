@@ -179,8 +179,13 @@ Archonia.Form.Forager.prototype = {
       if(!this.foraging) {
         this.trail.reset();
         this.searchAnchor.set(this.state.position);
-        this.whenToIssueNextMove = this.state.frameCount + howManyTicksBetweenMoves;
         this.foraging = true;
+
+        if(this.state.firstTickAfterLaunch) {
+          this.whenToIssueNextMove = 0;
+        } else {
+          this.whenToIssueNextMove = this.state.frameCount + howManyTicksBetweenMoves;
+        }
       }
 
       if(this.state.frameCount > this.whenToIssueNextMove) {
