@@ -9,7 +9,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   
 var Senses = function(archon) {
   this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "senses");
-  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "senses");
+  this.state = archon.state;
 };
 
 Senses.prototype = {

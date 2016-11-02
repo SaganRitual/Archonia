@@ -3,3 +3,4 @@ deps.js
 dist/**/*
 build/**/*
 TinyColor/**/*
+test/**/*

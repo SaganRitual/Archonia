@@ -9,9 +9,10 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 var Archon = function() {
   this.hasLaunched = false;
+  
+  this.setupState();
 
   Archonia.Cosmos.Genomery.genomifyMe(this); // No inheritance here; just getting a skeleton genome
-  Archonia.Cosmos.Statery.statifyMe(this);
   
   this.drone = Archonia.Cosmos.Dronery.getDrone(this);
 
@@ -80,6 +81,27 @@ Archon.prototype = {
       this.senses.senseSkinnyManna(manna);
     }
   },
+  
+  setupState: function() {
+    this.state = {
+      adultCalorieBudget: null,
+      archonUniqueId: null,
+      beingPoisoned: null,
+      embryoCalorieBudget: null,
+      encysted: null,
+      firstTickAfterLaunch: null,
+      frameCount: null,
+      hungerInput: null,
+      larvalCalorieBudget: null,
+      position: null,
+      sensedArchons: null,
+      sensedSkinnyManna: null,
+      targetPosition: new TargetPosition(),
+      tempInput: null,
+      velocity: null,
+      where: Archonia.Form.XY(),
+    };
+  },
 
   startTween: function() {},
 
@@ -96,6 +118,25 @@ Archon.prototype = {
   },
 
   toggleMotion: function() { if(this.moving) { this.legs.stop(); } this.moving = !this.moving; }
+};
+
+var TargetPosition = function() {
+  this.targetPosition = Archonia.Form.XY();
+  
+  this.clear();
+};
+
+TargetPosition.prototype = {
+  clear: function() { this.dirty = false; },
+  
+  get: function() { if(this.dirty) { return this.targetPosition; } else { return false; } },
+  
+  set: function(targetPosition, damper, damperDecay) {
+    this.targetPosition.set(targetPosition);
+    this.damper = damper; this.damperDecay = damperDecay;
+  
+    this.dirty = true;
+  }
 };
 
 Archonia.Form.Archon = Archon;

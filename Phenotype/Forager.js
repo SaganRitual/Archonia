@@ -32,7 +32,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 Archonia.Form.Forager = function(archon) {
   this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "forager");
-  this.state = Archonia.Cosmos.Statery.makeStateneCluster(archon, "forager");
+  this.state = archon.state;
   
   this.searchAnchor = Archonia.Form.XY();
   
@@ -206,6 +206,7 @@ Archonia.Form.Forager.prototype = {
           this.whenToIssueNextMove = 0;
         } else {
           this.whenToIssueNextMove = this.state.frameCount + howManyTicksBetweenMoves / 2;
+          this.state.targetPosition.set(0);
         }
       }
 
