@@ -143,7 +143,7 @@ Archonia.Form.Goo.prototype = {
   },
   
   getMotionCost: function() {
-    return this.getMass() * (this.genome.maxMVelocity / 10) + (this.genome.maxMAcceleration / 3);
+    return this.getMass() * (this.genome.maxMVelocity / 10) + (this.getMass() * Archonia.Axioms.maxForceOnBody / 3);
   },
   
   getSensorCost: function() { return 15 * this.genome.sensorScale / Archonia.Axioms.standardSensorScale; },

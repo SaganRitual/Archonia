@@ -26,7 +26,6 @@ var genomePool = [];
 var primordialGenome = {
   color:                     new Archonia.Form.ColorGene(tinycolor('hsl(180, 100%, 50%)')),
 
-  maxMAcceleration:          new Archonia.Form.ScalarGene(15),
   maxMVelocity:              new Archonia.Form.ScalarGene(30),
   sensorScale:               new Archonia.Form.ScalarGene(Archonia.Axioms.standardSensorScale),
   

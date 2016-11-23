@@ -71,7 +71,7 @@ var geneClustery = {
   
     valid: [
       "birthMassLarvalCalories", "birthMassAdultCalories",
-      "embryoThreshold", "hungerToleranceFactor", "maxMAcceleration", "maxMVelocity",
+      "embryoThreshold", "hungerToleranceFactor", "maxMVelocity",
       "offspringMassAdultCalories", "offspringMassLarvalCalories",
       "optimalTemp", "optimalTempHi", "optimalTempLo",
       "reproductionThreshold", "sensorScale", "tempRange", "toxinResistance", "toxinStrength"
@@ -83,7 +83,7 @@ var geneClustery = {
   cluster_head: { get: function(genome, gene) {  return geneClustery.getGene("head", genome, gene); } },
   
   cluster_legs: {
-    valid: [ "maxMAcceleration", "maxMVelocity" ],
+    valid: [ "maxMVelocity" ],
     get: function(genome, gene) { return geneClustery.getGene("legs", genome, gene); }
   },
   

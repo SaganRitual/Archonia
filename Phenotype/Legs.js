@@ -182,10 +182,11 @@ Archonia.Form.Legs.prototype = {
     var bestDeltaV = curtailedV.minus(this.state.velocity);
     var bestDeltaM = bestDeltaV.getMagnitude();
 
-    if(bestDeltaM > this.genome.maxMAcceleration) {
+    var hackMassForNow = 1;
+    if(bestDeltaM > Archonia.Axioms.maxForceOnBody * hackMassForNow) {
       this.needUpdate = true;
     
-      bestDeltaV.scalarMultiply(this.genome.maxMAcceleration / bestDeltaM);
+      bestDeltaV.scalarMultiply(Archonia.Axioms.maxForceOnBody * hackMassForNow / bestDeltaM);
     }
     
     this.state.velocity.add(bestDeltaV);
