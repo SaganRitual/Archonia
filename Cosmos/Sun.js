@@ -80,22 +80,11 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   var Sun = function() {
     this.rawBrightnessRange = new Archonia.Form.Range(-1, 1);
     this.seasonalBrightnessRange = new Archonia.Form.Range(-1, 1);
-    
-    // Haven't yet thought of a good place to put the desert. Its behavior
-    // is intimately connected to the sun's movements, so this will work for now
-    this.desert = Archonia.Engine.game.add.tileSprite(
-      0, 0, Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight, 'floor'
-    );
-
-    this.coldShelter = Archonia.Engine.game.add.sprite(50, 50, 'shelter'); this.coldShelter.anchor.setTo(0.5, 0.5);
-    this.warmShelter = Archonia.Engine.game.add.sprite(550, 550, 'shelter'); this.warmShelter.anchor.setTo(0.5, 0.5);
 
     // Note: add day/season sprites AFTER the desert, so
     // they'll come out on top in the z-order
     this.year = new Year();
     this.day = new Day(this.noonBells, this);
-    
-    this.shiftDesertFloor();
   };
   
   Sun.prototype = {
@@ -111,14 +100,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
       if(this.halfDayNumber % 2 === 1) {
         this.year.tick();
-        this.shiftDesertFloor();
       }
-    },
-
-    shiftDesertFloor: function() {
-      this.desert.tilePosition.setTo(
-        Archonia.Axioms.integerInRange(-1000, 0), Archonia.Axioms.integerInRange(-1000, 0)
-      );
     }
   };
   
