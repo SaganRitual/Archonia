@@ -55,6 +55,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     },
     
     letThereBeLivingThings: function() {
+      Archonia.Cosmos.TheMannaGenerator.start();
       Archonia.Cosmos.TheGenomery.start();
       Archonia.Cosmos.TheFamilyTree = new Archonia.Cosmos.TheFamilyTree();
       Archonia.Cosmos.Archonery.start();
@@ -85,7 +86,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
     preload: function() {
       Archonia.Engine.game.load.image('vent', 'assets/urchin.png');
-      Archonia.Engine.game.load.image('dragonfly', 'assets/dragonfly.png');
     },
     
     render: function() {
@@ -107,6 +107,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       
       try {
         Archonia.Cosmos.Archonery.tick();
+        Archonia.Cosmos.TheMannaGenerator.tick();
       } catch(e) { console.log(e.stack); throw e; }
     }
     

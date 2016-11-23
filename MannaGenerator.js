@@ -24,21 +24,24 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
-Archonia.Cosmos.MannaGenerator = function() {
+var MannaGenerator = function() {
   this.arrayScale = null;
   this.bellCurve = null;
   this.bellCurveHeight = 5;
   this.bellCurveRadius = null;
   this.gameScale = null;
   this.morselScale = 1;
-  this.started = false;
+  this.started = true;
   this.tempScale = null;
   this.frameCount = null;
+  this.allTheManna = [ ];
+  
+  this.initialize();
 };
 
-Archonia.Cosmos.MannaGenerator.prototype = {
+MannaGenerator.prototype = {
 
-  initialize: function(allTheManna) {
+  initialize: function() {
   
     var stopBelow = 0.01, xOffset = 0, width = 2;
     this.bellCurve = Archonia.Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
@@ -69,7 +72,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
       m.body.collideWorldBounds = true;
       m.tint = 0;
       
-      allTheManna.push(m);
+      this.allTheManna.push(m);
     }, this);
   },
 
@@ -118,8 +121,6 @@ Archonia.Cosmos.MannaGenerator.prototype = {
   		}, this);
   	}
   },
-    
-  start: function() { this.started = true; },
   
   takethAway: function() {
     for(var i = 0; i < 10; i++) {
@@ -145,9 +146,11 @@ Archonia.Cosmos.MannaGenerator.prototype = {
   }
     
 };
+
+Archonia.Cosmos.TheMannaGenerator = { start: function() { Archonia.Cosmos.TheMannaGenerator = new MannaGenerator(); } };
   
 })(Archonia);
 
 if(typeof window === "undefined") {
-  module.exports = Archonia.Cosmos.MannaGenerator;
+  module.exports = Archonia.Cosmos.TheMannaGenerator;
 }
