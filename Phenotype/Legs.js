@@ -14,7 +14,7 @@ if(typeof window === "undefined") {
 
 Archonia.Form.Legs = function(archon) {
 
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "legs");
+  this.genome = archon.genome;
   this.state = archon.state;
 
   this.damper = 10;

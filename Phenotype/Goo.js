@@ -9,7 +9,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   
 Archonia.Form.Goo = function(archon) {
   
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "goo");
+  this.genome = archon.genome;
   this.state = archon.state;
 
   this.state.embryoCalorieBudget = 0;

@@ -31,7 +31,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   };
 
 Archonia.Form.Forager = function(archon) {
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "forager");
+  this.genome = archon.genome;
   this.state = archon.state;
   
   this.searchAnchor = Archonia.Form.XY();
@@ -57,7 +57,7 @@ Archonia.Form.Forager.prototype = {
       if(tempSignal > 0) { this.where = "randomDownOnly"; } else { this.where = "randomUpOnly"; }
       
     } else {
-      var currentTemp = Archonia.Cosmos.Sun.getTemperature(this.state.position);
+      var currentTemp = Archonia.Cosmos.TheAtmosphere.getTemperature(this.state.position);
       var scaledTemp = Archonia.Essence.centeredZeroRange.convertPoint(currentTemp, Archonia.Essence.worldTemperatureRange);
       var scaledY = Archonia.Essence.centeredZeroRange.convertPoint(this.state.position.y, yAxisRange);
       

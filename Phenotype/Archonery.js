@@ -23,27 +23,6 @@ var breed = function(parent) {
   }
 };
 
-// Have to delay creation of the prototype because it needs XY,
-// which doesn't exist until later, when XY.js gets loaded
-var generateArchonoidPrototype = function() { 
-  var Archonoid = function(archonite) { this.archonite = archonite; Archonia.Form.XY.call(this); };
-
-  Archonoid.prototype = Object.create(Archonia.Form.XY.prototype);
-  Archonoid.prototype.constructor = Archonoid;
-
-  Object.defineProperty(Archonoid.prototype, 'x', {
-    get: function x() { return this.archonite.x; },
-    set: function x(v) { this.archonite.x = v; }
-  });
-
-  Object.defineProperty(Archonoid.prototype, 'y', {
-    get: function y() { return this.archonite.y; },
-    set: function y(v) { this.archonite.y = v; }
-  });
-  
-  Archonia.Form.Archonoid = Archonoid;
-};
-
 var getArchon = function() {
   var archon = null;
   
@@ -60,9 +39,9 @@ var getArchon = function() {
   return archon;
 };
 
-var getArchonById = function(archonId) {
+var getArchonById = function(archonUniqueId) {
   var archon = archonPool.find(function(e) {
-    return e.state.archonUniqueId === archonId;
+    return e.state.archonUniqueId === archonUniqueId;
   });
   
   return archon;
@@ -81,23 +60,22 @@ Archonia.Cosmos.Archonery = {
   
   getArchonById: function(id) { return getArchonById(id); },
   
-  senseSkinnyManna: function(sensor, manna) {
-    var archon = getArchonById(sensor.archonId);
-    archon.senseSkinnyManna(manna);
-  },
+  // Baffling: the args order should be sensor, vent, as far as
+  // I can tell, based on the way we're calling the Phaser overlap
+  // function. But this works, so I guess I'll worry about it later
+  senseVent: function(vent, sensor) { var diner = getArchonById(sensor.archonUniqueId); diner.senseVent(); },
   
   start: function() {
     Archonia.Cosmos.momentOfCreation = true;
 
-    generateArchonoidPrototype();
-    Archonia.Cosmos.Dronery.start();
+    Archonia.Engine.TheDronery.start();
     for(var i = 0; i < Archonia.Axioms.archonCount; i++) { breed(); }
 
     Archonia.Cosmos.momentOfCreation = false;
   },
   
   tick: function() {
-    Archonia.Cosmos.Dronery.tick();
+    Archonia.Engine.TheDronery.tick();
     for(var i = 0; i < archonPool.length; i++) { if(archonPool[i].hasLaunched) { archonPool[i].tick(); } }
   }
 };

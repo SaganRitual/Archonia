@@ -50,7 +50,7 @@ var show_ = function(howFarBack) {
   }
 };
   
-Archonia.Essence.Logger = {
+Archonia.Essence.TheLogger = {
   initialize: function(size, testOutput) { initialize_(size, testOutput); },
   log: function() { log_(arguments); },
   show: function(howFarBack) { show_(howFarBack); }

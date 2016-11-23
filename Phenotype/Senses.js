@@ -8,7 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   
 var Senses = function(archon) {
-  this.genome = Archonia.Cosmos.Genomery.makeGeneCluster(archon, "senses");
+  this.genome = archon.genome;
   this.state = archon.state;
 };
 
@@ -49,7 +49,7 @@ Senses.prototype = {
   senseHunger: function() { this.state.hungerInput.store(this.state.embryoCalorieBudget); },
   senseSkinnyManna: function(manna) { this.sensedSkinnyManna.push(manna); },
   senseTemp: function() {
-    this.state.tempInput.store(Archonia.Cosmos.Sun.getTemperature(this.state.position) - this.genome.optimalTemp);
+    this.state.tempInput.store(Archonia.Cosmos.TheAtmosphere.getTemperature(this.state.position) - this.genome.optimalTemp);
   },
   
   tick: function() { this.transferSpatialInputs(); this.senseTemp(); this.senseHunger(); },

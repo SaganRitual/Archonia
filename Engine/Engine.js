@@ -23,38 +23,45 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Engine.game.input.onUp.add(Archonia.Engine.onMouseUp, Archonia.Engine);
       Archonia.Engine.game.input.onDown.add(Archonia.Engine.onMouseDown, Archonia.Engine);
       
-      Archonia.Essence.Logger.initialize(1000);
-      
+      Archonia.Engine.letThereBeALoggingMechanism();
       Archonia.Engine.letThereBeRanges();
-
-      Archonia.Engine.TheBitmapFactory.start();
-      Archonia.Cosmos.Sea = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSea');
-      Archonia.Cosmos.Seasons = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSeasons');
-      Archonia.Essence.Goo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooArchonia');
-      Archonia.Essence.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooSensor');
-      Archonia.Essence.ButtonGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooButton');
-      Archonia.Essence.AvatarGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooAvatar');
-
-      Archonia.Cosmos.Sun.ignite();
-      Archonia.Cosmos.Year.start();
-      
-      Archonia.Cosmos.allTheManna = [];
-      
-      Archonia.Cosmos.skinnyManna = new Archonia.Cosmos.MannaGenerator();
-      Archonia.Cosmos.skinnyManna.initialize(Archonia.Cosmos.allTheManna);
-      Archonia.Cosmos.skinnyManna.start();
-
-      Archonia.Cosmos.FamilyTree = new Archonia.Cosmos.FamilyTree();
-      
-      Archonia.Cosmos.Archonery.start();
+      Archonia.Engine.letThereBeBitmaps();
+      Archonia.Engine.letThereBeElements();
+      Archonia.Engine.letThereBeLivingThings();
     },
 
     handleClick: function(/*pointer*/) {
-      
+      Archonia.Cosmos.barf = true;
+    },
+    
+    letThereBeALoggingMechanism: function() {
+      Archonia.Essence.TheLogger.initialize(1000);
+    },
+    
+    letThereBeBitmaps: function() {
+      Archonia.Engine.TheBitmapFactory.start();
+      Archonia.Cosmos.Sea = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSea');
+      Archonia.Cosmos.Seasons = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSeasons');
+      Archonia.Engine.Goo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooArchonia');
+      Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooButton');
+      Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooSensor');
+      Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooVent');
+    },
+    
+    letThereBeElements: function() {
+      Archonia.Cosmos.TheSun.ignite();
+      Archonia.Cosmos.TheAtmosphere.breathe();
+      Archonia.Engine.TheDebug.start();
+    },
+    
+    letThereBeLivingThings: function() {
+      Archonia.Cosmos.TheGenomery.start();
+      Archonia.Cosmos.TheFamilyTree = new Archonia.Cosmos.TheFamilyTree();
+      Archonia.Cosmos.Archonery.start();
     },
     
     letThereBeRanges: function() {
-      Archonia.Form.XY.setSafeScratch();
+      Archonia.Form.XY.start();
       Archonia.Essence.archonMassRange = new Archonia.Form.Range(0, 10);
       Archonia.Essence.archonTolerableTempRange = new Archonia.Form.Range(50, 200);
       Archonia.Essence.archonSizeRange = new Archonia.Form.Range(0.07, 0.125);
@@ -75,17 +82,22 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     onMouseUp: function(pointer) {
       if(!Archonia.Engine.mouseUp) { Archonia.Engine.mouseUp = true; Archonia.Engine.handleClick(pointer); }
     },
+
+    preload: function() {
+      Archonia.Engine.game.load.image('vent', 'assets/urchin.png');
+      Archonia.Engine.game.load.image('dragonfly', 'assets/dragonfly.png');
+    },
     
     render: function() {
-      Archonia.Cosmos.skinnyManna.render();
-      Archonia.Cosmos.Dronery.render();
     },
     
     start: function() {
       Archonia.Engine.game = new Phaser.Game(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight, Phaser.WEBGL);
 
       Archonia.Engine.game.state.add('Archonia', Archonia.Engine, false);
-      Archonia.Engine.game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
+      Archonia.Engine.game.state.add('Extinction', {
+        create: function() { console.log("They're all dead, and you're a terrible person"); }
+      }, false);
 
       Archonia.Engine.game.state.start('Archonia');
     },
@@ -94,10 +106,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       frameCount++;
       
       try {
-        Archonia.Cosmos.skinnyManna.tick(frameCount);
         Archonia.Cosmos.Archonery.tick();
-        Archonia.Cosmos.Year.tick();
-      } catch(e) { debugger; }  // jshint ignore: line
+      } catch(e) { console.log(e.stack); throw e; }
     }
     
   };

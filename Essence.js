@@ -19,7 +19,7 @@ if(typeof window === "undefined") {
   };
   
   Archonia.Essence.getTempCost = function(where, archonMass, archonOptimalTemp, archonTempRange) {
-    var t = Archonia.Cosmos.Sun.getTemperature(where);
+    var t = Archonia.Cosmos.TheAtmosphere.getTemperature(where);
     var d = Math.abs(t - archonOptimalTemp);
     var s = archonMass;
     var p = 2 * Math.log((d || 1) + 1) * Math.log(s + 1);

@@ -75,7 +75,7 @@ Archonia.Cosmos.MannaGenerator.prototype = {
 
   giveth: function() {
     var thisParticle = null;
-    var temp = Archonia.Cosmos.Sun.getTemperature(Archonia.Essence.gameCenter);
+    var temp = Archonia.Cosmos.TheAtmosphere.getTemperature(Archonia.Essence.gameCenter);
     
     for(var i = 0; i < 10; i++) {
       var rp = new Archonia.Form.RandomXY();

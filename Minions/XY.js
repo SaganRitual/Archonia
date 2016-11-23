@@ -200,6 +200,10 @@ function getSign(a1, a2) {
 
 Archonia.Essence.gameCenter = Archonia.Form.XY(Archonia.Axioms.gameWidth / 2, Archonia.Axioms.gameHeight / 2);
 
+Archonia.Form.XY.start = function() {
+  Archonia.Form.XY.setSafeScratch();
+};
+
 })(Archonia);
 
 if(typeof window === "undefined") {

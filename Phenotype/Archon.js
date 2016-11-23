@@ -12,9 +12,9 @@ var Archon = function() {
   
   this.setupState();
 
-  Archonia.Cosmos.Genomery.genomifyMe(this); // No inheritance here; just getting a skeleton genome
+  Archonia.Cosmos.TheGenomery.genomifyMe(this); // No inheritance here; just getting a skeleton genome
   
-  this.drone = Archonia.Cosmos.Dronery.getDrone(this);
+  this.drone = Archonia.Engine.TheDronery.getDrone(this);
 
   this.state.position = new Archonia.Form.Archonoid(this.drone.sensor.body.center);
   this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
@@ -44,7 +44,7 @@ Archon.prototype = {
   
     this.state.frameCount = Archonia.Axioms.integerInRange(0, 60);
 
-    Archonia.Cosmos.Genomery.inherit(this, myParentArchon);
+    Archonia.Cosmos.TheGenomery.inherit(this, myParentArchon);
 
     this.senses.launch();
     this.forager.launch();
@@ -58,7 +58,7 @@ Archon.prototype = {
       y = Archonia.Axioms.integerInRange(20, Archonia.Engine.game.height - 20);
 
       this.myParentArchonId = 0;
-      Archonia.Cosmos.FamilyTree.addMe(this.state.archonUniqueId, 'god');
+      Archonia.Cosmos.TheFamilyTree.addMe(this.state.archonUniqueId, 'god');
     } else {
       x = myParentArchon.state.position.x; y = myParentArchon.state.position.y;
 
@@ -66,7 +66,7 @@ Archon.prototype = {
       this.state.velocity.set(myParentArchon.velocity).timesScalar(-1);
       this.myParentArchonId = myParentArchon.state.archonUniqueId;
   
-      Archonia.Cosmos.FamilyTree.addMe(this.state.archonUniqueId, myParentArchon.state.archonUniqueId);
+      Archonia.Cosmos.TheFamilyTree.addMe(this.state.archonUniqueId, myParentArchon.state.archonUniqueId);
     }
 
     this.drone.launch(this.state.archonUniqueId, this.genome.sensorScale, x, y);

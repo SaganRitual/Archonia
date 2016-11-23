@@ -11,13 +11,13 @@ if(typeof module !== "undefined") {
 
 (function(Archonia) {
 
-Archonia.Cosmos.FamilyTree = function() {
+Archonia.Cosmos.TheFamilyTree = function() {
   this.everyone = {
     'god': { parentId: 'none', myChildren: [] }
   };
 };
 
-Archonia.Cosmos.FamilyTree.prototype = {
+Archonia.Cosmos.TheFamilyTree.prototype = {
   addMe: function(myId, idOfMyParent) {
     if(myId === undefined || idOfMyParent === undefined) {
         Archonia.Essence.hurl(new Archonia.Essence.BirthDefect("IDs missing"));
@@ -73,5 +73,5 @@ Archonia.Cosmos.FamilyTree.prototype = {
 })(Archonia);
 
 if(typeof module !== "undefined") {
-    module.exports = Archonia.Cosmos.FamilyTree;
+    module.exports = Archonia.Cosmos.TheFamilyTree;
 }
