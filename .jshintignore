@@ -1,6 +1,6 @@
 _*/**/*
-deps.js
-dist/**/*
-build/**/*
+phaser/**/*
 TinyColor/**/*
 test/**/*
+phaser.min.js
+tinycolor.js

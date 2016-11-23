@@ -1,7 +1,6 @@
 .DS_Store
-assets
-build
 node_modules
-_logsNbugs
-deps.js
 test
+_Test
+phaser.min.js
+tinycolor.js
