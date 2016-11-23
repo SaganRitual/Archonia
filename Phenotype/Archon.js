@@ -72,13 +72,13 @@ Archon.prototype = {
     this.drone.launch(this.state.archonUniqueId, this.genome.sensorScale, x, y);
   },
 
-  senseSkinnyManna: function(manna) {
+  senseManna: function(manna) {
     var d = this.state.position.getDistanceTo(manna);
     if(d < Archonia.Axioms.avatarRadius + manna.width) {
       this.goo.eat(manna);
       manna.kill();
     } else {
-      this.senses.senseSkinnyManna(manna);
+      this.senses.senseManna(manna);
     }
   },
   
@@ -94,8 +94,7 @@ Archon.prototype = {
       hungerInput: null,
       larvalCalorieBudget: null,
       position: null,
-      sensedArchons: null,
-      sensedSkinnyManna: null,
+      sensedManna: null,
       targetPosition: new TargetPosition(),
       tempInput: null,
       velocity: null,

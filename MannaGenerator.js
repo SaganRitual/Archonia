@@ -24,7 +24,7 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
-var MannaGenerator = function() {
+var MannaGenerator = function(allTheManna) {
   this.arrayScale = null;
   this.bellCurve = null;
   this.bellCurveHeight = 5;
@@ -34,14 +34,13 @@ var MannaGenerator = function() {
   this.started = true;
   this.tempScale = null;
   this.frameCount = null;
-  this.allTheManna = [ ];
   
-  this.initialize();
+  this.initialize(allTheManna);
 };
 
 MannaGenerator.prototype = {
 
-  initialize: function() {
+  initialize: function(allTheManna) {
   
     var stopBelow = 0.01, xOffset = 0, width = 2;
     this.bellCurve = Archonia.Axioms.generateBellCurve(stopBelow, this.bellCurveHeight, xOffset, width);
@@ -72,7 +71,7 @@ MannaGenerator.prototype = {
       m.body.collideWorldBounds = true;
       m.tint = 0;
       
-      this.allTheManna.push(m);
+      allTheManna.push(m);
     }, this);
   },
 
@@ -147,7 +146,11 @@ MannaGenerator.prototype = {
     
 };
 
-Archonia.Cosmos.TheMannaGenerator = { start: function() { Archonia.Cosmos.TheMannaGenerator = new MannaGenerator(); } };
+Archonia.Cosmos.TheMannaGenerator = {
+  start: function(allTheManna) {
+    Archonia.Cosmos.TheMannaGenerator = new MannaGenerator(allTheManna);
+  }
+};
   
 })(Archonia);
 

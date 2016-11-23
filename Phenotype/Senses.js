@@ -41,13 +41,11 @@ Senses.prototype = {
   },
   
   resetSpatialInputs: function() {
-    this.sensedSkinnyManna = [];
-    this.sensedArchons = [];
+    this.sensedManna = [];
   },
   
-  senseArchon: function(archon) { this.sensedArchons.push(archon); },
   senseHunger: function() { this.state.hungerInput.store(this.state.embryoCalorieBudget); },
-  senseSkinnyManna: function(manna) { this.sensedSkinnyManna.push(manna); },
+  senseManna: function(manna) { this.sensedManna.push(manna); },
   senseTemp: function() {
     this.state.tempInput.store(Archonia.Cosmos.TheAtmosphere.getTemperature(this.state.position) - this.genome.optimalTemp);
   },
@@ -55,8 +53,7 @@ Senses.prototype = {
   tick: function() { this.transferSpatialInputs(); this.senseTemp(); this.senseHunger(); },
   
   transferSpatialInputs: function() {
-    this.state.sensedSkinnyManna = this.sensedSkinnyManna.splice(0, this.sensedSkinnyManna.length);
-    this.state.sensedArchons = this.sensedArchons.splice(0, this.sensedArchons.length);
+    this.state.sensedManna = this.sensedManna.splice(0, this.sensedManna.length);
     
     this.resetSpatialInputs();
   }

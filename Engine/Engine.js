@@ -55,7 +55,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     },
     
     letThereBeLivingThings: function() {
-      Archonia.Cosmos.TheMannaGenerator.start();
+      Archonia.Cosmos.allTheManna = [ ];
+      Archonia.Cosmos.TheMannaGenerator.start(Archonia.Cosmos.allTheManna);
       Archonia.Cosmos.TheGenomery.start();
       Archonia.Cosmos.TheFamilyTree = new Archonia.Cosmos.TheFamilyTree();
       Archonia.Cosmos.Archonery.start();

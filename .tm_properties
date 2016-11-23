@@ -1,2 +1,2 @@
-exclude = '{$exclude,node_modules,phaser,phaser.min.js,TinyColor,tinycolor.js,test}'
-excludeInFolderSearch = '{$excludeInFolderSearch,$extraExcludes,_Test}'
+exclude = '{$exclude,node_modules,phaser,phaser.min.js,phaser.map,TinyColor,tinycolor.js,test}'
+excludeInFolderSearch = '{$excludeInFolderSearch,$extraExcludes,_Test,phaser.map}'

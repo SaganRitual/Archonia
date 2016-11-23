@@ -108,6 +108,12 @@ var getDronoid = function() {
   if(d === null) { throw new Error("No more dronoids in pool"); } else { return d; }
 };
 
+var handleOverlaps = function() {
+  Archonia.Engine.game.physics.arcade.overlap(
+    spritePools.sensors, Archonia.Cosmos.allTheManna, Archonia.Cosmos.Archonery.senseManna
+  );
+};
+
 var setupSpritePools = function() {
 	var setupPool = function(whichPool) {
     var image = null;
@@ -135,7 +141,7 @@ Archonia.Engine.TheDronery = {
   countDrones: function() { return spritePools.sensors.countLiving(); },
   getDrone: function(archon) { var dronoid = getDronoid(); return new Drone(archon, dronoid); },
   start: function() { setupSpritePools(); constructDronoids(); },
-  tick: function() { }
+  tick: function() { handleOverlaps(); }
 };
 
 })(Archonia);
