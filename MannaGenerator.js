@@ -30,7 +30,7 @@ Archonia.Cosmos.MannaGenerator = function() {
   this.bellCurveHeight = 5;
   this.bellCurveRadius = null;
   this.gameScale = null;
-  this.morselScale = 0.05;
+  this.morselScale = 1;
   this.started = false;
   this.tempScale = null;
   this.frameCount = null;
@@ -53,7 +53,8 @@ Archonia.Cosmos.MannaGenerator.prototype = {
   
     this.mannaGroup = Archonia.Engine.game.add.group();
     this.mannaGroup.enableBody = true;
-    this.mannaGroup.createMultiple(Archonia.Axioms.howManyMannaMorsels, 'particles', 0, false);
+    var b = Archonia.Engine.game.cache.getBitmapData('archoniaGooButton');
+    this.mannaGroup.createMultiple(Archonia.Axioms.howManyMannaMorsels, b, 0, false);
     Archonia.Engine.game.physics.enable(this.mannaGroup, Phaser.Physics.ARCADE);
 
     this.mannaGroup.forEach(function(m) {

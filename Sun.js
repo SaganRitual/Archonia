@@ -17,7 +17,7 @@ if(typeof window === "undefined") {
   Archonia.Form.Range = require('./Minions/Range.js');
   Archonia.Form.XY = require('./Minions/XY.js').XY;
 
-  Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
+  Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGooArchonia');
 }
 
 (function(Archonia) {
@@ -122,7 +122,7 @@ if(typeof window === "undefined") {
     
     ignite: function() {
       Archonia.Cosmos.Sun.darkness = Archonia.Engine.game.add.sprite(
-        Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y, Archonia.Engine.game.cache.getBitmapData('archoniaGoo')
+        Archonia.Essence.gameCenter.x, Archonia.Essence.gameCenter.y, Archonia.Engine.game.cache.getBitmapData('archoniaGooArchonia')
       );
 
       var scale = Archonia.Axioms.gameWidth / Archonia.Axioms.archoniaGooRadius;

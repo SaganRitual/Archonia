@@ -24,12 +24,16 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Engine.game.input.onDown.add(Archonia.Engine.onMouseDown, Archonia.Engine);
       
       Archonia.Essence.Logger.initialize(1000);
+      
+      Archonia.Engine.letThereBeRanges();
 
-      Archonia.Cosmos.Sea = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSea');
-      Archonia.Cosmos.Seasons = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSeasons');
-      Archonia.Essence.Goo = Archonia.Essence.BitmapFactory.makeBitmap('archoniaGoo');
-      Archonia.Essence.SensorGoo = Archonia.Essence.BitmapFactory.makeBitmap('archoniaSensorGoo');
-      Archonia.Essence.Dbitmap = Archonia.Essence.BitmapFactory.makeBitmap('debug');
+      Archonia.Engine.TheBitmapFactory.start();
+      Archonia.Cosmos.Sea = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSea');
+      Archonia.Cosmos.Seasons = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSeasons');
+      Archonia.Essence.Goo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooArchonia');
+      Archonia.Essence.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooSensor');
+      Archonia.Essence.ButtonGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooButton');
+      Archonia.Essence.AvatarGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooAvatar');
 
       Archonia.Cosmos.Sun.ignite();
       Archonia.Cosmos.Year.start();
@@ -49,6 +53,21 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       
     },
     
+    letThereBeRanges: function() {
+      Archonia.Form.XY.setSafeScratch();
+      Archonia.Essence.archonMassRange = new Archonia.Form.Range(0, 10);
+      Archonia.Essence.archonTolerableTempRange = new Archonia.Form.Range(50, 200);
+      Archonia.Essence.archonSizeRange = new Archonia.Form.Range(0.07, 0.125);
+      Archonia.Essence.hueRange = new Archonia.Form.Range(240, 0);	// Blue (240) is cold/small range, Red (0) is hot/large range
+      Archonia.Essence.darknessRange = new Archonia.Form.Range(Archonia.Axioms.darknessAlphaHi, Archonia.Axioms.darknessAlphaLo);
+      Archonia.Essence.oneToZeroRange = new Archonia.Form.Range(1, 0);
+      Archonia.Essence.worldTemperatureRange = new Archonia.Form.Range(Archonia.Axioms.temperatureLo, Archonia.Axioms.temperatureHi);
+      Archonia.Essence.yAxisRange = new Archonia.Form.Range(Archonia.Axioms.gameHeight, 0);
+      Archonia.Essence.zeroToOneRange = new Archonia.Form.Range(0, 1);
+      Archonia.Essence.centeredZeroRange = new Archonia.Form.Range(-1, 1);
+      Archonia.Essence.gameDistanceRange = new Archonia.Form.Range(0, Archonia.Axioms.gameHypoteneuse);
+    },
+    
     onMouseDown: function(/*pointer*/) {
       Archonia.Engine.mouseUp = false;
     },
@@ -56,17 +75,14 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     onMouseUp: function(pointer) {
       if(!Archonia.Engine.mouseUp) { Archonia.Engine.mouseUp = true; Archonia.Engine.handleClick(pointer); }
     },
-
-    preload: function() {
-      Archonia.Engine.game.load.image('particles', 'assets/sprites/pangball.png');
-    },
     
     render: function() {
       Archonia.Cosmos.skinnyManna.render();
+      Archonia.Cosmos.Dronery.render();
     },
     
     start: function() {
-      Archonia.Engine.game = new Phaser.Game(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight, Phaser.CANVAS);
+      Archonia.Engine.game = new Phaser.Game(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight, Phaser.WEBGL);
 
       Archonia.Engine.game.state.add('Archonia', Archonia.Engine, false);
       Archonia.Engine.game.state.add('Extinction', { create: function() { console.log("They're all dead, and you're a terrible person"); } }, false);
@@ -78,8 +94,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       frameCount++;
       
       try {
-        Archonia.Essence.Dbitmap.bm.clear();
-      
         Archonia.Cosmos.skinnyManna.tick(frameCount);
         Archonia.Cosmos.Archonery.tick();
         Archonia.Cosmos.Year.tick();

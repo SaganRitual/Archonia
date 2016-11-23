@@ -40,8 +40,9 @@ Drone.prototype = {
     this.avatar.reset(0, 0, 100);
     this.button.reset(0, 0, 100);
 
-    var avatarScale = Archonia.Axioms.avatarRadius * 2 / (sensorScale * 100);
-    var buttonScale = avatarScale / 3;
+    sensorScale = 1;
+    var avatarScale = 1;
+    var buttonScale = 1;
 
     this.sensor.scale.setTo(sensorScale, sensorScale);
     this.sensor.anchor.setTo(0.5, 0.5);
@@ -153,24 +154,33 @@ var handleOverlaps = function() {
 };
 
 var setupSpritePools = function() {
-	var setupPool = function(whichPool) {
-    var bmData = (whichPool === "sensors") ? "archoniaSensorGoo" : "archoniaGoo";
-
+	var setupPool = function(whichPool, whichBitmap) {
 		spritePools[whichPool] = Archonia.Engine.game.add.group();
 	  spritePools[whichPool].createMultiple(
-      Archonia.Axioms.archonPoolSize, Archonia.Engine.game.cache.getBitmapData(bmData), 0, false
+      Archonia.Axioms.archonPoolSize, Archonia.Engine.game.cache.getBitmapData(whichBitmap), 0, false
     );
 	};
 
-	setupPool('sensors');
-	setupPool('avatars');
-	setupPool('buttons');
+	setupPool('sensors', "archoniaGooSensor");
+	setupPool('avatars', "archoniaGooAvatar");
+	setupPool('buttons', "archoniaGooButton");
 
   Archonia.Engine.game.physics.enable(spritePools.sensors, Phaser.Physics.ARCADE);
 };
 
 Archonia.Cosmos.Dronery = {
   getDrone: function(archon) { var dronoid = getDronoid(); return new Drone(archon, dronoid); },
+  render: function() {
+  	var showDebugOutlines = false;
+
+  	if(showDebugOutlines) {
+    	spritePools.sensors.forEach(function(s) {
+  	    Archonia.Engine.game.debug.body(s, 'yellow', false);
+  			Archonia.Engine.game.debug.spriteBounds(s, 'blue', false);
+  		}, this);
+  	}
+  },
+
   start: function() { setupSpritePools(); constructDronoids(); },
   tick: function() { handleOverlaps(); }
 };

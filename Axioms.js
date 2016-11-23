@@ -8,18 +8,16 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 1;  // must be <= archon pool size
+  Archonia.Axioms.archonCount = 25;  // must be <= archon pool size
   Archonia.Axioms.archonPoolSize = 500;
-  Archonia.Axioms.archoniaGooDiameter = 100;
-  Archonia.Axioms.archoniaGooRadius = 50;
-  Archonia.Axioms.avatarRadius = 5;
+  Archonia.Axioms.avatarRadius = 3;
   Archonia.Axioms.caloriesPerManna = 8;
   Archonia.Axioms.calorieLossRatioForPredation = 2;
   Archonia.Axioms.costFactorForGivingBirth = 2;
   Archonia.Axioms.costFactorForBeingBorn = 1;
   Archonia.Axioms.dailyBirthCounter = 0;
   Archonia.Axioms.dailyDeathCounter = 0;
-  Archonia.Axioms.darknessAlphaHi = 0.3;
+  Archonia.Axioms.darknessAlphaHi = 1.0;
   Archonia.Axioms.darknessAlphaLo = 0.0;
   Archonia.Axioms.dayLength = 60 * 1000;  // In ms, not ticks
   Archonia.Axioms.daysPerYear = 10;
@@ -37,18 +35,29 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.howManyPointsForNonSpatialInputs = 1;
   Archonia.Axioms.howManyPointsForSpatialInputs = 12;
   Archonia.Axioms.howManyPointsForTemperatureInputs = 2;
+  Archonia.Axioms.gameHypoteneuse = Math.sqrt(2 * Math.pow(Archonia.Axioms.gameWidth, 2));
+  Archonia.Axioms.gooDiameterArchonia = Archonia.Axioms.gameHypoteneuse;
+  Archonia.Axioms.gooRadiusArchonia = Archonia.Axioms.gooDiameterArchonia / 2;
+  Archonia.Axioms.gooDiameterButton = 2;
+  Archonia.Axioms.gooRadiusButton = Archonia.Axioms.gooDiameterButton / 2;
+  Archonia.Axioms.gooDiameterSensor = 4;
+  Archonia.Axioms.gooRadiusSensor = Archonia.Axioms.gooDiameterSensor / 2;
+  Archonia.Axioms.gooDiameterVent = 50;
+  Archonia.Axioms.gooRadiusVent = Archonia.Axioms.gooDiameterVent / 2;
   Archonia.Axioms.larvalFatDensity = 1000;
   Archonia.Axioms.mannaPoolSize = 500;
   Archonia.Axioms.maxAcceleration = 15;
+  Archonia.Axioms.maxForceOnBody = 120; // In newtons, ie, kg-m / sec^2
   Archonia.Axioms.maxMagnitudeA = 15;
   Archonia.Axioms.maxMagnitudeV = 75;
   Archonia.Axioms.maxSpeed = 75;                   // pix/sec
   Archonia.Axioms.minimumAdultMass = 1;            // Below this, an adult will die
   Archonia.Axioms.reproductionCostFactor = 2;
   Archonia.Axioms.standardArchonTempRange = 400;
-  Archonia.Axioms.standardSensorScale = 0.2;
+  Archonia.Axioms.standardSensorScale = 1;
   Archonia.Axioms.temperatureHi = 1000;
   Archonia.Axioms.temperatureLo = -1000;
+  Archonia.Axioms.temperatureRadius = (Archonia.Axioms.temperatureHi - Archonia.Axioms.temperatureLo) / 2;
   
   Archonia.Axioms.clamp = function(value, min, max) {
     value = Math.max(value, min); value = Math.min(value, max); return value;
@@ -62,6 +71,21 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     var a = (robalizedAngle > Math.PI) ? 2 * Math.PI - robalizedAngle : -robalizedAngle;
 
     return a;
+  };
+  
+  Archonia.Axioms.fuzzyEqual = function(lhs, rhs, tolerance) {
+    // If we want the two values to be within x of each other,
+    // we have to cut the tolerance in half. Example:
+    // lhs = 1, rhs = 2, tolerance = 1 --> true
+    // lhs = 1, rhs = 2.5, tolerance = 1 --> false
+    // If we don't cut it in half then lhs range is 0 - 2, and
+    // rhs range is 1.5 - 3.5, so we'd say the second
+    // one is true also
+    var t = tolerance / 2;
+    return (
+      ((lhs + t) >= (rhs - t) && lhs <= (rhs + t)) ||
+      ((rhs + t) >= (lhs - t) && rhs <= (lhs + t))
+    );
   };
   
   Archonia.Axioms.generateBellCurve = function(stopBelow, height, xOffset, widthOfRange) {
@@ -104,11 +128,8 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
   Archonia.Axioms.robalizeAngle = function(computerizedAngle) {
     var a = (computerizedAngle < 0) ? -computerizedAngle : 2 * Math.PI - computerizedAngle;
-
-    while(a < 2 * Math.PI) {
-      a += 2 * Math.PI;
-    }
-
+    while(a < 2 * Math.PI) { a += 2 * Math.PI; }
+    a %= 2 * Math.PI;
     return a;
   };
 })(Archonia);
