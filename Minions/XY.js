@@ -12,6 +12,8 @@ if(typeof window === "undefined") {
 
 (function(Archonia) {
   
+  var sscratch = null, sscratch2 = null;
+  
 Archonia.Form.XY = function(sourceOrMaybeX, maybeY) {
   if(this instanceof Archonia.Form.XY) {
     this.set(sourceOrMaybeX, maybeY);
@@ -21,19 +23,25 @@ Archonia.Form.XY = function(sourceOrMaybeX, maybeY) {
 };
 
 Archonia.Form.XY.prototype = {
-  add: function(a1, a2) { rp(a1, a2); var addend = Archonia.Form.XY(a1, a2); this.x += addend.x; this.y += addend.y; },
+  add: function(a1, a2) { rp(a1, a2); sscratch.set(a1, a2); this.x += sscratch.x; this.y += sscratch.y; },
+  
+  capMagnitude: function(scalar) { if(this.getMagnitude() > scalar) { this.normalize(); this.scalarMultiply(scalar); } },
   
   dividedByScalar: function(scalar) { var scratch = Archonia.Form.XY(this); scratch.scalarDivide(scalar); return scratch; },
   
-  equals: function(a1, a2) { rp(a1, a2); var rhs = Archonia.Form.XY(a1, a2); return this.x === rhs.x && this.y === rhs.y; },
+  equals: function(a1, a2) { rp(a1, a2); sscratch.set(a1, a2); return this.x === sscratch.x && this.y === sscratch.y; },
   
   floor: function() { this.x = Math.floor(this.x); this.y = Math.floor(this.y); },
   
   floored: function() { var scratch = Archonia.Form.XY(this); scratch.floor(); return scratch; },
   
-  getAngleFrom: function(a1, a2) { rp(a1, a2); var c = Archonia.Form.XY(a1, a2); return Math.atan2(this.y - c.y, this.x - c.x); },
+  fuzzyEqual: function(rhs, tolerance) {
+    return Archonia.Axioms.fuzzyEqual(this.x, rhs.x, tolerance) && Archonia.Axioms.fuzzyEqual(this.y, rhs.y, tolerance);
+  },
+  
+  getAngleFrom: function(a1, a2) { rp(a1, a2); sscratch.set(a1, a2); return Math.atan2(this.y - sscratch.y, this.x - sscratch.x); },
 
-  getAngleTo: function(a1, a2) { rp(a1, a2); var c = Archonia.Form.XY(a1, a2); return c.getAngleFrom(this); },
+  getAngleTo: function(a1, a2) { rp(a1, a2); sscratch2.set(a1, a2); return sscratch2.getAngleFrom(this); },
   
   getDistanceTo: function(a1, a2) { rp(a1, a2); return getMagnitude(this.minus(a1, a2)); },
   
@@ -86,7 +94,7 @@ Archonia.Form.XY.prototype = {
   
   setByMagnitude: function(magnitude) { rp(magnitude); var a = magnitude / Math.sqrt(2); this.x = a; this.y = a; },
   
-  subtract: function(a1, a2) { rp(a1, a2); var subtrahend = Archonia.Form.XY(a1, a2); this.x -= subtrahend.x; this.y -= subtrahend.y; },
+  subtract: function(a1, a2) { rp(a1, a2); sscratch.set(a1, a2); this.x -= sscratch.x; this.y -= sscratch.y; },
   
   timesScalar: function(scalar) { rp(scalar); var scratch = Archonia.Form.XY(this); scratch.scalarMultiply(scalar); return scratch; },
 
@@ -97,7 +105,9 @@ Archonia.Form.XY.prototype = {
   Y: function(places) { if(places === undefined) { places = 0; } return this.y.toFixed(places); },
 
   set: function(sourceOrMaybeX, maybeY) {
-    if(sourceOrMaybeX === undefined) {
+    if(sourceOrMaybeX instanceof Archonia.Form.XY) {
+      this.x = sourceOrMaybeX.x; this.y = sourceOrMaybeX.y;
+    } else if(sourceOrMaybeX === undefined) {
       this.x = 0; this.y = 0;
     } else {
       if(sourceOrMaybeX.x === undefined) {
@@ -125,6 +135,11 @@ Archonia.Form.XY.prototype = {
 
     return this;
   }
+};
+
+Archonia.Form.XY.setSafeScratch = function() {
+  sscratch = Archonia.Form.XY();
+  sscratch2 = Archonia.Form.XY();
 };
 
 Archonia.Form.XY.fromPolar = function(r, theta) {

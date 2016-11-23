@@ -94,6 +94,10 @@ if(typeof window === 'undefined') {
       return this.empty;
     },
     
+    isFull: function() {
+      return this.elements.length === this.howManyElements;
+    },
+    
     reset: function() {
       this.empty = true;
       this.indexForNextElement = 0;
