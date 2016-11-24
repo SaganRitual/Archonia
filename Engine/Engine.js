@@ -90,6 +90,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Engine.game.load.image('urchin', 'assets/urchin.png');
       Archonia.Engine.game.load.image('bonsai', 'assets/bonsai.png');
       Archonia.Engine.game.load.image('archon', 'assets/archon.png');
+      Archonia.Engine.game.load.image('water', 'assets/water3.png');
     },
     
     render: function() {
@@ -111,6 +112,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       
       try {
         Archonia.Cosmos.Archonery.tick();
+        Archonia.Cosmos.TheBonsai.tick();
         Archonia.Cosmos.TheMannaGenerator.tick();
       } catch(e) { console.log(e.stack); throw e; }
     }

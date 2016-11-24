@@ -75,7 +75,7 @@ if(typeof window === "undefined") {
       cx.fillStyle = g;
       cx.fillRect(0, 0, Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
       bm.update();
-      Archonia.Engine.game.add.image(0, 0, bm);
+      Archonia.Engine.game.add.image(-600, -150, 'water');
       return new Bitmap(bm);
     },
   

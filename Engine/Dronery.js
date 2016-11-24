@@ -50,6 +50,7 @@ Drone.prototype = {
     this.sensor.scale.setTo(sensorScale, sensorScale);
     this.sensor.anchor.setTo(0.5, 0.5);
     this.sensor.alpha = 1;
+    this.sensor.rotation = Math.PI / 4;
   
     this.avatar.scale.setTo(avatarScale, avatarScale);
     this.avatar.anchor.setTo(0.5, 0.5);
@@ -93,8 +94,6 @@ var constructDronoids = function() {
     s.addChild(a); s.addChild(b);
     s.avatar = a; s.button = b;
 
-    s.visible = true;
-    a.visble = true;
     s.inputEnabled = true;
     s.input.enableDrag();
     s.events.onDragStart.add(function(s) { var a = getArchonById(s.archonUniqueId); a.toggleMotion(); } );

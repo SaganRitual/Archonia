@@ -59,7 +59,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     
     phaserSetup: function() {
       var x = Archonia.Axioms.integerInRange(Archonia.Axioms.goddamnedLeft, Archonia.Axioms.goddamnedRight);
-      var y = Archonia.Axioms.integerInRange(Archonia.Axioms.goddamnedTop, Archonia.Axioms.goddamnedBottom);
+      var y = Archonia.Axioms.integerInRange(Archonia.Axioms.goddamnedTop, 200);
       this.sprite = Archonia.Engine.game.add.sprite(x, y, 'bonsai');
     
       Archonia.Engine.game.physics.arcade.enable(this.sprite);
@@ -67,7 +67,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       this.sprite.scale.setTo(1, 1);
       this.sprite.anchor.setTo(0.5, 0.5);
       this.sprite.alpha = 1;
-      this.sprite.body.angularVelocity = 1;
+      //this.sprite.body.angularVelocity = 1;
     
       this.sprite.visible = true;
       this.tweenColor = new Archonia.Engine.TweenColorBonsai(this.sprite, "hsl(0, 100%, 50%)");
@@ -85,7 +85,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
         else if(this.state.nectarReserves > pollenThreshold) { this.tweenColor.setHue(60); }
       }
       
-      if(this.state.frameCount > this.state.whenToRespin) {
+      if(0 /*this.state.frameCount > this.state.whenToRespin*/) {
         
         if(this.sprite.body.angularVelocity === 0) {
           var directions = [ -1, 0, 1 ];
@@ -99,11 +99,15 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
         this.state.whenToRespin = this.state.frameCount + Archonia.Axioms.integerInRange(0, 600);
           
       }
+      
+      var constraints = null;
+      if(this.state.position.y > 200) { constraints = "randomNoDown"; }
+      else { constraints = "random"; }
 
       this.state.frameCount++;
-      this.antwalk.tick(true, "random");
+      this.antwalk.tick(true, constraints);
       this.legs.tick();
-      this.tweenColor.tick();
+      //this.tweenColor.tick();
     }
   };
   

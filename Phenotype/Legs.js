@@ -33,7 +33,9 @@ Archonia.Form.Legs.prototype = {
     this.running = false;
   },
   
-  launch: function() {
+  launch: function(maxMVelocity) {
+    if(maxMVelocity === undefined) { this.currentMVelocity = this.genome.maxMVelocity; }
+    else { this.currentMVelocity = maxMVelocity; }
   },
   
   reflect: function(vertical) {
@@ -78,8 +80,6 @@ Archonia.Form.Legs.prototype = {
     if(damper === undefined) { damper = 10; }
     if(damperDecay === undefined) { damperDecay = 0; }
     
-    this.currentMVelocity = this.genome.maxMVelocity;
-    
     this.damper = damper; this.damperDecay = damperDecay;
 
     // Force update on next tick, in case we're in the middle of a maneuver
@@ -91,8 +91,6 @@ Archonia.Form.Legs.prototype = {
   },
   
   setTargetVelocity: function(v) {
-    this.currentMVelocity = this.genome.maxMVelocity;
-
     // Force update on next tick, in case we're in the middle of a maneuver
     this.nextUpdate = 0;
 
@@ -136,7 +134,7 @@ Archonia.Form.Legs.prototype = {
 
     } else if(this.targetType === 'angle') {
       
-      this.targetVelocity = Archonia.Form.XY.fromPolar(this.genome.maxMVelocity, this.targetAngle);
+      this.targetVelocity = Archonia.Form.XY.fromPolar(this.currentMVelocity, this.targetAngle);
       optimalDeltaV.set(this.state.velocity.minus(this.targetVelocity));
       
     } else if(this.targetType === 'velocity') {
@@ -191,9 +189,9 @@ Archonia.Form.Legs.prototype = {
     
     this.state.velocity.add(bestDeltaV);
 
-    if(this.state.velocity.getMagnitude() > this.genome.maxMVelocity) {
+    if(this.state.velocity.getMagnitude() > this.currentMVelocity) {
       this.state.velocity.normalize();
-      this.state.velocity.scalarMultiply(this.genome.maxMVelocity);
+      this.state.velocity.scalarMultiply(this.currentMVelocity);
     }
     
     // Note: doing it this way means we're never actually setting

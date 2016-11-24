@@ -21,8 +21,15 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     for(var i = 0; i < 8; i++) {
       if(searchParameters === "random") { theArray.push(i); }
       else {
-        if(searchParameters === "randomUpOnly") { if(i === 7 || i === 0 || i === 1) { theArray.push(i); } }
-        else if(searchParameters === "randomDownOnly") { if(i === 3 || i === 4 || i === 5) { theArray.push(i); } }
+        var up = [ 7, 0, 1 ];
+        var down = [ 3, 4, 5 ];
+        switch(searchParameters) {
+          case "randomUpOnly":   if(up.indexOf(i) !== -1)   { theArray.push(i); } break;
+          case "randomDownOnly": if(down.indexOf(i) !== -1) { theArray.push(i); } break;
+          case "randomNoUp":     if(up.indexOf(i) === -1)   { theArray.push(i); } break;
+          case "randomNoDown":   if(down.indexOf(i) === -1) { theArray.push(i); } break;
+          default: Archonia.Axioms.hurl(new Error("Bad search parameters to Antwalk")); break;
+        }
       }
     }
     
