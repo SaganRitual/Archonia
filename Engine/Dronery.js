@@ -61,7 +61,8 @@ Drone.prototype = {
   },
   
   tick: function() {
-    this.avatar.tint = this.genome.color;
+    this.avatar.tint = 0x00FF00; //this.genome.color;
+    this.sensor.tint = 0xff0000;
 
     var temp = null, clampedTemp = null;
     
@@ -93,8 +94,8 @@ var constructDronoids = function() {
     s.addChild(a); s.addChild(b);
     s.avatar = a; s.button = b;
 
-    s.visible = false;
-    a.visble = false;
+    s.visible = true;
+    a.visble = true;
     s.inputEnabled = true;
     s.input.enableDrag();
     s.events.onDragStart.add(function(s) { var a = getArchonById(s.archonUniqueId); a.toggleMotion(); } );
@@ -121,7 +122,7 @@ var setupSpritePools = function() {
     switch(whichPool) {
       case "sensors": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooSensor"); break;
       case "buttons": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooButton"); break;
-      case "avatars": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooButton"); break;
+      case "avatars": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooAvatar"); break;
     }
 
 		spritePools[whichPool] = Archonia.Engine.game.add.group();

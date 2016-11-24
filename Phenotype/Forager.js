@@ -177,8 +177,9 @@ Archonia.Form.Forager.prototype = {
         
         this.state.sensedManna.sort(function(a, b) {
 
-          var aTempCost = Archonia.Essence.getTempCost(a, archonMass, optimalTemp);
-          var bTempCost = Archonia.Essence.getTempCost(b, archonMass, optimalTemp);
+          var axy = Archonia.Form.XY(a), bxy = Archonia.Form.XY(b);
+          var aTempCost = Archonia.Essence.getTempCost(axy, archonMass, optimalTemp);
+          var bTempCost = Archonia.Essence.getTempCost(bxy, archonMass, optimalTemp);
           
           if(aTempCost === bTempCost) {
             return p.getDistanceTo(a) < p.getDistanceTo(b);

@@ -60,6 +60,11 @@ Archonia.Cosmos.Archonery = {
   
   getArchonById: function(id) { return getArchonById(id); },
   
+  senseManna: function(manna, sensor) {
+    var a = Archonia.Cosmos.Archonery.getArchonById(sensor.archonUniqueId);
+    a.senseManna(manna);
+  },
+  
   // Baffling: the args order should be sensor, vent, as far as
   // I can tell, based on the way we're calling the Phaser overlap
   // function. But this works, so I guess I'll worry about it later

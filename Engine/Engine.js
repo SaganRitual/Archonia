@@ -43,6 +43,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Cosmos.Sea = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSea');
       Archonia.Cosmos.Seasons = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaSeasons');
       Archonia.Engine.Goo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooArchonia');
+      Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooAvatar');
       Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooButton');
       Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooSensor');
       Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooVent');

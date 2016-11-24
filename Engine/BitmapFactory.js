@@ -139,6 +139,21 @@ if(typeof window === "undefined") {
       return new Bitmap(bm);
     },
 
+    archoniaGooAvatar: function() {
+      var d = Archonia.Axioms.gooDiameterAvatar;
+      var r = Archonia.Axioms.gooRadiusAvatar;
+      
+      var bm = Archonia.Engine.game.add.bitmapData(d, d);
+      var cx = bm.context;
+
+      cx.beginPath();
+      bm.circle(r, r, r, 'rgba(255, 255, 255, 1)');
+      cx.fill();
+      
+      Archonia.Engine.game.cache.addBitmapData('archoniaGooAvatar', bm);
+      return new Bitmap(bm);
+    },
+
     archoniaGooButton: function() {
       var d = Archonia.Axioms.gooDiameterButton;
       var r = Archonia.Axioms.gooRadiusButton;
@@ -162,7 +177,7 @@ if(typeof window === "undefined") {
       var cx = bm.context;
 
       cx.beginPath();
-      bm.circle(r, r, r, 'hsla(240, 100%, 50%, 0.2)');
+      bm.circle(r, r, r, 'rgba(255, 255, 255, 1)');
       cx.fill();
 
       Archonia.Engine.game.cache.addBitmapData('archoniaGooSensor', bm);

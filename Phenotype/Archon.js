@@ -69,7 +69,7 @@ Archon.prototype = {
       Archonia.Cosmos.TheFamilyTree.addMe(this.state.archonUniqueId, myParentArchon.state.archonUniqueId);
     }
 
-    this.drone.launch(this.state.archonUniqueId, this.genome.sensorScale, x, y);
+    this.drone.launch(this.state.archonUniqueId, 1, x, y);
   },
 
   senseManna: function(manna) {
