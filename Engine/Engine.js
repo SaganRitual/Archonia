@@ -46,7 +46,6 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooAvatar');
       Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooButton');
       Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooSensor');
-      Archonia.Engine.SensorGoo = Archonia.Engine.TheBitmapFactory.makeBitmap('archoniaGooVent');
     },
     
     letThereBeElements: function() {
@@ -61,6 +60,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Cosmos.TheGenomery.start();
       Archonia.Cosmos.TheFamilyTree = new Archonia.Cosmos.TheFamilyTree();
       Archonia.Cosmos.Archonery.start();
+      Archonia.Cosmos.TheBonsai.start();
     },
     
     letThereBeRanges: function() {
@@ -87,7 +87,9 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     },
 
     preload: function() {
-      Archonia.Engine.game.load.image('vent', 'assets/urchin.png');
+      Archonia.Engine.game.load.image('urchin', 'assets/urchin.png');
+      Archonia.Engine.game.load.image('bonsai', 'assets/bonsai.png');
+      Archonia.Engine.game.load.image('archon', 'assets/archon.png');
     },
     
     render: function() {

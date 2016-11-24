@@ -31,7 +31,7 @@ var MannaGenerator = function(allTheManna) {
   this.bellCurveRadius = null;
   this.gameScale = null;
   this.morselScale = 1;
-  this.started = true;
+  this.started = false;
   this.tempScale = null;
   this.frameCount = null;
   

@@ -65,10 +65,10 @@ Archonia.Cosmos.Archonery = {
     a.senseManna(manna);
   },
   
-  // Baffling: the args order should be sensor, vent, as far as
+  // Baffling: the args order should be sensor, Bonsai, as far as
   // I can tell, based on the way we're calling the Phaser overlap
   // function. But this works, so I guess I'll worry about it later
-  senseVent: function(vent, sensor) { var diner = getArchonById(sensor.archonUniqueId); diner.senseVent(); },
+  senseVent: function(Bonsai, sensor) { var diner = getArchonById(sensor.archonUniqueId); diner.senseVent(); },
   
   start: function() {
     Archonia.Cosmos.momentOfCreation = true;

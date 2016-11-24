@@ -60,24 +60,6 @@ if(typeof window === "undefined") {
   
   BitmapFactory.prototype = {
     
-    archoniaVent: function() {
-      var bm = Archonia.Engine.game.add.bitmapData(100, 100);
-      var cx = bm.context;
-
-      var g = cx.createRadialGradient(50, 50, 1, 50, 50, 50);
-
-      g.addColorStop(0.00, 'hsla(0, 0%, 0%, 0)');
-      g.addColorStop(1.00, 'hsla(0, 0%, 0%, 1)');
-
-      cx.fillStyle = g;
-      bm.circle(50, 50, 50);
-
-      bm.update();
-      Archonia.Engine.game.cache.addBitmapData('archoniaVent', bm);
-    
-      return new Bitmap(bm);
-    },
-    
     archoniaSea: function() {
       var bm = Archonia.Engine.game.add.bitmapData(Archonia.Axioms.gameWidth, Archonia.Axioms.gameHeight);
       var cx = bm.context;
@@ -121,21 +103,6 @@ if(typeof window === "undefined") {
       cx.fill();
       
       Archonia.Engine.game.cache.addBitmapData('archoniaGooArchonia', bm);
-      return new Bitmap(bm);
-    },
-
-    archoniaGooVent: function() {
-      var d = Archonia.Axioms.gooDiameterVent;
-      var r = Archonia.Axioms.gooRadiusVent;
-      
-      var bm = Archonia.Engine.game.add.bitmapData(d, d);
-      var cx = bm.context;
-
-      cx.beginPath();
-      bm.circle(r, r, r, 'rgba(255, 255, 255, 1)');
-      cx.fill();
-      
-      Archonia.Engine.game.cache.addBitmapData('archoniaGooVent', bm);
       return new Bitmap(bm);
     },
 

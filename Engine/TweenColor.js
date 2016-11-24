@@ -29,7 +29,7 @@ TweenColor.prototype = {
   }
 };
 
-var TweenColorVent = function(sprite, hslString) {
+var TweenColorBonsai = function(sprite, hslString) {
   TweenColor.call(this, sprite, hslString);
   
   this.hueTween = null;
@@ -41,10 +41,10 @@ var TweenColorVent = function(sprite, hslString) {
   this.startLumaPulse();
 };
 
-TweenColorVent.prototype = Object.create(TweenColor.prototype);
-TweenColorVent.prototype.constructor = TweenColor;
+TweenColorBonsai.prototype = Object.create(TweenColor.prototype);
+TweenColorBonsai.prototype.constructor = TweenColor;
 
-TweenColorVent.prototype.setHue = function(hueValue) {
+TweenColorBonsai.prototype.setHue = function(hueValue) {
   // Tick calls us with no parameter; this is to tell us to check for new
   // hue in the queue and start another tween going if it's time to do so.
   // The class client will call us with a value; we'll store that in the
@@ -66,15 +66,15 @@ TweenColorVent.prototype.setHue = function(hueValue) {
   }
 };
 
-TweenColorVent.prototype.startLumaPulse = function() {
+TweenColorBonsai.prototype.startLumaPulse = function() {
   this.lumaTween = Archonia.Engine.game.add.tween(this).to(
     { L: 25 }, 5 * 1000, Phaser.Easing.Quartic.InOut, true, 0, -1, true
   );
 };
   
-TweenColorVent.prototype.tick = function() {
+TweenColorBonsai.prototype.tick = function() {
   this.setHue(); 
-  Object.getPrototypeOf(TweenColorVent.prototype).tick.call(this);
+  Object.getPrototypeOf(TweenColorBonsai.prototype).tick.call(this);
 };
 
 var TweenColorButton = function(sprite, hslString) {
@@ -126,7 +126,7 @@ TweenColorDragonfly.prototype.tick = function() {
   Object.getPrototypeOf(TweenColorDragonfly.prototype).tick.call(this);
 };
   
-Archonia.Engine.TweenColorVent = TweenColorVent;
+Archonia.Engine.TweenColorBonsai = TweenColorBonsai;
 Archonia.Engine.TweenColorButton = TweenColorButton;
 Archonia.Engine.TweenColorDragonfly = TweenColorDragonfly;
 

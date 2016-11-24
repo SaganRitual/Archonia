@@ -50,10 +50,14 @@ var Genome = function(genomeCore) {
 };
 
 var colorGeneNames = [
-  "hslString", "optimalTemp", "optimalTempHi", "optimalTempLo", "tempRange", "tempRadius"
+  "color", "hslString", "optimalTemp", "optimalTempHi", "optimalTempLo", "tempRange", "tempRadius"
 ];
 
 var TheGenomery = function() {
+  Object.defineProperty(Genome.prototype, "color", {
+    get: function() { return this.genomeCore.color.getColorAsDecimal(); }
+  });
+
   Object.defineProperty(Genome.prototype, "hslString", {
     get: function() { return this.genomeCore.color.getHslString(); }
   });

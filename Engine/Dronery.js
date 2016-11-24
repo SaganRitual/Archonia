@@ -53,7 +53,7 @@ Drone.prototype = {
   
     this.avatar.scale.setTo(avatarScale, avatarScale);
     this.avatar.anchor.setTo(0.5, 0.5);
-    this.avatar.alpha = 1;
+    this.avatar.alpha = 0;
   
     this.button.scale.setTo(buttonScale, buttonScale);
     this.button.anchor.setTo(0.5, 0.5);
@@ -61,8 +61,7 @@ Drone.prototype = {
   },
   
   tick: function() {
-    this.avatar.tint = 0x00FF00; //this.genome.color;
-    this.sensor.tint = 0xff0000;
+    this.sensor.tint = this.genome.color;
 
     var temp = null, clampedTemp = null;
     
@@ -120,7 +119,7 @@ var setupSpritePools = function() {
     var image = null;
     
     switch(whichPool) {
-      case "sensors": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooSensor"); break;
+      case "sensors": image = "archon"; break;
       case "buttons": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooButton"); break;
       case "avatars": image = Archonia.Engine.game.cache.getBitmapData("archoniaGooAvatar"); break;
     }
