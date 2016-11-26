@@ -122,7 +122,7 @@ Archon.prototype = {
 
   senseManna: function(bonsai) {
     var d = this.state.position.getDistanceTo(bonsai.sprite);
-    if(d < Archonia.Axioms.avatarRadius + bonsai.sprite.width) {
+    if(d < Archonia.Axioms.avatarRadius/* + bonsai.sprite.width*/) {
       var manna = { calories: bonsai.giveNectar() };
       this.goo.eat(manna);
       this.state.sensedManna = [ ];

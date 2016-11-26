@@ -55,10 +55,12 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       var calories = 50 / 60; // 50 cal per second
       if(this.state.nectarReserves - calories < 0) {
         if(this.state.producingPollen) {
-          this.tweenColor.setHue(0); this.state.producingPollen = false; return 0;
+          this.tweenColor.setHue(0); this.state.producingPollen = false;
         }
+        
+        return 0;
       }
-      else { this.state.nectarReserves -= calories * 10; return calories; }
+      else { this.state.nectarReserves -= calories; return calories; }
     },
     
     phaserSetup: function() {
@@ -70,21 +72,16 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
       this.sprite.scale.setTo(1, 1);
       this.sprite.anchor.setTo(0.5, 0.5);
-      this.sprite.alpha = 1;
-      //this.sprite.body.angularVelocity = 1;
-    
+      this.sprite.alpha = 1;    
       this.sprite.visible = true;
       this.tweenColor = new Archonia.Engine.TweenColorBonsai(this.sprite, "hsl(0, 100%, 50%)");
     },
     
     tick: function() {
       this.state.nectarReserves++;
-      this.state.nectarReserves *= 1 + (0.01 / 60);
+      this.state.nectarReserves *= 1 + (0.005 / 60);
       if(this.state.nectarReserves > pollenThreshold) {
         this.state.producingPollen = true;
-        this.sprite.alpha = 1;
-      } else {
-        this.sprite.alpha = 0.1;
       }
       
       if(this.state.producingPollen) {
