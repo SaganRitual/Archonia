@@ -167,26 +167,15 @@ Archonia.Form.Forager.prototype = {
       this.foraging = false;
 
       var ix = this.state.sensedManna.findIndex(
-        function(m) { return m.archoniaUniqueObjectId === this.currentMannaTarget; }, this
+        function(m) {
+          return m.archoniaUniqueObjectId === this.currentMannaTarget; }, this
       );
       
       if(ix === -1) {
-        var archonMass = Archonia.Essence.getArchonMass(this.state);
-        var optimalTemp = this.genome.optimalTemp;
         var p = this.state.position;
         
         this.state.sensedManna.sort(function(a, b) {
-
-          var axy = Archonia.Form.XY(a), bxy = Archonia.Form.XY(b);
-          var aTempCost = Archonia.Essence.getTempCost(axy, archonMass, optimalTemp);
-          var bTempCost = Archonia.Essence.getTempCost(bxy, archonMass, optimalTemp);
-          
-          if(aTempCost === bTempCost) {
-            return p.getDistanceTo(a) < p.getDistanceTo(b);
-          } else {
-            return aTempCost < bTempCost;
-          }
-
+          return p.getDistanceTo(a) < p.getDistanceTo(b);
         });
         
         ix = 0;

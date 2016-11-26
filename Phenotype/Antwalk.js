@@ -68,7 +68,7 @@ Antwalk.prototype = {
 
     if(drawDebugLines && !this.trail.isEmpty()) {
       this.trail.forEach(function(ix, value) {
-        Archonia.Engine.Debug.cSquare(value, squareSize, "yellow", 2);
+        Archonia.Engine.TheDebug.cSquare(value, squareSize, "yellow", 2);
       });
     }
 
@@ -84,8 +84,8 @@ Antwalk.prototype = {
         case "randomDownOnly": color = "red"; break;
       }
       
-      Archonia.Engine.Debug.aLine(this.state.position, p, color, 2);
-      Archonia.Engine.Debug.aLine(this.state.position, this.debugRandomTarget, "black", 1);
+      Archonia.Engine.TheDebug.aLine(this.state.position, p, color, 2);
+      Archonia.Engine.TheDebug.aLine(this.state.position, this.debugRandomTarget, "black", 1);
     }
   },
   

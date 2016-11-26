@@ -7,32 +7,36 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 (function(Archonia) {
   
-  var pollenThreshold = 3000;
+  var pollenThreshold = 100;
   
   var Bonsai = function() {
+    this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
     this.phaserSetup();
+    this.bonsaiSetup();
     this.archoniaSetup();
   };
   
   Bonsai.prototype = {
-    state: {
-      archonUniqueId: "Bonsai",
-      firstTickAfterLaunch: true,
-      frameCount: 0,
-      mass: 1,
-      nectarReserves: 500,  // Calories
-      position: null,
-      producingPollen: false,
-      targetPosition: new Archonia.Form.TargetPosition(),
-      velocity: null,
-      whenToRespin: 0
-    },
-    
     archoniaSetup: function() {
       this.state.position = new Archonia.Form.Archonoid(this.sprite.body.center);
       this.state.velocity = new Archonia.Form.Archonoid(this.sprite.body.velocity);
       this.legs = new Archonia.Form.Legs(this); this.legs.launch(5, 1);
       this.antwalk = new Archonia.Form.Antwalk(this, 480); this.antwalk.launch();
+    },
+    
+    bonsaiSetup: function() {
+      this.state = {
+        archonUniqueId: "Bonsai" + Archonia.Essence.archoniaUniqueObjectId,
+        firstTickAfterLaunch: true,
+        frameCount: 0,
+        mass: 1,
+        nectarReserves: 500,  // Calories
+        position: null,
+        producingPollen: false,
+        targetPosition: new Archonia.Form.TargetPosition(),
+        velocity: null,
+        whenToRespin: 0
+      };
     },
     
     getPollenLevel: function(where) {
@@ -42,7 +46,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
         var p = this.state.position.getDistanceTo(where);
         var q = Archonia.Axioms.gameHypoteneuse - p;
         var r = Archonia.Essence.zeroToOneRange.convertPoint(q, Archonia.Essence.gameDistanceRange);
-      
+        
         return r;
       } else { return 0; }
     },
@@ -54,12 +58,12 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
           this.tweenColor.setHue(0); this.state.producingPollen = false; return 0;
         }
       }
-      else { this.state.nectarReserves -= calories; return calories; }
+      else { this.state.nectarReserves -= calories * 10; return calories; }
     },
     
     phaserSetup: function() {
       var x = Archonia.Axioms.integerInRange(Archonia.Axioms.goddamnedLeft, Archonia.Axioms.goddamnedRight);
-      var y = Archonia.Axioms.integerInRange(Archonia.Axioms.goddamnedTop, 200);
+      var y = Archonia.Axioms.integerInRange(Archonia.Axioms.goddamnedTop, 100);
       this.sprite = Archonia.Engine.game.add.sprite(x, y, 'bonsai');
     
       Archonia.Engine.game.physics.arcade.enable(this.sprite);
@@ -75,9 +79,12 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     
     tick: function() {
       this.state.nectarReserves++;
-      this.state.nectarReserves *= 1 + (0.05 / 60);
+      this.state.nectarReserves *= 1 + (0.01 / 60);
       if(this.state.nectarReserves > pollenThreshold) {
         this.state.producingPollen = true;
+        this.sprite.alpha = 1;
+      } else {
+        this.sprite.alpha = 0.1;
       }
       
       if(this.state.producingPollen) {
@@ -101,7 +108,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       }
       
       var constraints = null;
-      if(this.state.position.y > 200) { constraints = "randomNoDown"; }
+      if(this.state.position.y > 100) { constraints = "randomNoDown"; }
       else { constraints = "random"; }
 
       this.state.frameCount++;
@@ -111,6 +118,12 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     }
   };
   
-  Archonia.Cosmos.TheBonsai = { start: function() { Archonia.Cosmos.TheBonsai = new Bonsai(); } };
+  Archonia.Cosmos.TheBonsai = {
+    start: function() {
+      var theBonsai = [ ];
+      for(var i = 0; i < 3; i++) { theBonsai.push(new Bonsai()); }
+      Archonia.Cosmos.TheBonsai = theBonsai.slice();
+    }
+  };
   
 })(Archonia);

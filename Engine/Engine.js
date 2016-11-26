@@ -112,7 +112,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       
       try {
         Archonia.Cosmos.Archonery.tick();
-        Archonia.Cosmos.TheBonsai.tick();
+        for(var i = 0; i < 3; i++) { Archonia.Cosmos.TheBonsai[i].tick(); }
         Archonia.Cosmos.TheMannaGenerator.tick();
       } catch(e) { console.log(e.stack); throw e; }
     }
