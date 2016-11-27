@@ -8,7 +8,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 (function(Archonia) {
   Archonia.Axioms.adultFatAtBirth = 100;
   Archonia.Axioms.adultFatDensity = 100;
-  Archonia.Axioms.archonCount = 25;  // must be <= archon pool size
+  Archonia.Axioms.archonCount = 30;  // must be <= archon pool size
   Archonia.Axioms.archonPoolSize = 500;
   Archonia.Axioms.avatarRadius = 3;
   Archonia.Axioms.caloriesPerManna = 8;
@@ -48,11 +48,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
   Archonia.Axioms.gooRadiusVent = Archonia.Axioms.gooDiameterVent / 2;
   Archonia.Axioms.larvalFatDensity = 1000;
   Archonia.Axioms.mannaPoolSize = 500;
-  Archonia.Axioms.maxAcceleration = 15;
-  Archonia.Axioms.maxForceOnBody = 15; // In newtons, ie, kg-m / sec^2
-  Archonia.Axioms.maxMagnitudeA = 15;
-  Archonia.Axioms.maxMagnitudeV = 75;
-  Archonia.Axioms.maxSpeed = 75;                   // pix/sec
+  Archonia.Axioms.maxForceOnBody = 1; // In newtons, ie, kg-m / sec^2
   Archonia.Axioms.minimumAdultMass = 1;            // Below this, an adult will die
   Archonia.Axioms.reproductionCostFactor = 2;
   Archonia.Axioms.standardArchonTempRange = 400;

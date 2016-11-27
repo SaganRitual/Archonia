@@ -5,152 +5,104 @@
 
 var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Form: {} };
 
-if(typeof window === "undefined") {
-  Archonia.Essence = require('./Essence.js');
-  Archonia.Form.XY = require('./Minions/XY.js').XY;
-}
-
 (function(Archonia) {
 
 Archonia.Form.Legs = function(archon) {
 
-  this.genome = archon.genome;
   this.state = archon.state;
 
-  this.damper = 10;
-  this.damperDecay = 0.1;
   this.running = false;
-  this.nextUpdate = 0;
   
-  this.targetType = null;
   this.targetPosition = Archonia.Form.XY();
-  this.targetVelocity = Archonia.Form.XY();
-  this.targetAngle = null;
+  this.previousPosition = Archonia.Form.XY();
+
+  this.optimalDeltaV = Archonia.Form.XY();
+  this.curtailedV = Archonia.Form.XY();
+  this.bestDeltaV = Archonia.Form.XY();
 };
 
 Archonia.Form.Legs.prototype = {
-  drift: function() {
-    this.running = false;
-  },
-  
   launch: function(maxMVelocity) {
-    if(maxMVelocity === undefined) { this.currentMVelocity = this.genome.maxMVelocity; }
-    else { this.currentMVelocity = maxMVelocity; }
+    this.maxMVelocity = maxMVelocity;
+    this.maxMAcceleration = Archonia.Axioms.maxForceOnBody / this.state.mass;
   },
   
-  reflect: function(vertical) {
-    this.running = true;
-    var fromZero = Archonia.Axioms.robalizeAngle(this.state.velocity.getAngleFrom(0));
-    var theta = null;
+  setTargetPosition: function(p) {
+    this.currentMVelocity = this.maxMVelocity;
     
-    if(vertical) {
-      if(this.state.velocity.x > 0) {
-
-        theta = (3 * Math.PI / 2) - fromZero;
-        this.setTargetAngle(theta);
-
-      } else  if(this.state.velocity.x < 0) {
-
-        theta = (3 * Math.PI / 2) + fromZero;
-        this.setTargetAngle(theta);
-
-      }
-    }
-  },
-  
-  rotate: function(angle) {
-    // Angle from zero, not from the world center, because
-    // we're talking velocity here, not position
-    var theta = this.state.velocity.getAngleTo(0);
-    
-    theta = Archonia.Axioms.robalizeAngle(theta) + angle;
-    
-    this.targetType = 'angle';
-    this.running = true;
-    this.targetAngle = Archonia.Axioms.computerizeAngle(theta);
-  },
-  
-  setTargetAngle: function(a) {
-    this.targetType = 'angle';
-    this.running = true;
-    this.targetAngle = Archonia.Axioms.computerizeAngle(a);
-  },
-  
-  setTargetPosition: function(p, damper, damperDecay) {
-    if(damper === undefined) { damper = 10; }
-    if(damperDecay === undefined) { damperDecay = 0; }
-    
-    this.damper = damper; this.damperDecay = damperDecay;
-
-    // Force update on next tick, in case we're in the middle of a maneuver
-    this.nextUpdate = 0;
-
-    this.targetType = 'point';
     this.running = true;
     this.targetPosition.set(p);
   },
-  
-  setTargetVelocity: function(v) {
-    // Force update on next tick, in case we're in the middle of a maneuver
-    this.nextUpdate = 0;
 
-    this.targetType = 'velocity';
-    this.running = true;
-    this.targetVelocity.set(v);
-  },
-  
-  stop: function() { this.running = false; this.state.velocity.set(0); },
-
-  tick: function() {
-    var p = this.state.targetPosition.get();
-    if(p) {
-      if(p.equals(0)) { this.drift(); }
-      else { this.setTargetPosition(p); }
-    }
-
-    this.state.targetPosition.clear();
-    
-    if(this.running && this.state.frameCount > this.nextUpdate) {
-      this.updateMotion();
-      this.nextUpdate = this.state.frameCount + this.damper;
-    }
-  },
+  tick: function() { if(this.running) { this.updateMotion(); } },
   
   updateMotion: function() {
-    if(!this.running) { return; }
+    var drawDebugLines = false;
+
+    if(drawDebugLines) { Archonia.Engine.game.debug.text("WTF", 25, 25); }
     
-    this.damper -= this.damperDecay; if(this.damper < 0) { this.damper = 0; }
+    var ctx = Archonia.Engine.game.debug.context;
+    var pos = this.state.position;
+    var tgt = this.targetPosition;
 
-    var optimalDeltaV = Archonia.Form.XY();
+    var vectorToHim = Archonia.Form.XY(tgt).minus(pos);
 
-    if(this.targetType === 'point') {
-      
-      // Get the target into the same frame of reference as my
-      // velocity vector. To do so, we need to get the angle between 
-      // my vector and the distance vector from me to the target
+    if(drawDebugLines) {
+      ctx.strokeStyle = 'yellow'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pos.x, pos.y); ctx.lineTo(vectorToHim.x + pos.x, vectorToHim.y + pos.y); ctx.stroke();
     
-      // This is the vector from my velocity to the target position
-      optimalDeltaV.set(this.targetPosition.minus(this.state.position).plus(this.state.velocity));
+      ctx.strokeStyle = 'blue'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      ctx.lineTo(this.state.velocity.x + pos.x, this.state.velocity.y + pos.y);
+      ctx.stroke();
 
-    } else if(this.targetType === 'angle') {
-      
-      this.targetVelocity = Archonia.Form.XY.fromPolar(this.currentMVelocity, this.targetAngle);
-      optimalDeltaV.set(this.state.velocity.minus(this.targetVelocity));
-      
-    } else if(this.targetType === 'velocity') {
-      
-      optimalDeltaV.set(this.state.velocity.minus(this.targetVelocity));
-
-    } else {
-      Archonia.Essence.hurl(new Error("Bad target type"));
+      var wtfLine = vectorToHim.minus(this.state.velocity);
+      ctx.strokeStyle = 'green'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(this.state.velocity.x + pos.x, this.state.velocity.y + pos.y);
+      ctx.lineTo(this.state.velocity.x + pos.x + wtfLine.x, this.state.velocity.y + pos.y + wtfLine.y);
+      ctx.stroke();
     }
+
+    // Get the target into the same frame of reference as my
+    // velocity vector. To do so, we need to get the angle between 
+    // my vector and the distance vector from me to the target
+  
+    // This is the vector from my velocity to the target position
+    // Using reflexives rather than scratchers for performance
+    this.optimalDeltaV.set(this.targetPosition);
+    this.optimalDeltaV.subtract(this.state.position);
+    this.optimalDeltaV.add(this.state.velocity);
+    
+    // override here
+    //this.optimalDeltaV.set(wtfLine);
     
     // The magnitude of that vector
-    var optimalDeltaM = optimalDeltaV.getMagnitude();
+    var optimalDeltaM = this.optimalDeltaV.getMagnitude();
     
     // And finally, the angle between my velocity and the
     // vector from me to the target
-    var thetaToTarget = optimalDeltaV.getAngleFrom(0);
+    var thetaToTarget = this.optimalDeltaV.getAngleFrom(0);
+    var thetaFromTarget = this.optimalDeltaV.getAngleTo(0);
+    
+    if(drawDebugLines) {
+      var whatReallyHappened = Archonia.Form.XY();
+      whatReallyHappened.setPolar(optimalDeltaM, thetaToTarget);
+      ctx.strokeStyle = 'red'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(this.state.velocity.x + pos.x, this.state.velocity.y + pos.y);
+      ctx.lineTo(this.state.velocity.x + pos.x + whatReallyHappened.x, this.state.velocity.y + pos.y + whatReallyHappened.y);
+      ctx.stroke();
+
+      var oWhatReallyHappened = Archonia.Form.XY();
+      oWhatReallyHappened.setPolar(optimalDeltaM, thetaFromTarget);
+      ctx.strokeStyle = 'cyan'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(this.state.velocity.x + pos.x, this.state.velocity.y + pos.y);
+      ctx.lineTo(this.state.velocity.x + pos.x + oWhatReallyHappened.x, this.state.velocity.y + pos.y + oWhatReallyHappened.y);
+      ctx.stroke();
+    }
     
     // The optimal mVelocity from me to the target is, of
     // course, the magnitude of the vector, that is, a magnitude
@@ -172,39 +124,34 @@ Archonia.Form.Legs.prototype = {
     var curtailedM = Math.min(optimalDeltaM, this.currentMVelocity);
     
     // Point me to the target with my maximum possible mVelocity
-    var curtailedV = Archonia.Form.XY.fromPolar(curtailedM, thetaToTarget);
+    this.curtailedV.setPolar(curtailedM, thetaToTarget);
 
     // Now we have the best possible vector that our max mVelocity
     // will allow. But now we have to curtail it further to comply
     // with our maximum mAcceleration
-    var bestDeltaV = curtailedV.minus(this.state.velocity);
-    var bestDeltaM = bestDeltaV.getMagnitude();
+    this.bestDeltaV.set(this.curtailedV);
+    this.bestDeltaV.subtract(this.state.velocity);
+    var bestDeltaM = this.bestDeltaV.getMagnitude();
 
-    var hackMassForNow = 1;
-    if(bestDeltaM > Archonia.Axioms.maxForceOnBody * hackMassForNow) {
+    if(bestDeltaM > this.maxMAcceleration) {
       this.needUpdate = true;
     
-      bestDeltaV.scalarMultiply(Archonia.Axioms.maxForceOnBody * hackMassForNow / bestDeltaM);
+      this.bestDeltaV.scalarMultiply(this.maxMAcceleration / bestDeltaM);
     }
     
-    this.state.velocity.add(bestDeltaV);
+    this.state.velocity.add(this.bestDeltaV);
 
-    if(this.state.velocity.getMagnitude() > this.currentMVelocity) {
+    ctx.strokeStyle = 'orange'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(this.state.velocity.x + pos.x, this.state.velocity.y + pos.y);
+    ctx.stroke();
+
+    if(this.state.velocity.getMagnitude() > this.maxMVelocity) {
       this.state.velocity.normalize();
-      this.state.velocity.scalarMultiply(this.currentMVelocity);
+      this.state.velocity.scalarMultiply(this.maxMVelocity);
     }
-    
-    // Note: doing it this way means we're never actually setting
-    // a target position, even though I've called one of the
-    // functions setTargetPosition(). This way, it's more like we're
-    // aiming at the target, but not bothering to aim super-carefully
-    // or slow down when we get there
-    if(!this.needUpdate) { this.drift(); }  // We've reached our target velocity
   }
 };
 
 })(Archonia);
-
-if(typeof window === "undefined") {
-  module.exports = Archonia.Form.Legs;
-}

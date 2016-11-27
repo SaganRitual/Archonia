@@ -7,7 +7,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
 
 (function(Archonia) {
   
-  var pollenThreshold = 100;
+  var pollenThreshold = 500;
   
   var Bonsai = function() {
     this.archoniaUniqueObjectId = Archonia.Essence.archoniaUniqueObjectId++;
@@ -79,7 +79,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
     
     tick: function() {
       this.state.nectarReserves++;
-      this.state.nectarReserves *= 1 + (0.005 / 60);
+      this.state.nectarReserves *= 1 + (0.001 / 60);
       if(this.state.nectarReserves > pollenThreshold) {
         this.state.producingPollen = true;
       }

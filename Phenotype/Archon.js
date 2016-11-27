@@ -20,9 +20,9 @@ var Archon = function() {
   this.state.velocity = new Archonia.Form.Archonoid(this.drone.sensor.body.velocity);
 
   this.senses = new Archonia.Form.Senses(this);
+  this.gnatfly = new Archonia.Form.Gnatfly(this);
   this.goo = new Archonia.Form.Goo(this);
   this.legs = new Archonia.Form.Legs(this);
-  this.forager = new Archonia.Form.Forager(this);
   
   this.bonsaiDescriptors = [
     { ix: 0, distance: 0, producingPollen: 0, contender: false },
@@ -34,46 +34,6 @@ var Archon = function() {
 };
 
 Archon.prototype = {
-  checkBonsai: function() {
-    var i = null;
-
-    for(i = 0; i < 3; i++) {
-      var bd = this.bonsaiDescriptors[i];
-      var ix = bd.ix;
-      var theBonsai = Archonia.Cosmos.TheBonsai[ix];
-      
-      bd.distance = this.state.position.getDistanceTo(theBonsai.sprite);
-      bd.producingPollen = theBonsai.getPollenLevel(this.state.position) > 0;
-      
-      if(this.currentBonsaiTarget === null) { bd.contender = true; }
-    }
-    
-    this.bonsaiDescriptors.sort(function(a, b) { return a.distance > b.distance; });
-    
-    var c = this.bonsaiDescriptors.find(function(e) { return e.producingPollen && e.contender; });
-    
-    if(c === undefined) {
-      Archonia.Essence.TheLogger.log("All contenders");
-      for(i = 0; i < 3; i++) { this.bonsaiDescriptors[i].contender = true; }
-      this.currentBonsaiTarget = null;
-    } else {
-      if(c.ix !== this.currentBonsaiTarget) {
-        if(this.currentBonsaiTarget !== null) {
-          Archonia.Essence.TheLogger.log("Disqualifying target " + this.currentBonsaiTarget);
-          var t = this.currentBonsaiTarget;
-          this.bonsaiDescriptors.find(function(e) { return e.ix === t; }).contender = false;
-        }
-
-        Archonia.Essence.TheLogger.log("New target " + c.ix);
-        this.currentBonsaiTarget = c.ix;
-      }
-    }
-    
-    if(this.currentBonsaiTarget !== null) {
-      this.senseManna(Archonia.Cosmos.TheBonsai[this.currentBonsaiTarget]);
-    }
-  },
-  
   decohere: function() {
     this.drone.decohere();
     this.available = true;
@@ -95,8 +55,8 @@ Archon.prototype = {
     Archonia.Cosmos.TheGenomery.inherit(this, myParentArchon);
 
     this.senses.launch();
-    this.forager.launch();
-    this.legs.launch();
+    this.gnatfly.launch();
+    this.legs.launch(45);
     this.goo.launch();
 
     var x = null, y = null;
@@ -142,6 +102,7 @@ Archon.prototype = {
       frameCount: null,
       hungerInput: null,
       larvalCalorieBudget: null,
+      mass: 1,
       position: null,
       sensedManna: null,
       targetPosition: new TargetPosition(),
@@ -157,13 +118,13 @@ Archon.prototype = {
     this.state.frameCount++;
 
     this.senses.tick();
-    this.forager.tick();
+    this.gnatfly.tick();
     this.goo.tick();
+    
+    if(this.state.frameCount % 60 === 0) { this.legs.setTargetPosition(this.state.targetPosition.targetPosition); }
     this.legs.tick();
     this.drone.tick();
     
-    this.checkBonsai();
-
     this.state.firstTickAfterLaunch = false;
   },
 
