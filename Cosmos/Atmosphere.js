@@ -12,16 +12,10 @@ var Atmosphere = function() {
 };
 
 Atmosphere.prototype = {
-  getTemperature: function(where) {
+  getTemperature: function(/*where*/) {
     var sunEnergyLevel = Archonia.Cosmos.TheSun.getEnergyLevel();
-    var desertHotspotTemp = 500;
-    var desertColdspotTemp = -500;
     
-    var hd = where.getDistanceTo(100, 100), cd = where.getDistanceTo(500, 500);
-    var hotspotContribution = desertHotspotTemp * Math.pow(hd / Archonia.Axioms.gameHypoteneuse, 2);
-    var coldspotContribution = desertColdspotTemp * Math.pow(cd / Archonia.Axioms.gameHypoteneuse, 2);
-    
-    return (sunEnergyLevel + hotspotContribution + coldspotContribution) / 3;
+    return sunEnergyLevel;
   }
 };
 

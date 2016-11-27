@@ -45,9 +45,9 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
         // the closer you are to the source, the higher the level
         var p = this.state.position.getDistanceTo(where);
         var q = Archonia.Axioms.gameHypoteneuse - p;
-        var r = Archonia.Essence.zeroToOneRange.convertPoint(q, Archonia.Essence.gameDistanceRange);
+        var r = Archonia.Essence.oneToZeroRange.convertPoint(q, Archonia.Essence.gameDistanceRange);
         
-        return r;
+        return r / Math.pow(r, 2);
       } else { return 0; }
     },
     
@@ -71,7 +71,7 @@ var Archonia = Archonia || { Axioms: {}, Cosmos: {}, Engine: {}, Essence: {}, Fo
       Archonia.Engine.game.physics.arcade.enable(this.sprite);
 
       this.sprite.scale.setTo(1, 1);
-      this.sprite.anchor.setTo(0.5, 0.5);
+      this.sprite.anchor.setTo(0.5, 0.75);
       this.sprite.alpha = 1;    
       this.sprite.visible = true;
       this.tweenColor = new Archonia.Engine.TweenColorBonsai(this.sprite, "hsl(0, 100%, 50%)");

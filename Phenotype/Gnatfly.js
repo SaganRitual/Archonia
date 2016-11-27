@@ -77,7 +77,7 @@ Gnatfly.prototype = {
     var r = Archonia.Form.XY(), s = Archonia.Form.XY();
     r.set(Archonia.Essence.gridPositions[where].plus(this.state.position));
     s.set(r);
-    
+  
     // Just so they don't go around in straight lines all the time
     r = s.randomizedTo(Archonia.Essence.gridletSize); if(!s.isInBounds()) { r.set(s); }
     this.state.targetPosition.set(r);

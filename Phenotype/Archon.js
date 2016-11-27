@@ -82,7 +82,7 @@ Archon.prototype = {
 
   senseManna: function(bonsai) {
     var d = this.state.position.getDistanceTo(bonsai.sprite);
-    if(d < Archonia.Axioms.avatarRadius/* + bonsai.sprite.width*/) {
+    if(d < Archonia.Axioms.avatarRadius + bonsai.sprite.width) {
       var manna = { calories: bonsai.giveNectar() };
       this.goo.eat(manna);
       this.state.sensedManna = [ ];
@@ -116,6 +116,10 @@ Archon.prototype = {
 
   tick: function() {
     this.state.frameCount++;
+    
+    for(var i = 0; i < 3; i++) {
+      this.senseManna(Archonia.Cosmos.TheBonsai[i]);
+    }
 
     this.senses.tick();
     this.gnatfly.tick();
