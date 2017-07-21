@@ -102,9 +102,8 @@ Archonia.Form.XY.prototype = {
     } else {
       if(sourceOrMaybeX.x === undefined) {
         if(maybeY === undefined) {
-          if(isNaN(sourceOrMaybeX || !isFinite(sourceOrMaybeX))) {
-            // sourceOrMaybeX appears to be a number, an x-coordinate, but
-            // maybeY has nothing in it. Tell the caller we hate him
+          if(isNaN(sourceOrMaybeX) || !isFinite(sourceOrMaybeX)) {
+            // Garbage in x-coordinate. Tell the caller we hate him
             throw Error("Bad arguments to XY()");
           } else {
             // Single number specified, take it as the value for both

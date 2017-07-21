@@ -34,6 +34,8 @@ describe('RandomXY', function() {
 describe('Archonia.Form.XY', function() {
   describe('Test constructor:', function() {
     function makeBadXY() { Archonia.Form.XY('zero'); }
+    function makeNaNXY() { Archonia.Form.XY(0/0); }
+    function makeInfinityXY() { Archonia.Form.XY(1/0); }
     function xyFromUndefined() { return Archonia.Form.XY(); }
     function xyFromScalar() { return Archonia.Form.XY(42); }
     function xyFromPair() { return Archonia.Form.XY(69, 96); }
@@ -42,6 +44,8 @@ describe('Archonia.Form.XY', function() {
     
     it('Should throw Error', function() {
       chai.expect(makeBadXY).to.throw(Error, 'Bad arg');
+      chai.expect(makeNaNXY).to.throw(Error, 'Bad arg');
+      chai.expect(makeInfinityXY).to.throw(Error, 'Bad arg');
     });
     
     it('Should not throw', function() {
